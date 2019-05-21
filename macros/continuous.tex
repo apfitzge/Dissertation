@@ -1,0 +1,21 @@
+%%% Continuous Energy quantities %%%
+% Cross-sections
+\DeclareDocumentCommand{\xst}{ O{\loc} O{E} }{\ensuremath{\CrossSection_{t}(#1,#2)}}
+\DeclareDocumentCommand{\xsa}{ O{\loc} O{E} }{\ensuremath{\CrossSection_{a}(#1,#2)}}
+\DeclareDocumentCommand{\xsf}{ O{\loc} O{\Eprime} }{\ensuremath{\CrossSection_{f}(#1,#2)}}
+\DeclareDocumentCommand{\xss}{ o O{\loc} O{\dirprime\vdot\dir} O{\Eprime \to E}}{
+    \IfNoValueOrEmptyTF{#1}
+    {\ensuremath{\CrossSection_{s}(#2,#3,#4)}}
+    {\ensuremath{\CrossSection_{s,#1}(#2,#4)}}
+}
+\DeclareDocumentCommand{\spect}{ O{\loc} O{E} }{\ensuremath{\Spectrum(#1,#2)}}
+\DeclareDocumentCommand{\nufis}{ O{\loc} O{E^{\prime}} }{ \ensuremath{\nu\xsf[#1][#2] }}
+
+% Flux
+\DeclareDocumentCommand{\aflux}{ O{\loc} O{\dir} O{E} }{\ensuremath{\AngularFlux(#1,#2,#3)}}
+\DeclareDocumentCommand{\sflux}{ O{\loc} O{E} }{\ensuremath{\ScalarFlux(#1,#2)}}
+\DeclareDocumentCommand{\current}{ O{\loc} O{E} }{\ensuremath{\Current(#1,#2)}}
+\DeclareDocumentCommand{\afluxmom}{ O{\loc} O{E} O{\ell} O{n} }{\FluxMoment^{#4}_{#3}(#1,#2)}
+
+% Source
+\DeclareDocumentCommand{\source}{ O{\loc} O{\dir} O{E} }{\ensuremath{Q(#1,#2,#3)}}

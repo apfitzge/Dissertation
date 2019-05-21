@@ -1,0 +1,20 @@
+%%% Discrete Ordinates Quantities %%%
+\DeclareDocumentCommand{\mprime}{}{m^{\prime}}
+\DeclareDocumentCommand{\dirm}{ O{m} }{\dir_{#1}}
+\DeclareDocumentCommand{\wt}{ O{m} }{\Weight_{#1}}
+
+% Quadrature set
+\DeclareDocumentCommand{\angquad}{ O{N} }{ \mathcal{M}_{#1} }
+
+% Cross-Sections
+\DeclareDocumentCommand{\xss}{ o O{\loc} O{ m^{\prime}\!\to m} O{\gprime\!\to g} }{
+    \IfNoValueOrEmptyTF{#1}
+    {\xs[s,#3][#2][#4]}
+    {\xs[s,#1][#2][#4]}
+}
+
+% Flux
+\DeclareDocumentCommand{\aflux}{ O{\loc} O{m} O{g}}{\ensuremath{\AngularFlux^{#3}_{#2}\!\left(#1\right)}}
+
+% Source
+\DeclareDocumentCommand{\source}{ O{\loc} O{m} O{g} }{\ensuremath{q^{#3}_{#2}\!\left(#1\right)}}

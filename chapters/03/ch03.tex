@@ -1,0 +1,543 @@
+\chapter{The Method of Characteristics}{\label{ch:The Method of Characteristics}
+    \input{macros/multigroup.tex}
+    \input{macros/DiscreteOrdinates.tex}
+    \input{macros/MOC.tex}
+    \def\figpath{chapters/03/figures/}
+    \graphicspath{ {\figpath} }
+
+    \section{Fundamentals}{\label{sec:MOC:Fundamentals}
+        The \acf{MOC} is a technique used in mathematics to solve \acp{PDE}, by transforming a \ac{PDE} into a system of \acp{ODE}.
+        The method was first applied to the neutron transport problem by \citeauthor{Askew1972} in 1972 \cite{Askew1972}, but only began to see real use in the 1980's \cite{Halsall1980}.
+        The \ac{MOC} transforms the transport equation into the characteristic form, by examining the equation along straight neutron paths through the spatial domain.
+        For simplicity, the derivation of this method will begin with the multi-group \ac{SN} $k$-eigenvalue transport equation with spatially discretized mesh with constant material properties within each cell.
+        \begin{equation}\label{eq:MOC:SSMGFS Transport}
+            \left[\dirm\vdot\grad + \xst\right]\aflux[mi][g][\loc] = \rfourpi\source[mi][g][\loc],
+        \end{equation}
+        \begin{equation*}
+            \forall\loc\in\Region, \quad \forall m \in \angquad, \quad \forall i, g,
+        \end{equation*}
+        where $\Region$ is the spatial cell, $\angquad$ is the directional quadrature, as described in \cref{sssec:NTT:Directional Discretization}, and the fixed-source, $
+        \source[mi][g][\loc]$ is given by
+        \begin{equation}\label{eq:MOC:Source}
+            \source[mi][g][\loc] \defined
+                \left[\suml[\gprime]\suml[\ell=0][L](2\ell+1)\suml[n=-\ell][\ell]\SH\xss[\ell]\afluxmom(\loc) + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime](\loc)\right].
+        \end{equation}
+
+        Consider a point, $\loc_0$, and a line passing through this point in direction $\dirm$.
+        Any location along this \emph{characteristic} line (also referred to as a ray, or track), can be described as
+        \begin{equation}\label{eq:MOC:Characteristic Ray}
+            \loc = \loc_0 + \len\dirm,
+        \end{equation}
+        where $\len$ is the distance along the track from $\loc_0$.
+        Applying this transformation, \cref{eq:MOC:SSMGFS Transport} is put into the characteristic form
+        \begin{equation}\label{eq:MOC:Characteristic Form Deriv 1}
+            \left[\deriv{}{\len} + \xst\right]\aflux[mi][g][\loc_0 + \len\dirm] = \rfourpi\source[mi][g][\loc_0 + \len\dirm].
+        \end{equation}
+        As described in \cref{sec:NTT:Neutron Transport Equation}, reactor physicists are generally interested in integrated angular flux quantities rather than the angular flux.
+        It is thus typical in the \ac{MOC} to have many different characteristic tracks through our problem; in this work separate tracks will be subscripted with the index $k$.
+        The characteristic form of the transport equation then becomes
+        \begin{equation}\label{eq:MOC:MOC Equation Generic}
+            \left[\deriv{}{\len} + \xst\right]\aflux = \rfourpi\source[mi][g][\len],
+        \end{equation}
+        \begin{equation*}
+            \forall \len \in [0,\segl], \forall m\in\angquad, \forall i,k,g,
+        \end{equation*}
+        where $\segl$ is the total length of the track-segment, as depicted in \cref{fig:MOC:MOC Coordinate System}.
+
+        \begin{figure}[h]
+            \centering
+            \def\svgwidth{0.4\linewidth}
+            \input{\figpath/MOCCoordinateSystem.pdf_tex}
+            \caption{Depiction of a single characteristic track through a cell $i$.}
+            \label{fig:MOC:MOC Coordinate System}
+        \end{figure}
+
+        \Cref{eq:MOC:MOC Equation Generic} can be solved analytically along a characteristic track-segment using an integrating factor,
+        \begin{equation}\label{eq:MOC:Integrating Factor}
+            M(\len) = \exp\!\left(\intl[0][\len]\xst\dif{s'}\right) = \exp\!\left(\opt\right),
+        \end{equation}
+        where the \emph{optical thickness}, $\opt$, is defined by
+        \begin{equation}\label{eq:MOC:Optical Thickness Definition}
+            \opt \defined \xst\len.
+        \end{equation}
+        Using this integrating factor, the generic solution to the \ac{MOC} equation, given in \cref{eq:MOC:MOC Equation Generic}, is
+        \begin{equation}\label{eq:MOC:MOC Generic Solution}
+            \aflux = \afluxin\exp\!\left(-\opt\right) + \intl[0][\len]\rfourpi\source[mi][g][\len']\exp\!\left(-\xst\left[\len-\len'\right]\right)\dif{s'},
+        \end{equation}
+        where $\afluxin$ is the incident angular flux, $\aflux[mki][g][0]$.
+        If a source shape is provided, \cref{eq:MOC:MOC Generic Solution} can be evaluated for every track-segment in the problem.
+        The next subsection introduces formal methods to approximate the integration of quantities over both space and direction.
+        These procedures can be used to determine the scalar flux or other quantities necessary in \ac{MOC} calculations.
+
+        \subsection{Track-Based Integration}{\label{ssec:MOC:Track-Based Integration}
+            Determining the angular flux along a single characteristic track is typically not very useful for reactor physics calculations.
+            It is most often necessary to evaluate reaction rates, and therefore the scalar flux through integration of the angular flux.
+            This section aims to provide a formal basis for the integration process used in the \ac{MOC} calculations in this work.
+
+            \begin{figure}[h]
+                \centering
+                \def\svgwidth{0.4\linewidth}
+                \input{\figpath/MOCTracks.pdf_tex}
+                \caption{Example characteristic tracks (2D) through a cell for a single direction.}
+                \label{fig:MOC:MOC Tracks}
+            \end{figure}
+
+            The \ac{MOC} is based on the \acf{SN} approximation; integration over the directional variable simply becomes a quadrature integration:
+            \begin{equation}\label{eq:MOC:Directional Quadrature Integration}
+                \intl[\fourpi]f(\dir)\ddir \approx \fourpi\suml[m]\wt[m]f(\dirm).
+            \end{equation}
+            Within a cell, $\Region$, there are many characteristic track-segments in each direction in the directional quadrature, as is shown for a single direction in \cref{fig:MOC:MOC Tracks}.
+            Thus, the spatial discretization is different for each direction, and spatial integration is linked with directional integration.
+            For a single direction, the integration over the spatial domain can be approximated by the weighted summation of track-averaged values, with the weight being equal to the area of the track-segment.
+            The average value of a function, $f(\loc,\dirm)$, along a track-segment is given as
+            \begin{equation}\label{eq:MOC:Track-Averaged Definition UnRenormalized}
+                \MOCTrackIntegral{f(\loc,\dirm)} \defined \frac{1}{\segl}\intl[0][\segl]f(\len,\dirm)\dif{\len},
+            \end{equation}
+            where $\segl$ is the total length of the track-segment.
+            The spatial integration for a single direction becomes
+            \begin{equation}\label{eq:MOC:Spatial Averaging Definition UnRenormalized}
+                \frac{1}{V_i}\intl[\loc\in\Region]f(\loc,\dirm)\dif^3{\loc} \approx \MOCSingleAngleIntegral{f(\loc,\dirm)} \defined \frac{1}{V_i}\suml[k]\tA[mki]\segl\MOCTrackIntegral{f(\loc,\dirm)} ,
+            \end{equation}
+            where $\tA[mki]$ is the cross-sectional area of the track (width in 2D).
+            In this notation, the integral is divided by the volume such that $\MOCSingleAngleIntegral{f}$ is approximately the mean value in the region, for the direction $\dirm$.
+            Finally, an integration over both space and angle can be defined as
+            \begin{equation}\label{eq:MOC:Spatial and Directional Integration Definition}
+                \MOCIntegral{f(\loc,\dir)} = \fourpi\suml[m]\wt[m]\MOCSingleAngleIntegral{f(\loc,\dirm)}.
+            \end{equation}
+
+            These integrations have been expressed as 3-D \ac{MOC} equations.
+            For 2-D calculations, the form remains the same, except that in \cref{eq:MOC:Spatial Averaging Definition UnRenormalized}, which requires a scaling factor on the cell volume (now area):
+            \begin{equation}
+              \label{eq:MOC:Spatial Averaging Definition UnRenormalized 2D}
+              \frac{1}{V_i}\intl[\loc\in\Region]f(\loc,\dirm)\dif^3{\loc} \approx \MOCSingleAngleIntegral{f(\loc,\dirm)} \defined \frac{\sin(\Polar_p)}{V_i}\suml[k]\tA[mki]\segl\MOCTrackIntegral{f(\loc,\dirm)}
+            \end{equation}
+        }
+        \subsection{Track-Length Renormalization}{\label{sec:MOC:Track-Length Renormalization}
+            In general, the spatial integration described in \cref{ssec:MOC:Track-Based Integration} does not preserve the cell volume; this is visually apparent in \cref{fig:MOC:MOC Tracks}.
+            In order to preserve spatial volumes within a cell, track-lengths are often ``renormalized''.
+            There are three renormalization methods which become obvious through the notation presented in \cref{ssec:MOC:Track-Based Integration}:
+            \begin{enumerate}
+                \item{segment-volume preservation}
+                \item{angle-volume preservation}
+                \item{volume preservation}
+            \end{enumerate}
+
+            Track-length renormalization involves adjusting the lengths of track-segments such that volume is preserved.
+            Let us define a renormalization factor, $\renorm[mki]$, such that the renormalized track-length is given by
+            \begin{equation}\label{eq:MOC:Track-Length Renormalization}
+                \nsegl = \renorm[mki]\segl.
+            \end{equation}
+            The spatial integration schemes given by \cref{eq:MOC:Track-Averaged Definition UnRenormalized,eq:MOC:Spatial Averaging Definition UnRenormalized} become
+            \begin{subequations}\label{eq:MOC:Renormalized Spatial Integration Definition}
+                \begin{equation}\label{eq:MOC:Renormalized Track-Averaged Definition}
+                    \MOCTrackIntegral{f(\loc,\dirm)} \defined \frac{1}{\nsegl}\intl[0][\nsegl]f(\len,\dirm)\dif{\nlen},
+                \end{equation}
+                and
+                \begin{equation}\label{eq:MOC:Renormalized Spatial Averaging Definition}
+                    \MOCSingleAngleIntegral{f(\loc,\dirm)} \defined \frac{1}{V_i}\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{f(\loc,\dirm)},
+                \end{equation}
+                where the spatial variable $\loc$ can now be written as a function of the renormalized track-distance, $\nlen$, as
+                \begin{equation}\label{eq:MOC:Renormalized Location Variable}
+                    \loc =  \locIn + \nlen\dirm / \renorm[mki],
+                \end{equation}
+                where $\locIn$ is the starting point of the track-segment.
+            \end{subequations}
+
+            Segment-volume preservation is a renormalization method in which the track-length is adjusted such that the analytic volume within the cross-sectional area of each track-segment is preserved.
+            This renormalization technique is the most ``correct'' method of renormalization, but is very expensive as each track is renormalized separately.
+            It is also more difficult to implement, as the analytic area of each track-segment must be found.
+            To the best of our knowledge, this method is not implemented in any production-level \ac{MOC} code.
+
+            Angle-volume preservation is the next ``best'' renormalization technique.
+            In this method, every monodirectional spatial integration should preserve the cell volume, i.e.
+            \begin{equation}\label{eq:MOC:Angle-Volume Preservation}
+                \MOCSingleAngleIntegral{1} = 1.
+            \end{equation}
+            This constraint leads to the renormalization factor given by
+            \begin{equation}\label{eq:MOC:Direction-Dependent Renormalization}
+                \renorm[mi] = \frac{V_i}{\suml[k]\tA[mki]\segl}.
+            \end{equation}
+            This method is significantly less expensive in terms of memory, computational time, and difficulty of implementation.
+
+            The simplest renormalization technique, volume preservation, only preserves the volume over the spatial and directional integration, i.e.
+            \begin{equation}\label{eq:MOC:Volume Preservation}
+                \MOCIntegral{1} = \fourpi.
+            \end{equation}
+            This constraint leads to the renormalization factor given by
+            \begin{equation}\label{eq:MOC:Region Renormalization}
+                \renorm[i] = \frac{V_i}{\suml[m]\wt[m]\suml[k]\tA[mki]\segl}.
+            \end{equation}
+
+            Renormalization is not the only technique used for volume preservation.
+            Another method is to use the numerical volume, $\suml[k]\tA[mki]\segl$ in place of $V_i$ in \cref{eq:MOC:Spatial Averaging Definition UnRenormalized}.
+            This seems to be a more consistent method; however, a detailed comparison of these methods has not taken place, to the best of my knowledge.
+            The renormalization technique generally seems to be the faster approach, and is the approach used in MPACT \cite{Collins2016}, which is used extensively in this work.
+        }
+    }
+    \section{The Flat-Source Approximation}{\label{sec:MOC:FSA}
+        The simplest approximation to the spatial shape of the source, $\source[mi][g][\loc]$, within each cell is the \ac{FSA}.
+        The \ac{MOC} has been widely used in lattice physics and neutron transport codes \cite{Knott2010}, many of which have utilized the \ac{FSMOC} \cite{Halsall1980,Hong1998,Saji2000,Smith2002,Sugimura2006,Masiello2008,Boyd2014,Collins2016}.
+
+        \subsection{Derivation}{\label{ssec:MOC:FSA:Derivation}
+            The \ac{FS} approximation is simply the assumption that within each cell, $\Region$, the source, $\source[mi][g][\loc]$, is uniform.
+            This can be expressed as
+            \begin{equation}\label{eq:MOC:FSA:Source Shape}
+                \source[mi][g][\loc] \approx \srcF[mi] = \srcF + \suml[\ell=1][L](2\ell+1)\suml[n=-\ell][\ell]\SH\srcF[i,\ell][g,n]
+            \end{equation}
+            Thus, to get a source in this form, \cref{eq:MOC:Source} requires, that the region averaged scalar flux and higher-order angular moments (up to order $L$) be determined.
+            In mathematical terms, the flat-source can be determined as
+            \begin{equation}\label{eq:MOC:FSA:Source Computation}
+                \srcF[mi] =
+                    \left[
+                        \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH\xss[\ell]\afluxmom
+                        + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime]
+                    \right],
+            \end{equation}
+            where the $\sflux[\gprime]$ is the region-averaged scalar flux, and $\afluxmom$ are the region-averaged higher-order angular moments of the flux.
+
+            In order to get these region-averaged flux moments, the spatial and directional integration operators, introduced in \cref{ssec:MOC:Track-Based Integration}, are used.
+            \begin{subequations}\label{eqs:MOC:FSA:Region-Averaged Flux Moments Definition}
+                The region-averaged scalar flux is then given by
+                \begin{equation}\label{eq:MOC:FSA:Region-Averaged Scalar Flux Definition}
+                    \sflux = \MOCIntegral{\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt[m]\suml[k]\nsegl\tA[mki]\MOCTrackIntegral{\aflux[][g][]},
+                \end{equation}
+                and the higher-order angular moments of the flux are given by
+                \begin{equation}\label{eq:MOC:FSA:Region-Averaged Angular Moments of Flux Definition}
+                    \afluxmom[\ell][n][i][g] = \MOCIntegral{\SH\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\nsegl\tA[mki]\MOCTrackIntegral{\aflux[][g][]}.
+                \end{equation}
+            \end{subequations}
+
+            To evaluate these flux moments, the track-averaged angular flux, $\MOCTrackIntegral{\aflux[][g][]}$, must be found.
+            By applying the \ac{FSA}, \cref{eq:MOC:MOC Equation Generic} becomes
+            \begin{equation}\label{eq:MOC:FSA:Characteristic Form}
+                \left[\deriv{}{\nlen} + \xst\right]\aflux[mki][g][\nlen] = \tsrcF[mi],
+            \end{equation}
+            where
+            \begin{equation}
+              \label{eq:MOC:FSA:Track Average Source}
+              \tsrcF[mi] \defined \rfourpi\srcF[mi].
+            \end{equation}
+            This can be solved analytically for the angular flux along the track,
+            \begin{subequations}\label{eqs:MOC:FSA:Angular Flux Solution}
+                \begin{equation}\label{eq:MOC:FSA:Angular Flux Solution}
+                    \aflux[mki][g][\nlen] = \afluxin + \left(\frac{\tsrcF[mi]}{\xst} - \afluxin\right)F_1(\opt),
+                \end{equation}
+                where
+                \begin{equation}\label{eq:MOC:FSA:F1}
+                    F_1(\opt) \defined 1 - \exp(-\opt),
+                \end{equation}
+                and $\opt$ is the (renormalized) optical thickness,
+                \begin{equation}\label{eq:MOC:FSA:Optical Thickness}
+                    \opt \defined \nlen\xst.
+                \end{equation}
+            \end{subequations}
+
+            One approach to find $\MOCTrackIntegral{\aflux[][g][]}$, is to plug \cref{eq:MOC:FSA:Angular Flux Solution} to explicitly evaluate the track-average value, resulting in
+            \begin{equation}\label{eq:MOC:FSA:Track-Averaged Angular Flux Explicit}
+                \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF[mi]}{\xst} - \left(\frac{\tsrcF[mi]}{\xst} - \afluxin\right)\frac{F_1(\segopt)}{\segopt}.
+            \end{equation}
+            Another, approach, which in the author's opinion is simpler, is use the track-averaging operator on the characteristic form of the equation, \cref{eq:MOC:FSA:Characteristic Form}, which then simplifies to
+            \begin{equation}\label{eq:MOC:FSA:Track-Averaged Angular Flux Implicit}
+                \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF[mi]}{\xst} + \frac{\afluxin-\afluxout}{\segopt}.
+            \end{equation}
+            Note, that these two forms are equivalent; by evaluating the outgoing flux in \cref{eq:MOC:FSA:Angular Flux Solution} at the outgoing position, \cref{eq:MOC:FSA:Track-Averaged Angular Flux Implicit} can be put into the form of \cref{eq:MOC:FSA:Track-Averaged Angular Flux Explicit}.
+            The track-averaged angular flux can be used in \cref{eqs:MOC:FSA:Region-Averaged Flux Moments Definition} to evaluate the flux moments, which can then be used to compute the source.
+            A transport calculation can then be carried out using the source iteration algorithm defined by \cref{alg:NTT:Source Iteration}.
+        }
+        \subsection{Particle Conservation}{\label{ssec:MOC:FSA:Particle Conservation}
+            The neutron transport equation, \cref{eq:NTT:Boltzmann Transport}, is a statement of particle balance within the defined phase-space.
+            Previous works \cite{LeTellier2008,Ferrer2018} have examined the \ac{FSMOC} with respect to \emph{particle conservation}.
+            \citet{LeTellier2008} defined necessary constraints on the directional quadrature and the characteristic tracks (trajectories) in order to ensure particle conservation for the anisotropic \ac{FSMOC}.
+            The constraints can be found by requiring
+            \begin{equation}\label{eq:MOC:FSA:Anisotropic Source Conservation}
+                \rfourpi\MOCIntegral{\SH\srcF[mi]} = \srcF[i,\ell][g,n].
+            \end{equation}
+            Substituting \cref{eq:MOC:FSA:Source Shape} into \cref{eq:MOC:FSA:Anisotropic Source Conservation}, requires that
+            \begin{subequations}\label{eqs:MOC:FSA:Anisotropic Constraints}
+                \begin{equation}\label{eq:MOC:FSA:Quadrature Constraint}
+                    \suml[m]\wt[m]\SH[\ell][n][\dirm]\SH[\ell'][n'] = \delta_{\ell\ell'}\delta_{nn'},
+                \end{equation}
+                and
+                \begin{equation}\label{eq:MOC:FSA:Track Constraint}
+                    \suml[k]\nsegl\tA[mki] = V_i.
+                \end{equation}
+            \end{subequations}
+            \Cref{eq:MOC:FSA:Quadrature Constraint} is a constraint on the directional quadrature, requiring orthogonality of the real spherical harmonics \cite{LeTellier2008}.
+            \Cref{eq:MOC:FSA:Track Constraint} requires that direction-dependent renormalization, \cref{eq:MOC:Direction-Dependent Renormalization}, is used.
+
+            If the constraints on directional quadrature, and characteristic tracks, are satisfied several simplifications to \cref{eqs:MOC:FSA:Region-Averaged Flux Moments Definition} can be made.
+            \begin{subequations}\label{eqs:MOC:FSA:Region-Averaged Flux Moments}
+                \begin{equation}\label{eq:MOC:FSA:Region-Averaged Scalar Flux}
+                    \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
+                \end{equation}
+                \begin{equation}\label{eq:MOC:FSA:Region-Averaged Angular Moments of Flux}
+                    \afluxmom[\ell][n][i][g] = \frac{\srcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
+                \end{equation}
+                where
+                \begin{equation}\label{eq:MOC:FSA:Delta Flux}
+                    \dflux \defined \afluxin - \afluxout.
+                \end{equation}
+            \end{subequations}
+        }
+        \subsection{Isotropic Simplifications}{\label{ssec:MOC:FSA:Isotropic Simplifications}
+            While anisotropic scattering is necessary for accurate calculations, it is also common for isotropic source calculations to be performed.
+            Typically, these account for anisotropic behavior by using the \ac{TCP0} approximation \cite{YamamotoAnisotropy2008}.
+            While not as accurate as truly anisotropic calculations, use of an isotropic source results in significantly fewer calculations, and allows for additional simplifications to be made.
+
+            \Cref{eq:MOC:FSA:Anisotropic Source Conservation} is now only of concern for the isotropic component of the source.
+            This results in the following constraint,
+            \begin{equation}\label{eq:MOC:FSA:Isotropic Track Constraint}
+                \suml[m]\wt[m]\suml[k]\nsegl\tA[mki] = V_i,
+            \end{equation}
+            which is equivalent to the direction-independent renormalization, given by \cref{eq:MOC:Region Renormalization}.
+        }
+        \subsection{Applications}{\label{ssec:FSA:Applications}
+            The \ac{FSMOC} has been utilized in many \ac{MOC} production codes \cite{Halsall1980,Hong1998,Saji2000,Smith2002,Sugimura2006,Masiello2008,Boyd2014,Collins2016}.
+            However, previous studies on the \ac{FSMOC} have found that a fine mesh must be used to obtain accurate results, particularly in the presence of control rods or blades, strong absorber rods, gadolinia poisoned fuel rods \cite{Petkov1999}, as well as in the presence of large reflector regions (such as in critical experiments) \cite{Ferrer2016}.
+            As the number of mesh elements increase, so does the number of track-segments (on which the \ac{MOC} computations are performed), which may result in large run-times.
+            This has motivated the development of \acp{LSA} to the \ac{MOC}, which are discussed in detail in \cref{sec:MOC:LSA}.
+        }
+    }
+    \section{The Linear-Source Approximation}{\label{sec:MOC:LSA}
+        \subsection{Overview}{\label{ssec:MOC:LSA:Overview}
+            The \acf{LSA}, in the \ac{MOC}, assumes the shape of the source along a characteristic track-segment is linear.
+            There has long been motivation for the development of \acp{LSA} for the \ac{MOC}, as previous work \cite{Larsen1980} indicated that a spatially linear source was able to achieve faster computational performance in \ac{SN} calculations.
+            There have been many different variants of this approximation.
+            The first instance of the \ac{LSA} was the \emph{gradient source approximation} introduced by \citet{Halsall1993}.
+            This early \ac{LSMOC} was based on the averaging of the angular flux gradient along tracks, and was implemented in the WIMS \cite{Halsall1993}, and PEACH \cite{Tang2009} \ac{MOC} transport codes.
+            These averaged gradients were then used as estimates to the gradient of the scalar flux, which were used to compute the source shape as spatially linear.
+
+            \citeauthor{Petkov1998} devised a \ac{LSA} that estimated the gradient of the scalar flux based on the $P_1$ approximation in the MARIKO code \cite{Petkov1998,Petkov1999}.
+            In this approximation, the gradient of the scalar flux is computed from the neutron current, the total cross section, and the linearly anisotropic scattering matrix:
+            \begin{equation}\label{eq:MOC:LSA:Current2Gradient}
+                \grad\sflux \approx -3\left(\xst\current - \suml[\gprime]\xss[1]\current[i][\gprime]\right).
+            \end{equation}
+            A similar approach, using the diffusion approximation to compute the scalar flux gradient, was used in the so called ``quasi-linear'' source implemented by \citet{Rabiti2009}.
+            In this approach, the $\xss[1]$ matrix is diagonalized, turning the $P_1$ approximation into the diffusion approximation.
+            Due to their basis on the $P_1$ and diffusion approximations, these early \acp{LSA} are inaccurate in situations where more transport-like effects are present.
+            It can be shown, even in simple cases, that this approximation can be predict the opposite direction for the scalar flux gradient.
+            % NOTE[show TCP0 work here?]
+
+            \citet{Santandrea2002} introduced the positive linear and nonlinear surface characteristics scheme, which constructed a linear source by interpolating between source values on the surfaces of cell regions.
+            Various improvements have been made to this surface characteristics scheme for conservation \cite{Santandrea2002}, as well as coupling in APOLLO2 \cite{Santandrea2008}.
+            \citet{LeTellier2006} introduced a simplification to the linear characteristics scheme for conservation, by using a diamond-differencing scheme.
+            This work was extended by \citet{Hebert2016}, to include higher-order diamond difference schemes, as well as allowing for acceleration \cite{Hebert2017}.
+
+            The most recent \ac{LSA} examined in this work was introduced as a 2-D general high-order method for unstructured meshes by \citet{Masiello2009}.
+            The approximation uses track-based integration, defined in \cref{ssec:MOC:Track-Based Integration}, in order to compute spatial moments of the angular flux.
+            This \ac{LSA} was shown to reduce memory and computation times in 3-D \ac{MOC} calculations \cite{Chai2009}.
+            The general method was simplified in the case of the isotropic and anisotropic \ac{LS} by \citet{Ferrer2016}; this also introduced the ``LS-P0'' method in which the isotropic source is spatially linear, but the anisotropic source components are spatially uniform within each cell.
+            This \ac{LSA} was also to be consistent with particle conservation, under certain constraints, and shown to be compatible with \ac{CMFD} acceleration \cite{Ferrer2018}.
+
+            As part of this thesis work, significant effort has been spent on improvements to this moment-based \ac{LSA} in problems with near-void regions \cite{Fitzgerald2018}, and for the multiphysics problems that are of interest in the \ac{CASL} program \cite{Fitzgerald2019}.
+            While this method is capable of modeling general spatially linear anisotropic source, previous work has shown that treating only the isotropic source as spatially linear is more practical \cite{Ferrer2016}; thus, the derivation provided in the next section is for such a source.
+        }
+        \subsection{Derivation}{\label{ssec:MOC:LSA:Derivation}
+            The moment-based \ac{LSA} assumes the shape of the source, $\source[mi][g][\loc]$, is spatially linear within each cell, $\Region$.
+            This can be expressed as
+            \begin{subequations}\label{eqs:MOC:LSA:Source Shape}
+                \begin{equation}\label{eq:MOC:LSA:Source Shape}
+                    \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL,
+                \end{equation}
+                where $\srcL$ is a column vector of source spatial expansion coefficients,
+                \begin{equation}
+                    \srcL \defined\begin{bmatrix}\srcL[x]\\\srcL[y]\\\srcL[z]\end{bmatrix},
+                \end{equation}
+                and $\loc$ is the position in \emph{local} coordinates.
+            \end{subequations}
+            By performing a similar spatially linear expansion of the scalar flux,
+            \begin{equation}\label{eq:MOC:LSA:Scalar Flux Expansion}
+                \sflux(\loc) \approx \sfluxF + \loc\vdot\sfluxL,
+            \end{equation}
+            the sources linear expansion coefficients can be expressed as
+            \begin{equation}\label{eq:MOC:LSA:Linear Source Computation}
+                \srcL = \suml[\gprime]\xss[0]\sfluxL[i][\gprime] + \frac{\spect}{\keff}\suml[\gprime]\nufis\sfluxL[i][\gprime].
+            \end{equation}
+
+            In this \ac{LSA}, it is convenient to define the spatially linear source in terms of a cell-local coordinate system.
+            Allow $\Loc$ to be the position variable in the global coordinate system, the local coordinates are then defined as
+            \begin{equation}\label{eq:MOC:LSA:Global to Local Coordinates}
+                \loc = \Loc - \centroid[\Loc][mi],
+            \end{equation}
+            where $\centroid[\Loc][mi]$ is the numerical centroid of the cell $i$.
+
+            These numerical centroids can be defined as either direction-dependent, or direction-independent, which will have implications on particle conservation, as discussed in \cref{ssec:MOC:LSA:Particle Conservation}.
+            The direction-dependent centroids are defined by
+            \begin{equation}\label{eq:MOC:LSA:Direction-Dependent Centroids}
+                \centroid[\Loc][mi] \defined \MOCSingleAngleIntegral{\Loc} = \frac{1}{V_i}\suml[k]\tA[mki]\nsegl\locCent[\Loc],
+            \end{equation}
+            where $\locCent[\Loc]$ is the global coordinate vector of the track-segment mid-point.
+            Similarly, the direction-independent centroids are defined by
+            \begin{equation}\label{eq:MOC:LSA:Direction-Independent Centroids}
+                \centroid[\Loc][i] \defined \rfourpi\MOCIntegral{\Loc} = \frac{1}{V_i}\suml[m]\wt\suml[k]\tA[mki]\nsegl\locCent[\Loc].
+            \end{equation}
+
+            Following the same approach as the \ac{FSMOC} derivation, in \cref{ssec:MOC:FSA:Derivation}, to compute the source the scalar flux region-averaged value, $\sfluxF$, the scalar flux expansion coefficients, $\sfluxL$, and the higher-order angular moments, $\afluxmom[\ell][n][i][g]$, are required.
+            \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
+                The region-averaged scalar flux can be found using the same definition as previously,
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Scalar Flux Definition}
+                    \sfluxF \defined \MOCIntegral{\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]},
+                \end{equation}
+                the angular moments can be defined as
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments of Flux Definition}
+                    \afluxmom[\ell][n][i][g] \defined \MOCIntegral{\SH\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
+                \end{equation}
+                In order to determine the spatial expansion coefficients of the scalar flux, \cref{eq:MOC:LSA:Scalar Flux Expansion} is operated on by $\MOCIntegral{\loc(\vdot)}$.
+                Recognizing that this should be directly proportional to the angular flux moment $\MOCIntegral{\loc\aflux[][g][]}$, a system of equations is found
+                \begin{equation}\label{eq:MOC:LSA:Moment to Expansion Coefficient}
+                    \M\sfluxL = \MOCIntegral{\loc\aflux[][g][]},
+                \end{equation}
+                where
+                \begin{equation}\label{eq:MOC:LSA:Geometric Moments}
+                    \M \defined \MOCIntegral{\loc\loc^T}.
+                \end{equation}
+                The spatial angular flux moments, $\MOCIntegral{\loc\aflux[][g][]}$, are then defined as
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Flux Moments Definition}
+                    \MOCIntegral{\loc\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\suml[k]\nsegl\tA[mki]\left(\locIn\MOCTrackIntegral{\aflux[][g][]} + \dirm\MOCTrackIntegral{\nlen\aflux[][g][]} / \renorm[mi]\right).
+                \end{equation}
+            \end{subequations}
+
+            In order to evaluate the flux moments defined in \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, the track-averaged angular flux values, $\MOCTrackIntegral{\aflux[][g][]}$, and $\MOCTrackIntegral{\nlen\aflux[][g][]}$, must be determined.
+            First, the transport equation must be put into characteristic form, using \cref{eq:MOC:Renormalized Location Variable} the spatially expanded source, \cref{eq:MOC:LSA:Source Shape}, can be defined along the characteristic.
+            \begin{subequations}\label{eqs:MOC:LSA:Characteristic Form}
+                The characteristic transport equation becomes
+                \begin{equation}\label{eq:MOC:LSA:Characteristic Form}
+                    \left[\deriv{}{\nlen} + \xst\right]\aflux = \tsrcF + \tsrcL\left(\nlen - \frac{\nsegl}{2}\right),
+                \end{equation}
+                where
+                \begin{equation}\label{eq:MOC:LSA:Track Average Source}
+                    \tsrcF \defined \rfourpi\left[\srcF[mi] + \locCent \vdot \srcL\right],
+                \end{equation}
+                and
+                \begin{equation}\label{eq:MOC:LSA:Track Linear Source}
+                    \tsrcL \defined \rfourpi\left[\frac{\dirm\vdot\srcL}{\renorm[mi]}\right].
+                \end{equation}
+            \end{subequations}
+            This can be solved analytically for the angular flux along the track,
+            \begin{subequations}\label{eqs:MOC:LSA:Angular Flux Solution}
+                \begin{equation}\label{eq:MOC:LSA:Angular Flux Solution}
+                    \aflux = \afluxin + \left(\frac{\tsrcF}{\xst} - \afluxin\right)F_1(\opt) + \frac{\tsrcL}{2(\xst)^2}F_2(\opt),
+                \end{equation}
+                where
+                \begin{equation}\label{eq:MOC:LSA:F1}
+                    F_1(\opt) \defined 1 - \exp(-\opt),
+                \end{equation}
+                and
+                \begin{equation}\label{eq:MOC:LSA:F2}
+                    F_2(\opt) \defined 2[\opt-F_1(\opt)] - \segopt F_1(\opt).
+                \end{equation}
+            \end{subequations}
+
+            As discussed in \cref{ssec:MOC:FSA:Derivation}, there are two \emph{equivalent} methods with which one could determine the track-averaged angular flux values.
+            However, it is the author's opinion that defining these moments implicitly, by taking the moments of the characteristic equation (\cref{eq:MOC:LSA:Characteristic Form}), results in a form that is simpler.
+            The original basis of this work \cite{Ferrer2016}, evaluated the linear moment explicitly; for brevity, the derivation will only be shown here with the implicitly defined moment.
+            Previous work \cite{Fitzgerald2019} has also shown that by using the form given by the implicit definition, there are significant benefits in multi-physics applications.
+            The implicitly defined moments, given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$ and $\MOCTrackIntegral{\nlen(\vdot)}$, are given by
+            \begin{subequations}\label{eqs:MOC:LSA:Track-Averaged Moments}
+                \begin{equation}\label{eq:MOC:LSA:Track-Averaged Angular Flux}
+                    \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF}{\xst} + \frac{\dflux}{\segopt},
+                \end{equation}
+                and
+                \begin{equation}\label{eq:MOC:LSA:Track-Averaged Linear Angular Flux}
+                    \MOCTrackIntegral{\nlen\aflux[][g][]} = \frac{\MOCTrackIntegral{\aflux[][g][]} - \afluxout}{\xst} + \frac{\nsegl}{2}\left[\frac{\tsrcF}{\xst} + \frac{\tsrcL}{\xst}\frac{\nsegl}{6}\right].
+                \end{equation}
+            \end{subequations}
+            Due to the presence of the $\dflux/\segopt$ term in \cref{eq:MOC:LSA:Track-Averaged Linear Angular Flux}, it is beneficial to stability and performance \cite{Fitzgerald2018,Fitzgerald2019} to compute this quantity directly, rather than computing $\dflux$ (as is done for \ac{FSMOC}).
+            \begin{subequations}\label{eqs:MOC:LSA:Delta Flux over Optical Thickness}
+                This can be found explicitly by subtracting \cref{eq:MOC:LSA:Angular Flux Solution} evaluated at the exiting location from $\afluxin$ and dividing by $\segopt$, to get
+                \begin{equation}\label{eq:MOC:LSA:Delta Flux over Optical Thickness}
+                    \frac{\dflux}{\segopt} = \left(\afluxin-\frac{\tsrcF}{\xst}\right)E_1(\segopt) - \frac{\nsegl}{2}\frac{\tsrcL}{\xst}T_2(\segopt),
+                \end{equation}
+                where
+                \begin{equation}\label{eq:MOC:LSA:E1}
+                    E_1(\segopt) \defined \frac{F_1(\segopt)}{\segopt},
+                \end{equation}
+                \begin{equation}\label{eq:MOC:LSA:T2}
+                    T_2(\segopt) \defined 2E_2(\segopt) - E_1(\segopt),
+                \end{equation}
+                and
+                \begin{equation}\label{eq:MOC:LSA:E2}
+                    E_2(\segopt) \defined \frac{1-E_1(\segopt)}{\segopt}.
+                \end{equation}
+            \end{subequations}
+        }
+        \subsection{Particle Conservation}{\label{ssec:MOC:LSA:Particle Conservation}
+            In consideration to particle balance, use of the \ac{LSA} results in additional constraints on the calculations.
+            Similarly to \cref{ssec:MOC:FSA:Particle Conservation}, the track-based integration of the source must exactly integrate to the spatial and angular moments of the source.
+            The conservation of spatial moments is the basis of this \ac{LSA} \cite{Ferrer2018}, so this constraint is satisfied without additional constraints on the method.
+            The angular moment constraint is expressed as
+            \begin{equation}\label{eq:MOC:LSA:Angular Moment Constaint}
+                \rfourpi\MOCIntegral{\SH\source[mi][g][\loc]} = \srcF[i,\ell][g,n].
+            \end{equation}
+            In addition to the constraints introduced in \cref{ssec:MOC:FSA:Particle Conservation}, namely direction-dependent renormalization, and directional quadrature restrictions, this places constraints on the definition of the local coordinate system:
+            \begin{equation}\label{eq:MOC:LSA:Anisotropic Coordinate Constraint}
+                \MOCSingleAngleIntegral{\loc} = 0.
+            \end{equation}
+            This is equivalent to stating that the local coordinate system must be defined with respect to direction-dependent global centroids, as is given by \cref{eq:MOC:LSA:Direction-Dependent Centroids}.
+
+            If these constraints are satisfied, \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions} can be simplified,
+            \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments}
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Scalar Flux}
+                    \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
+                \end{equation}
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments of Flux}
+                    \afluxmom[\ell][n][i][g] = \frac{\tsrcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
+                \end{equation}
+                and
+                \begin{aequation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}
+                    \MOCIntegral{\loc\aflux[][g][]}
+                        = \M\frac{\srcL}{\xst}
+                            &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right) \\
+                            &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\frac{\srcF[mi]}{\xst}\left(\segopt\locCent + \dirm\segl\right).
+                \end{aequation}
+                where
+                \begin{equation}\label{eq:MOC:LSA:Delta Flux}
+                    \dflux \defined \afluxin - \afluxout.
+                \end{equation}
+            \end{subequations}
+        }
+        \subsection{Isotropic Simplifications}{\label{ssec:MOC:LSA:Isotropic Simplifications}
+            In the case of an isotropic source, the constraints for particle balance are relaxed.
+            Track-length renormalization as well as numerical centroid definitions can be direction-independent while still preserving particle conservation \cite{Ferrer2018}, as given by \cref{eq:MOC:Region Renormalization}, and \cref{eq:MOC:LSA:Direction-Independent Centroids} respectively.
+            The calculation of angular flux spatial moments, given in \cref{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}, can also be simplified into the form
+            \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux Isotropic}
+                \MOCIntegral{\loc\aflux[][g][]}
+                        = \M\frac{\srcL}{\xst}
+                            + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right).
+            \end{equation}
+        }
+        \subsection{Applications}{\label{ssec:MOC:LSA:Applications}
+            Various different \acp{LSA} to the \ac{MOC} have been developed and implemented in transport codes \cite{Halsall1993,Petkov1999,Santandrea2002,Tang2009,Rabiti2009,Boyd2014,Ferrer2016,Fitzgerald2018}.
+            Result have indicated that by using a \ac{LSA}, the spatial mesh discretization can be made coarser, relative to with a \ac{FSA}, while maintaining accuracy.
+            Although each segment calculation is more expensive when using a \ac{LSA}, the number of calculations (due to the coarser spatial mesh) can be significantly reduced, leading to reduced run-times.
+            Additionally, the reduction in spatial mesh elements generally reduces the amount of memory used by the calculation.
+            As part of this work, a spatial mesh discretization study was performed on problems with multiphysics applications in mind \cite{Fitzgerald2019}; this is presented in more detail in \cref{sec:Results:2-D Linear Source}.
+        }
+    }
+    \section{Parallelism}{\label{sec:MOC:Parallelism}
+        High-fidelity transport methods, such as the \ac{MOC}, can require significant computational resources for full core calculations; this is particularly true for 3-D calculations.
+        While processing power has increased exponentially since the \ac{MOC} was first conceived in 1972 \cite{Askew1972}, since the early 2000's, single-core processing power has largely leveled off.
+        System architectures, as well as code design, have become more focused on \emph{parallel} computations.
+        Previous works \cite{Kochunas2013} made significant progress in the efficient parallelization of the \ac{MOC}.
+
+        \citet{Kochunas2013} developed a hybrid-parallel algorithm for the \ac{MOC} that included thread-based parallelism over characteristic tracks, as well as spatial and angular decomposition.
+        This work showed that the \ac{MOC} was able to scale well up to 10000's of processors.
+        While this work is important, and has led to significant advancement, the use of 1000's of processors is not feasible for industrial use.
+        It is thus the author's opinion that the primary focus of research on 3-D \ac{MOC} techniques should be on serial efficiency, such as the \acf{LS} (\cref{sec:MOC:LSA}), and macroray (\cref{ssec:RT:Macroray});
+        however, moderate levels of parallelism are feasible for industry, and so more efficient parallelism should also be a focus of research.
+
+        In \ac{MOC} calculations, each characteristic track calculation is nearly independent from others; previous works have indicated that loops over characteristic tracks can be parallelized efficiently by using threads on traditional \acp{CPU} \cite{Kochunas2013} or on \acp{GPGPU} \cite{Boyd2014}.
+        This type of parallelism is most generally called \emph{shared-data parallelism}, as data is shared between the parallel threads.
+
+        Large neutronics calculations may require significant amounts of memory, and thus \emph{distributed-data parallelism} is necessary.
+        In general, this type of parallelism separates (partitions) a domain of the problem, and separate computing nodes are assigned a subdomain.
+        Only data for the assigned subdomain is stored, and thus whole-core simulations become possible; additionally, because each subdomain can be processed in parallel, overall runtimes typically decrease with increasing numbers of subdomains (processors).
+
+        MPACT has the capabilities for domain decomposition/parallelism over two separate domains: space and direction.
+        In MPACT, each discrete direction has an easily calculable amount of work, and the decomposition is trivial; in general the same cannot be said of the spatial domain.
+        As part of this thesis work, a more efficient method of spatial decomposition has been investigated and developed in MPACT \cite{Fitzgerald2019a}.
+        A journal article on this work has been submitted to the Annals of Nuclear Energy; for now, the submitted manuscript is attached in \cref{ch:Spatial Decomposition in MPACT}.
+    }
+    % References
+    % \printbibliography
+}

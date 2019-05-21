@@ -1,0 +1,65 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Aligned equation
+\NewEnviron{aequation}{%
+    \begin{equation}\begin{split}
+        \BODY
+    \end{split}\end{equation}
+}
+
+% Xparse extension
+\newcommand{\DeclareAutoPairedDelimiter}[3]{%
+  \expandafter\DeclarePairedDelimiter\csname Auto\string#1\endcsname{#2}{#3}%
+  \DeclareRobustCommand{#1}{\csname Auto\string#1\endcsname*}}
+\ExplSyntaxOn
+\DeclareExpandableDocumentCommand{\IfNoValueOrEmptyTF}{mmm}{
+  \IfNoValueTF{#1}{#2}{\tl_if_empty:nTF {#1} {#2} {#3}}
+}
+\ExplSyntaxOff
+%%% General Mathematics %%%
+\newcommand{\defined}{\equiv}
+\newcommand{\pluseq}{\mathrel{+}=}        % Accumulation (plus-equals)
+\DeclareDocumentCommand{\avg}{ m }{\overline{#1}}
+\DeclareDocumentCommand{\vec}{ m }{\boldsymbol{#1}}             % Bold vectors
+\DeclareDocumentCommand{\lvec}{ m }{\underline{\vec{#1}}}       % underline bold vectors
+\DeclareDocumentCommand{\uvec}{ m }{\vec{\widehat{#1}}}         % Unit-vector
+\DeclareDocumentCommand{\mat}{ m }{\boldsymbol{#1}}
+\newcommand{\vdot}{\boldsymbol{\cdot}}           % Bold dot-mulitply
+\newcommand{\grad}{\vec{\nabla}}
+\newcommand{\dif}{\mathop{}\!\mathrm{d}}  % d for integrals
+\DeclareDocumentCommand{\deriv}{ m m }{                   % Derivatives
+  \frac{\dif{#1}}{\dif{#2}}
+}
+\DeclareDocumentCommand{\pderiv}{ m m }{                  % Partial derivatives
+  \frac{\partial{#1}}{\partial{#2}}
+}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}       % Absolute value
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}      % Ceiling
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}   % Floor
+%%% Mathematical Operators %%%
+\DeclareDocumentCommand{\intl}{ o o }{    % Integral w/ or w/o limits
+  \IfValueTF{#1}
+  {
+    \IfValueTF{#2}
+    {\int_{#1}^{#2}}
+    {\int_{#1}}
+  }
+  {\int}
+}
+\DeclareDocumentCommand{\suml}{ o o }{    % Sum w/ or w/o limits
+  \IfValueTF{#1}
+  {
+    \IfValueTF{#2}
+    {\mathchoice{\sum\limits_{#1}^{#2}}{\sum\limits_{#1}^{#2}}{\sum_{#1}^{#2}}{\sum_{#1}^{#2}}}
+    {\mathchoice{\sum\limits_{#1}}{\sum\limits_{#1}}{\sum_{#1}}{\sum_{#1}}}
+  }
+  {\sum}
+}
+\DeclareDocumentCommand{\prodl}{ o o }{    % Product w/ or w/o limits
+  \IfValueTF{#1}
+  {
+    \IfValueTF{#2}
+    {\mathchoice{\prod\limits_{#1}^{#2}}{\prod\limits_{#1}^{#2}}{\prod_{#1}^{#2}}{\prod_{#1}^{#2}}}
+    {\mathchoice{\prod\limits_{#1}}{\prod\limits_{#1}}{\prod_{#1}}{\prod_{#1}}}
+  }
+  {\prod}
+}

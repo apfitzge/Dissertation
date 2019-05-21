@@ -1,0 +1,151 @@
+% Use the University of Michigan thesis class
+\documentclass[thesis]{prospectus-umich}
+
+\usepackage{amsmath,amssymb,amsthm,amsbsy}      % Math packages
+\usepackage{environ}                            % Easy Environment defining
+\usepackage{empheq}                             % Put boxes around long equations
+\usepackage{mathtools}                          % ceil command
+\usepackage{enumerate,enumitem}                 % Numbered list and formatting
+\usepackage{graphicx}                           % Graphics
+\usepackage{placeins}                           % Allows for \FloatBarrier command (constrains float placement)
+\usepackage[bottom]{footmisc}                   % Footnotes to be bottom aligned
+\usepackage[super]{nth}                         % 1st, 2nd, etc properly formatted automatically
+\usepackage{multirow,multicol}                  % Multiple rows/columsn in tables
+\usepackage{caption}                            % Allows for \caption*
+\usepackage{subcaption}                         % Subfigures
+\usepackage{siunitx}                            % Column type S in tables
+\usepackage[ruled]{algorithm2e}                 % Fancy algorithms
+\usepackage{algcompatible}
+\usepackage{booktabs}                           % Better table formatting
+\usepackage{microtype}                          % Better line breaking and formatting
+\usepackage{breakcites}                         % Better line breaking with cites?
+% \usepackage[backend=bibtex,                     % Use bibtex backend
+%             natbib=true,                        % Use natbib
+%             refsection=chapter,                 % Break references by chapter
+%             sorting=none,
+%             style=numeric-comp,
+%             maxcitenames=2]{biblatex}       % Biblatex - Reference management. Citations in-order
+\usepackage[backend=bibtex,                     % Use bibtex backend
+            natbib=true,                        % Use natbib
+            sorting=none,
+            style=numeric-comp,
+            maxcitenames=2]{biblatex}       % Biblatex - Reference management. Citations in-order
+\usepackage{etoolbox}                           % Command definitions
+\usepackage{tikz}                               % TikZ figures
+\usepackage{titletoc}                           % Chapter TOC
+\usepackage{xstring}                            % String processing stuff
+\usepackage[nameinlink,capitalize]{cleveref}    % Clever references (\cref, \Cref)
+\usepackage[final]{pdfpages}                    % \includepdf
+
+% Extra stylings
+\input{style/stylings}
+
+% Extra macros
+\input{macros/macros}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\addbibresource{library}
+\title{Parallel 3-D Method of Characteristics with Linear Source and Advanced Transverse Integration}
+\author{Andrew P. Fitzgerald}
+\department{Nuclear Engineering and Radiological Sciences}
+\year=2019
+% \frontispiece{I may put a frontispiece here later}
+\frontpagestyle{1}
+
+% Make it harder for widows and orphans to appear:
+% \widowpenalty10000
+% \clubpenalty10000
+
+% Dedication
+%  \dedication{ %
+%  I will add a dedication here later.}%ZZZZ
+
+% Acknowledgments
+%  \acknowledgments[6]{ %
+%  I will add acknowledgements here later.}
+ % This command sets the width of the acknowledgments area as a fraction
+ % of the total width of the text area.
+%  \acknowledgmentswidth{0.8} %ZZZZ
+
+% % Preface
+%  \preface[2]{ %
+%  I may add a preface here later.} %ZZZZ
+
+% Committee
+\committee{ %
+    Professor Thomas Downar, Co-Chair,\\
+    Dr. Brendan Kochunas, Co-Chair,\\
+    Professor Edward Larsen,\\
+    Professor Venkat Raman,
+}
+
+% Chair must be entered separately for formatting reasons.
+\cochair{Thomas Downar, Brendan Kochunas}
+
+% Commands to hide or show lists of figures, tables, etc.
+\hidelistoftables
+\hidelistoffigures %ZZZ check captions
+% \showlistofalgorithms
+\showlistofappendices
+
+% Definition of any abbreviations used.
+\input{Preface/abbr.tex}
+
+%%% This requires double spacing! go back and fix it in thesis.cls! %%%
+\abstract{
+    In the design and analysis of nuclear fission reactor systems, simulations are an essential tool for improving efficiency as well as safety.
+    Neutronics simulations have always been limited by the available computational resources.
+    This is because of the large discretizations that are needed for the neutron transport equation, which has a 6-dimensional phase space for steady-state eigenvalue problems.
+
+    The ``gold standard'' for 3-D neutron transport simulations is Monte Carlo with explicit geometry representation because it treats all dependent variables continuously.
+    However, there are significant remaining challenges for Monte Carlo methods that prohibit their widespread use, and put them at a disadvantage compared to deterministic methods.
+    The ``gold standard'' for deterministic 3-D neutron transport is the 3-D \ac{MOC}.
+    Numerous deterministic methods exist for solving the 3-D transport equation. Each of them has their own drawback.
+    3-D \ac{MOC} is considered the ``best'' due to its ability to accurately model the exact geometry and neutron scattering physics (other methods do just one of these well or become undesirably complex).
+    The downside of the 3-D \ac{MOC} method is the substantial computational resources required to discretize the problem.
+
+    In 2-D, \ac{MOC} solutions of the transport equation are the preferred method for reactor applications because:
+    \begin{itemize}[leftmargin=0.5in]
+        \item{they can model the geometry exactly}
+        \item{they easily accommodate much of the desired physics}
+        \item{their implementation on a computer is one of the most efficient and often the fastest}
+        \item{the method is highly parallelizable}
+    \end{itemize}
+
+    The \ac{MOC} method for neutron transport, first converts the transport equation (a PDE) to an ODE in terms of the ``characteristic'' dependent variable (a combination of space and direction of flight).
+    As a consequence, \ac{MOC} methods have a unique discretization that requires discretization of the ``characteristic'' variable in addition to the usual spatial variables.
+    The discretization of the characteristics (commonly called rays) involves tracking rays through the spatial mesh and computing the lengths of the segments made by the intersections of the rays with the spatial mesh.
+    Then for each segment the solution of the transport equation is evaluated. These solutions are then ultimately integrated to compute the engineering figures of merit.
+
+    Over the past decade, there has been renewed interest in assessing the state of the art for 3-D \ac{MOC} and the tractability of this problem on the newest computer architectures.
+    Previous work made significant strides in parallelizing the \ac{MOC} algorithm for 100,000's of processors, but ultimately did not prove viable due to the extreme compute resources required.
+    Since then there has been progress in making 3-D MOC a less computationally burdensome by adopting more advanced discretization methods that overall, lead to fewer spatial mesh regions and rays; namely the linear source approximation, and ray-categorization or on-the-fly ray-tracing.
+
+    The goal of this thesis is to continue progress in reducing the burden of 3-D \ac{MOC} calculations by extending a ray-tracing technique previously used for 2-D \ac{MOC} calculations: the macroband.
+    The macroband ray-tracing method lays down characteristic tracks in the domain such that transverse integration over these tracks is more accurate. By doing so, the same accuracy can be achieved with fewer rays, and thus less computational work.
+    It has been observed in 2-D calculations that the average distance between rays can be increased by up to 5 times (3-5 times fewer rays).
+    In 3-D, the average distance between rays is expected to be increased in both axial and radial directions leading to 9-25 times fewer rays overall.
+
+    The macroband approach also offers several more advantages compared to traditional ``modular'' ray-tracing methods.
+    In modular ray-tracing methods the discretization of the angular variable via a quadrature is slightly perturbed to guarantee rays are aligned at certain geometric interfaces.
+    This angular perturbation has not been observed to cause significant error in 2-D calculations, but for 3-D it has, meaning more discrete angles are required to obtain an accurate result.
+    The macroband approach does not suffer from this because rays are not forced to be aligned at geometric interfaces, though this does require new approximations be introduced at mesh interfaces.
+    Additionally, modular ray-tracing techniques require the same density of rays everywhere in the domain.
+    For certain nuclear reactor designs, some components may require a highly resolved discretization in some areas, but not others.
+    Therefore, with modular ray tracing the same fine ray-spacing is necessary everywhere.
+    However, in the macroband approach it is possible to assign a finer ray-spacing only in these special regions, while using a coarser spacing/discretization everywhere else. Both of these advantages are expected to reduce the amount of work compared to traditional \ac{MOC} ray-tracing techniques and succeed in making the 3-D \ac{MOC} problem more tractable.
+}
+\begin{document}
+    \acresetall
+
+    \input{chapters/01/ch01}
+    \input{chapters/02/ch02}
+    \input{chapters/03/ch03}
+    \input{chapters/04/ch04}
+    \input{chapters/05/ch05}
+    \printbibliography
+    \appendix
+        \chapter{Spatial Decomposition}{\label{ch:Spatial Decomposition in MPACT}
+            \includepdf[pages=-,scale=0.80,frame,pagecommand={}]{appendices/SpatialDecomposition/ANE-Manuscript.pdf}
+        }
+\end{document}

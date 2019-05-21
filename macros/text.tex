@@ -1,0 +1,6 @@
+% Possessive textual citation
+\NewDocumentCommand{\citetp}{s m}{%
+    \IfBooleanTF{#1}%
+        {\citeauthor{#2}'~\cite{#2}}%
+        {\citeauthor{#2}'s~\cite{#2}}%
+}

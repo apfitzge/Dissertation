@@ -1,0 +1,44 @@
+%%% Neutronics Quantities %%%
+% Dimensional Quantities %
+\newcommand{\Direction}{\Omega}           % General Direction symbol
+\newcommand{\Azimuthal}{\varphi}          % General Azimuthal Angle
+\newcommand{\Polar}{\theta}               % General Polar Angle
+\newcommand{\PolarCos}{\mu}               % General Polar cosine
+\newcommand{\location}{x}                 % General Location symbol
+\newcommand{\Bounds}{X}                   % General Location symbol (bounds)
+\newcommand{\Time}{t}                     % General Time symbol
+\newcommand{\dir}{\uvec{\Direction}}      % Direction vector
+\newcommand{\loc}{\vec{\location}}        % Location vector
+\newcommand{\Loc}{\vec{X}}                % Global location vector
+\newcommand{\Eprime}{E^{\prime}}          % Integration energy
+\newcommand{\dirprime}{\dir^{\prime}}     % Integration direction
+\newcommand{\ddir}{\dif{\Direction}}
+\newcommand{\ddirprime}{\dif{\Direction^{\prime}}}
+\newcommand{\Weight}{w}
+
+% Cross-sections
+\newcommand{\CrossSection}{\Sigma}
+\newcommand{\MicroCrossSection}{\sigma}
+\newcommand{\OpticalThickness}{\tau}
+\newcommand{\irchi}[2]{\raisebox{\depth}{$#1\chi$}} % inner command, used by \Spectrum
+\DeclareRobustCommand{\Spectrum}{{\mathpalette\irchi\relax}}
+
+% Flux
+\newcommand{\AngularFlux}{\psi}
+\newcommand{\ScalarFlux}{\phi}
+\newcommand{\FluxMoment}{\Phi}
+\newcommand{\Current}{\vec{J}}
+\newcommand{\FluxSpectrum}{\Phi}
+
+% Eigenvalues
+\newcommand{\Eigenvalue}{\lambda}
+\newcommand{\kEigenvalue}{k}
+\newcommand{\keff}{\kEigenvalue_{\text{eff}}}
+
+% Common terms
+\newcommand{\fourpi}{4\pi}
+\newcommand{\rfourpi}{\frac{1}{\fourpi}}
+
+% Spherical harmonics
+\DeclareDocumentCommand{\SH}{ O{\ell} O{n} O{\dir} }{\ensuremath{R^{#2}_{#1}(#3)}}
+\DeclareDocumentCommand{\Region}{ O{i} }{\mathcal{R}_{#1}}

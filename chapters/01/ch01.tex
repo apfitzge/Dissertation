@@ -1,0 +1,45 @@
+\chapter{Introduction}{\label{ch:Introduction}
+    \section{Motivation}{\label{sec:Introduction:Motivation}
+        Computer simulations have played an important role in the design and analysis of nuclear reactor systems over the past 60 years \cite{FewGroupDiffusion}.
+        The methods used by these simulations have always been limited by the available computational resources; as such, in the 1950's two-group diffusion theory was used as a basis for simulation tools \cite{FewGroupDiffusion}.
+        As computers became more powerful, multi-group diffusion calculations became the method of choice for \ac{LWR} design calculations.
+
+        More accurate and detailed simulation tools allow for designs to have higher power density, and thus be more profitable, without compromising safety.
+        However, computational resources have always limited the level of detail of simulation tools.
+        Exponential increases in computing power, and high-performance computing clusters have made whole-core transport calculations possible \cite{CASMO-4,Apollo2-2010,DeCART,Denovo,Yang2010,Boyd2014,Collins2016,Gunow2018}.
+        Programs such as \ac{CASL} and \ac{NEAMS} have focused on development of modern advanced simulation tools to address certain challenge problems.
+        Large computing clusters are generally unavailable to reactor analysts in industry, and so using direct whole-core 3-D transport methods is not common outside academia or national laboratories.
+
+        The ``gold standard'' of deterministic methods has been the 3-D \ac{MOC} \cite{Askew1972} due to its' ability to exactly model complicated geometries.
+        At the time of writing, whole-core 3-D \ac{MOC} calculations are generally not possible without use of large computing clusters.
+        This is due to the large discreteizations that are necessary for the neutron transport equation, which has a 6-dimensional phase space for stead-state eigenvalue problems.
+        In the past decade, there has been renewed interest in making 3-D \ac{MOC} more efficient and performant by using parallelism \cite{Kochunas2013}, modern \ac{GPU} architectures \cite{Boyd2014}, and ray-tracing storage techniques \cite{Sciannandrone2016, Gunow2016}.
+        There has also been work done to make \ac{MOC} faster by improving the efficiency of the calculations by using higher-order approximations \cite{Ferrer2016,Gunow2018}.
+
+        The bulk of this thesis work is comprised of three distinct, yet connected, topics, all with a focus on improving the feasibility of 3-D \ac{MOC} calculations.
+        It is the author's opinion, that improving efficiency of 3-D \ac{MOC} calculations should be the primary focus of current research, as it is not feasible for industry to use thousands of processors.
+        Thus, two techniques are utilized as part of this thesis work: the \acf{LSA}, and the macroray.
+
+        The \ac{LSA} has been studied by other research groups \cite{Ferrer2016,Ferrer2018,Gunow2018}, and has been worked on as part of this thesis project; specifically, this work has led to improvements of the method for stability in near-void regions \cite{Fitzgerald2018}, and efficiency in multi-physics simulations \cite{Fitzgerald2019}.
+        The \ac{LSA} is an approximation that is used to improve \ac{MOC} efficiency by reducing the number of computational cells required for accurate results.
+
+        The macroray is a new ray-tracing technique under development as part of this thesis work; this technique is an extension of the two-dimensional macroband \cite{Villarino1992} ray-tracing technique.
+        This technique has been shown to reduce the number of characteristic rays required for accurate results in two-dimensional flat-source calculations \cite{Yamamoto2005,Fevotte2007}.
+        To the best of the author's knowledge, there have been no studies of this ray-tracing technique in three-dimensional ray-tracing calculations.
+        Fewer characteristic rays results in more efficient calculations; the improvement in efficiency is expected to be more significant in 3-D calculations due to the square scaling of tracks with ray-spacing, rather than linear scaling in 2-D.
+        Additionally, efficiency should be improved further by the \ac{LS} which allows for coarser cells and fewer track-segments.
+
+        The third contribution of this thesis is work in improving parallel efficiency.
+        While large scale parallelism on thousands of processors may not be feasible for industry, some degree of parallelism is necessary for whole-core calculations due to memory constraints.
+        An automated spatial decomposition scheme based on graph theory, is developed leading to significantly improved parallel efficiency \cite{Fitzgerald2017,Fitzgerald2019a}.
+    }
+    \section{Outline}{\label{sec:Introduction:Outline}
+        The remainder of this document is structured as follows.
+        \Cref{ch:Neutron Transport Theory} gives an overview of neutron transport theory, with a focus on what is relevant to this work.
+        The derivation and details on the \acf{MOC} are provided in \cref{ch:The Method of Characteristics}, with a focus on the contributions made in this work.
+        Ray-tracing is an important aspect of \acf{MOC} calculations, and details about ray-tracing techniques are provided in \cref{ch:Ray-Tracing}.
+        Finally, initial results are presented in \cref{ch:Initial Results} with an overview of future work that needs to be done.
+    }
+    % References
+    % \printbibliography
+}

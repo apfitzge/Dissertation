@@ -1,0 +1,59 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfgantt}
+\usetikzlibrary{intersections,decorations.markings}
+
+\begin{document}
+    \begin{ganttchart}[hgrid,vgrid,
+                    x unit = 0.5cm,
+                    y unit title = 0.5cm,
+                    y unit chart = 0.5cm,
+                    bar/.style={fill=black},
+                    progress label text={}]{1}{24}
+        % Months
+        \gantttitle{2019}{24}\\
+        \gantttitle{Jan.}{2}
+        \gantttitle{Feb.}{2}
+        \gantttitle{Mar.}{2}
+        \gantttitle{Apr.}{2}
+        \gantttitle{May}{2}
+        \gantttitle{June}{2}
+        \gantttitle{July}{2}
+        \gantttitle{Aug.}{2}
+        \gantttitle{Sep.}{2}
+        \gantttitle{Oct.}{2}
+        \gantttitle{Nov.}{2}
+        \gantttitle{Dec.}{2}\\
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Implementation Activities
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        \ganttgroup[inline=false,progress=050]{A. MacroMOC Implementation}{1}{16}\\
+        \ganttbar[inline=false, progress=100]{A.1 High-level design}{2}{2}\\
+        \ganttbar[inline=false, progress=100]{A.2: Geometry interface}{2}{3}\\
+        \ganttbar[inline=false, progress=100]{A.3: Macro ray-tracing}{3}{3}
+            \ganttbar[inline=false, progress=000]{}{9}{9}\\         % 3D generalizations to MRT
+        \ganttbar[inline=false, progress=100]{A.4: Boundary condition structure}{4}{4}
+            \ganttbar[inline=false, progress=000]{}{10}{10}         % 3D generalizations
+            \ganttbar[inline=false, progress=000]{}{15}{15}\\       % Unstructured generalizations
+        \ganttbar[inline=false, progress=100]{A.5: Sweeper Structure}{4}{5}
+            \ganttbar[inline=false, progress=000]{}{12}{12}         % 3D generalizations to sweeper structure
+            \ganttbar[inline=false, progress=000]{}{13}{14}\\       % Anisotropic generalizations
+        \ganttbar[inline=false, progress=100]{A.6: Sweeper Routines}{5}{5}
+            \ganttbar[inline=false, progress=000]{}{12}{12}         % 3D generalizations
+            \ganttbar[inline=false, progress=000]{}{13}{14}\\       % Anisotropic generalizations
+        \ganttbar[inline=false, progress=100]{A.7 Linear Source}{7}{8}\\
+        \ganttbar[inline=false, progress=000]{A.8 3D Generalization}{9}{12}\\
+        \ganttbar[inline=false, progress=000]{A.9 Anisotropic Scattering}{13}{14}\\
+        \ganttbar[inline=false, progress=000]{A.10 Unstructured Pin Map}{15}{15}\\
+        \ganttbar[inline=false, progress=000]{A.11 Optimizations}{14}{18}\\
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % MacroMOC Results
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        \ganttgroup[inline=false, progress=10]{B. MacroMOC Results}{6}{18}\\
+        \ganttmilestone[name=pin2D, progress=070]{B.1: 2D pin-cell}{5}\\
+        \ganttmilestone[name=lat2D, progress=000]{B.2: 2D lattice}{10}\\
+        \ganttmilestone[name=pin3D, progress=000]{B.3: 3D pin-cell}{12}\\
+        \ganttmilestone[name=asm3D, progress=000]{B.4: 3D assembly}{14}\\
+        \ganttmilestone[name=bwrAm, progress=000]{B.5: BWR 3D assembly}{16}
+    \end{ganttchart}
+\end{document}
