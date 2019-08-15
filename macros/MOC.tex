@@ -66,18 +66,17 @@
 \DeclareDocumentCommand{\tfluxL}{ O{mki} O{g} }{  \widehat{\AngularFlux}_{#1}^{#2} }          % Linear flux-moment along track
 \DeclareDocumentCommand{\dflux}{ O{mki} O{g} }{ \Delta\AngularFlux_{#1}^{#2} }                % Difference of angular flux along track
 \DeclareDocumentCommand{\sfluxF}{ O{i} O{g} }{ \overline{\ScalarFlux}_{#1}^{#2} }             % Average scalar flux
-% \DeclareDocumentCommand{\sfluxL}{ o O{i} O{g} }{ % Linear expansion coeff (Scalar Flux)
-%     \IfNoValueOrEmptyTF{#1}
-%         {\lvec{\widehat{\ScalarFlux}}_{#2}^{#3}}
-%         {\widehat{\ScalarFlux}_{#2,#1}^{#3}}
-% }
 \DeclareDocumentCommand{\sfluxL}{ O{i} O{g} o }{ % Linear expansion coeff (Scalar Flux)
     \IfNoValueOrEmptyTF{#3}
         {\lvec{\widehat{\ScalarFlux}}_{#1}^{#2}}
         {\widehat{\ScalarFlux}_{#1,#3}^{#2}}
 }
-% \DeclareDocumentCommand{\sfluxL}{ m O{i} O{g} }{\widehat{\ScalarFlux}_{#2,#1}^{#3} }          % Linear expansion coeff (Scalar flux)
-\DeclareDocumentCommand{\afluxmom}{ O{\ell} O{n} O{i} O{\gprime} }{\FluxMoment_{#3,#1}^{#4,#2}}
+\DeclareDocumentCommand{\afluxmom}{ O{g} O{\ell} O{n} O{i} }{\FluxMoment_{#4,#3}^{#2,#1}}
+\DeclareDocumentCommand{\afluxmomF}{ O{g} O{\ell} O{n} O{i} }{\overline{\FluxMoment}_{#4,#3}^{#2,#1}}
+\DeclareDocumentCommand{\afluxmomL}{ O{g} O{\ell} O{n} O{i} }{\lvec{\widehat{\FluxMoment}}_{#4,#3}^{#2,#1}}
+\DeclareDocumentCommand{\fluxA}{ O{g} O{\ell} O{n} O{i} }{\ScalarFlux_{#4,#3}^{#2,#1}}
+\DeclareDocumentCommand{\fluxF}{ O{g} O{\ell} O{n} O{i} }{\overline{\ScalarFlux}_{#4,#3}^{#2,#1}}
+\DeclareDocumentCommand{\fluxL}{ O{g} O{\ell} O{n} O{i} }{\lvec{\widehat{\ScalarFlux}}_{#4,#3}^{#2,#1}}
 
 % Source
 \DeclareDocumentCommand{\source}{ O{mki} O{g} O{\len} }{\ensuremath{q^{#2}_{#1}\!\left(#3\right)}}
@@ -92,4 +91,4 @@
 }
 
 % Linear source operators / functions
-\DeclareDocumentCommand{\FluxToSource}{ O{g} }{\mathcal{S}^{#1}}
+\DeclareDocumentCommand{\FluxToSource}{ O{g} O{m} O{i} }{\mathcal{S}^{#1}_{#3,#2}}

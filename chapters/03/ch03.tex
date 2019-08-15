@@ -17,10 +17,16 @@
             \forall\loc\in\Region, \quad \forall m \in \angquad, \quad \forall i, g,
         \end{equation*}
         where $\Region$ is the spatial cell, $\angquad$ is the directional quadrature, as described in \cref{sssec:NTT:Directional Discretization}, and the fixed-source, $
-        \source[mi][g][\loc]$ is given by
+        \source[mi][g][\loc]$ can be found by applying the discrete-to-moment operator, $\FluxToSource$, defined by
+        \begin{equation}\label{eq:MOC:LSA:Flux To Source Operator}
+          \FluxToSource(f) \defined
+            \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]f^{\ell,\gprime}_{n,i}(\loc)
+            + \frac{\spect}{\keff}\suml[\gprime]\nufis f^{\gprime}_{i}(\loc),
+        \end{equation}
+        to get
         \begin{equation}\label{eq:MOC:Source}
             \source[mi][g][\loc] \defined
-                \left[\suml[\gprime]\suml[\ell=0][L](2\ell+1)\suml[n=-\ell][\ell]\SH\xss[\ell]\afluxmom(\loc) + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime](\loc)\right].
+                \left[\suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH\xss[\ell]\afluxmom(\loc) + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime](\loc)\right].
         \end{equation}
 
         Consider a point, $\loc_0$, and a line passing through this point in direction $\dirm$.
@@ -149,7 +155,7 @@
             To the best of our knowledge, this method is not implemented in any production-level \ac{MOC} code.
 
             Angle-volume preservation is the next ``best'' renormalization technique.
-            In this method, every monodirectional spatial integration should preserve the cell volume, i.e.
+            In this method, every mono-directional spatial integration should preserve the cell volume, i.e.
             \begin{equation}\label{eq:MOC:Angle-Volume Preservation}
                 \MOCSingleAngleIntegral{1} = 1.
             \end{equation}
@@ -182,18 +188,18 @@
             The \ac{FS} approximation is simply the assumption that within each cell, $\Region$, the source, $\source[mi][g][\loc]$, is uniform.
             This can be expressed as
             \begin{equation}\label{eq:MOC:FSA:Source Shape}
-                \source[mi][g][\loc] \approx \srcF[mi] = \srcF + \suml[\ell=1][L](2\ell+1)\suml[n=-\ell][\ell]\SH\srcF[i,\ell][g,n]
+                \source[mi][g][\loc] \approx \srcF[mi] = \srcF + \suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\srcF[i,\ell][g,n]
             \end{equation}
             Thus, to get a source in this form, \cref{eq:MOC:Source} requires, that the region averaged scalar flux and higher-order angular moments (up to order $L$) be determined.
             In mathematical terms, the flat-source can be determined as
             \begin{equation}\label{eq:MOC:FSA:Source Computation}
                 \srcF[mi] =
                     \left[
-                        \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH\xss[\ell]\afluxmom
+                        \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\afluxmom[\gprime]
                         + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime]
                     \right],
             \end{equation}
-            where the $\sflux[\gprime]$ is the region-averaged scalar flux, and $\afluxmom$ are the region-averaged higher-order angular moments of the flux.
+            where the $\sflux[\gprime]$ is the region-averaged scalar flux, and $\afluxmom[\gprime]$ are the region-averaged higher-order angular moments of the flux.
 
             In order to get these region-averaged flux moments, the spatial and directional integration operators, introduced in \cref{ssec:MOC:Track-Based Integration}, are used.
             \begin{subequations}\label{eqs:MOC:FSA:Region-Averaged Flux Moments Definition}
@@ -203,7 +209,7 @@
                 \end{equation}
                 and the higher-order angular moments of the flux are given by
                 \begin{equation}\label{eq:MOC:FSA:Region-Averaged Angular Moments of Flux Definition}
-                    \afluxmom[\ell][n][i][g] = \MOCIntegral{\SH\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\nsegl\tA[mki]\MOCTrackIntegral{\aflux[][g][]}.
+                    \afluxmom[g] = \MOCIntegral{\SH\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\nsegl\tA[mki]\MOCTrackIntegral{\aflux[][g][]}.
                 \end{equation}
             \end{subequations}
 
@@ -255,7 +261,7 @@
             Substituting \cref{eq:MOC:FSA:Source Shape} into \cref{eq:MOC:FSA:Anisotropic Source Conservation}, requires that
             \begin{subequations}\label{eqs:MOC:FSA:Anisotropic Constraints}
                 \begin{equation}\label{eq:MOC:FSA:Quadrature Constraint}
-                    \suml[m]\wt[m]\SH[\ell][n][\dirm]\SH[\ell'][n'] = \delta_{\ell\ell'}\delta_{nn'},
+                    \suml[m]\wt[m]\SH[\ell][n][\dirm]\SH[\ell'][n'][\dirm] = \delta_{\ell\ell'}\delta_{nn'},
                 \end{equation}
                 and
                 \begin{equation}\label{eq:MOC:FSA:Track Constraint}
@@ -271,7 +277,7 @@
                     \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
                 \end{equation}
                 \begin{equation}\label{eq:MOC:FSA:Region-Averaged Angular Moments of Flux}
-                    \afluxmom[\ell][n][i][g] = \frac{\srcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
+                    \afluxmom[g] = \frac{\srcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
                 \end{equation}
                 where
                 \begin{equation}\label{eq:MOC:FSA:Delta Flux}
@@ -329,7 +335,7 @@
             The general method was simplified in the case of the isotropic and anisotropic \ac{LS} by \citet{Ferrer2016}; this also introduced the ``LS-P0'' method in which the isotropic source is spatially linear, but the anisotropic source components are spatially uniform within each cell.
             This \ac{LSA} was also to be consistent with particle conservation, under certain constraints, and shown to be compatible with \ac{CMFD} acceleration \cite{Ferrer2018}.
 
-            As part of this thesis work, significant effort has been spent on improvements to this moment-based \ac{LSA} in problems with near-void regions \cite{Fitzgerald2018}, and for the multiphysics problems that are of interest in the \ac{CASL} program \cite{Fitzgerald2019}.
+            As part of this thesis work, significant effort has been spent on improvements to this moment-based \ac{LSA} in problems with near-void regions \cite{Fitzgerald2018}, and for the multi-physics problems that are of interest in the \ac{CASL} program \cite{Fitzgerald2019}.
             While this method is capable of modeling general spatially linear anisotropic source, previous work has shown that treating only the isotropic source as spatially linear is more practical \cite{Ferrer2016}; thus, the derivation provided in the next section is for such a source.
         }
         \subsection{Derivation}{\label{ssec:MOC:LSA:Derivation}
@@ -345,16 +351,24 @@
                 \end{equation}
                 and $\loc$ is the position in \emph{local} coordinates.
             \end{subequations}
-            By performing a similar spatially linear expansion of the scalar flux,
-            \begin{equation}\label{eq:MOC:LSA:Scalar Flux Expansion}
-                \sflux(\loc) \approx \sfluxF + \loc\vdot\sfluxL,
+            A similar spatial expansion of the angular moments of the flux can be performed,
+            \begin{equation}\label{eq:MOC:LSA:Flux Expansion}
+                \fluxA(\loc) = \fluxF + \loc\vdot\fluxL,
             \end{equation}
-            the sources linear expansion coefficients can be expressed as
+            the source can then be expressed as
             \begin{equation}\label{eq:MOC:LSA:Linear Source Computation}
-                \srcL = \suml[\gprime]\xss[0]\sfluxL[i][\gprime] + \frac{\spect}{\keff}\suml[\gprime]\nufis\sfluxL[i][\gprime].
+                \source[mi][g][\loc]
+                    = \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\fluxA[\gprime](\loc)
+                    + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime](\loc),
+            \end{equation}
+            and the linear expansion coefficients are explicitly given by
+            \begin{equation}\label{eq:MOC:LSA:Linear Source Coefficients}
+                \srcL
+                    = \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\fluxL[\gprime]
+                    + \frac{\spect}{\keff}\suml[\gprime]\nufis\sfluxL[\gprime].
             \end{equation}
 
-            In this \ac{LSA}, it is convenient to define the spatially linear source in terms of a cell-local coordinate system.
+            In the spatial moment-base \ac{LSA}, it is convenient to define the spatially linear source (and flux) in terms of a cell-local coordinate system.
             Allow $\Loc$ to be the position variable in the global coordinate system, the local coordinates are then defined as
             \begin{equation}\label{eq:MOC:LSA:Global to Local Coordinates}
                 \loc = \Loc - \centroid[\Loc][mi],
@@ -372,28 +386,24 @@
                 \centroid[\Loc][i] \defined \rfourpi\MOCIntegral{\Loc} = \frac{1}{V_i}\suml[m]\wt\suml[k]\tA[mki]\nsegl\locCent[\Loc].
             \end{equation}
 
-            Following the same approach as the \ac{FSMOC} derivation, in \cref{ssec:MOC:FSA:Derivation}, to compute the source the scalar flux region-averaged value, $\sfluxF$, the scalar flux expansion coefficients, $\sfluxL$, and the higher-order angular moments, $\afluxmom[\ell][n][i][g]$, are required.
+            Following the same approach as the \ac{FSMOC} derivation, in \cref{ssec:MOC:FSA:Derivation}, computing the source the region-averaged flux moment, $\fluxF$, and the flux expansion coefficients, $\fluxL$, are required.
             \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
-                The region-averaged scalar flux can be found using the same definition as previously,
-                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Scalar Flux Definition}
-                    \sfluxF \defined \MOCIntegral{\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]},
+                The region-averaged flux moment can be found using the same definition as previously,
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Flux Moment Definition}
+                    \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
                 \end{equation}
-                the angular moments can be defined as
-                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments of Flux Definition}
-                    \afluxmom[\ell][n][i][g] \defined \MOCIntegral{\SH\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
-                \end{equation}
-                In order to determine the spatial expansion coefficients of the scalar flux, \cref{eq:MOC:LSA:Scalar Flux Expansion} is operated on by $\MOCIntegral{\loc(\vdot)}$.
-                Recognizing that this should be directly proportional to the angular flux moment $\MOCIntegral{\loc\aflux[][g][]}$, a system of equations is found
+                In order to determine the spatial expansion coefficients of the flux moments, \cref{eq:MOC:LSA:Flux Expansion} is operated on by $\MOCIntegral{\SH(\vdot)\loc^T}$.
+                Recognizing that this should be directly proportional to angular flux operated on by $\MOCIntegral{\SH\aflux[][g][]\loc^T}$, a system of equations is found
                 \begin{equation}\label{eq:MOC:LSA:Moment to Expansion Coefficient}
-                    \M\sfluxL = \MOCIntegral{\loc\aflux[][g][]},
+                    \M\fluxL = \MOCIntegral{\SH\loc\aflux[][g][]},
                 \end{equation}
                 where
                 \begin{equation}\label{eq:MOC:LSA:Geometric Moments}
-                    \M \defined \MOCIntegral{\loc\loc^T}.
+                    \M \defined \MOCIntegral{\loc^T\loc}.
                 \end{equation}
-                The spatial angular flux moments, $\MOCIntegral{\loc\aflux[][g][]}$, are then defined as
-                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Flux Moments Definition}
-                    \MOCIntegral{\loc\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\suml[k]\nsegl\tA[mki]\left(\locIn\MOCTrackIntegral{\aflux[][g][]} + \dirm\MOCTrackIntegral{\nlen\aflux[][g][]} / \renorm[mi]\right).
+                The spatial angular flux moments, $\MOCIntegral{\SH\loc\aflux[][g][]}$, are then defined as
+                \begin{equation}\label{eq:MOC:LSA:Revion-Averaged Spatial Angular Flux Moments Definition}
+                    \MOCIntegral{\SH\loc\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\left(\locIn\MOCTrackIntegral{\aflux[][g][]} + \dirm\MOCTrackIntegral{\nlen\aflux[][g][]} / \renorm[mi]\right).
                 \end{equation}
             \end{subequations}
 
@@ -481,29 +491,44 @@
                     \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
                 \end{equation}
                 \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments of Flux}
-                    \afluxmom[\ell][n][i][g] = \frac{\tsrcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
+                    \fluxF = \frac{\tsrcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
                 \end{equation}
                 and
                 \begin{aequation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}
-                    \MOCIntegral{\loc\aflux[][g][]}
-                        = \M\frac{\srcL}{\xst}
-                            &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right) \\
-                            &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\frac{\srcF[mi]}{\xst}\left(\segopt\locCent + \dirm\segl\right).
+                    \MOCIntegral{\loc\SH\aflux[][g][]}
+                        &= \suml[m]\wt\SH[\ell][n][\dirm]\M[][mi]\frac{\srcL[][mi]}{\xst}\\
+                        &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]
+                            \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout + \frac{\tsrcF}{\xst}\right)\right]
                 \end{aequation}
                 where
                 \begin{equation}\label{eq:MOC:LSA:Delta Flux}
-                    \dflux \defined \afluxin - \afluxout.
+                    \dflux \defined \afluxin - \afluxout,
+                \end{equation}
+                and
+                \begin{equation}\label{eq:MOC:LSA:Direction Dependent M}
+                  \M[][mi] \defined \MOCSingleAngleIntegral{\loc^T\loc}.
                 \end{equation}
             \end{subequations}
         }
-        \subsection{Isotropic Simplifications}{\label{ssec:MOC:LSA:Isotropic Simplifications}
+        \subsection{Spatial and Isotropic Simplifications}{\label{ssec:MOC:LSA:Isotropic Simplifications}
+            The work introducing the original formulation of the moment-based \ac{LSA} suggests that it is beneficial to allow only the isotropic moments of the source and flux to be spatially linear, while higher order moments are spatially flat.
+            The reformulation introduced as part of this work \cite{Fitzgerald2019} was extended to make this simplification in the so called \acf{LIFA} source [CITATION].
+            The linear moment equations can then be simplified to
+            \begin{aequation}\label{eq:MOC:LSA:LIFA Region-Averaged Spatial Moments of Flux}
+                \MOCIntegral{\loc\aflux[][g][]}
+                    &= \M\frac{\srcL}{\xst}
+                    + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]
+                        \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt} - \afluxout + \frac{\tsrcF}{\xst}\right)\right].
+            \end{aequation}
+
             In the case of an isotropic source, the constraints for particle balance are relaxed.
             Track-length renormalization as well as numerical centroid definitions can be direction-independent while still preserving particle conservation \cite{Ferrer2018}, as given by \cref{eq:MOC:Region Renormalization}, and \cref{eq:MOC:LSA:Direction-Independent Centroids} respectively.
             The calculation of angular flux spatial moments, given in \cref{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}, can also be simplified into the form
             \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux Isotropic}
                 \MOCIntegral{\loc\aflux[][g][]}
                         = \M\frac{\srcL}{\xst}
-                            + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right).
+                        + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA
+                            \left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right).
             \end{equation}
         }
         \subsection{Applications}{\label{ssec:MOC:LSA:Applications}
@@ -511,7 +536,7 @@
             Result have indicated that by using a \ac{LSA}, the spatial mesh discretization can be made coarser, relative to with a \ac{FSA}, while maintaining accuracy.
             Although each segment calculation is more expensive when using a \ac{LSA}, the number of calculations (due to the coarser spatial mesh) can be significantly reduced, leading to reduced run-times.
             Additionally, the reduction in spatial mesh elements generally reduces the amount of memory used by the calculation.
-            As part of this work, a spatial mesh discretization study was performed on problems with multiphysics applications in mind \cite{Fitzgerald2019}; this is presented in more detail in \cref{sec:Results:2-D Linear Source}.
+            As part of this work, a spatial mesh discretization study was performed on problems with multi-physics applications in mind \cite{Fitzgerald2019}; this is presented in more detail in \cref{sec:Results:2-D Linear Source}.
         }
     }
     \section{Parallelism}{\label{sec:MOC:Parallelism}
