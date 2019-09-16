@@ -14,8 +14,11 @@
 \usepackage{caption}                            % Allows for \caption*
 \usepackage{subcaption}                         % Subfigures
 \usepackage{siunitx}                            % Column type S in tables
-\usepackage[ruled]{algorithm2e}                 % Fancy algorithms
+% \usepackage[ruled]{algorithm2e}                 % Fancy algorithms
+% \usepackage{algcompatible}
+\usepackage{algorithm}
 \usepackage{algcompatible}
+\usepackage{algpseudocode}
 \usepackage{booktabs}                           % Better table formatting
 \usepackage{microtype}                          % Better line breaking and formatting
 \usepackage{breakcites}                         % Better line breaking with cites?
@@ -86,7 +89,7 @@
 % Commands to hide or show lists of figures, tables, etc.
 \hidelistoftables
 \hidelistoffigures %ZZZ check captions
-% \showlistofalgorithms
+\showlistofalgorithms
 \showlistofappendices
 
 % Definition of any abbreviations used.

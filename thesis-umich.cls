@@ -983,29 +983,29 @@
 % This sets the formatting for map entries in the list of maps.
 \newcommand*{\l@algorithm}{\@dottedtocline{1}{0em}{2.5em}}
 
-% This sets the formatting of the list of maps page.
-\newcommand*{\listofalgorithms}{%
- % Move to new page.
- \newpage %
- % Add this page to the table of contents.
- \phantomsection\addcontentsline{toc}{chapter}{List of Algorithms} %
- % Anchor for pdf
- \phantomsection %
- % Use front page styling.
- \frntpg %
- % Larger upper margin for first page of table (thesis only)
- \if@umich@thesis %
-  \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
- \fi %
- % Add the title
- \centerline{\large\bf LIST OF ALGORITHMS} %
- % Add some space after the title.
- \vspace{1ex} %
- % Start the automatic table of contents features.
- \begin{singlespace} %
-  \@starttoc{loalg}\if@restonecol\twocolumn\fi %
- \end{singlespace} %
-}
+% % This sets the formatting of the list of maps page.
+% \newcommand*{\listofalgorithms}{%
+%  % Move to new page.
+%  \newpage %
+%  % Add this page to the table of contents.
+%  \phantomsection\addcontentsline{toc}{chapter}{List of Algorithms} %
+%  % Anchor for pdf
+%  \phantomsection %
+%  % Use front page styling.
+%  \frntpg %
+%  % Larger upper margin for first page of table (thesis only)
+%  \if@umich@thesis %
+%   \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
+%  \fi %
+%  % Add the title
+%  \centerline{\large\bf LIST OF ALGORITHMS} %
+%  % Add some space after the title.
+%  \vspace{1ex} %
+%  % Start the automatic table of contents features.
+%  \begin{singlespace} %
+%   \@starttoc{loalg}\if@restonecol\twocolumn\fi %
+%  \end{singlespace} %
+% }
 
 
 
