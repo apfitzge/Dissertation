@@ -229,7 +229,7 @@
         Instead, the vertices will be sorted according to their distance from the approximate bisectors, and then a cut will be made so that near equal amounts of weight are in each set using \cref{alg:Graph Cutting}.
         This sorting and cutting based on weights is equivalent to shifting the bisector in the direction of the normal vector.
         An example is visualized in \cref{fig:Spatial Decomposition:RIB Diagram}.
-        The RIB algorithm is listed in \cref{alg:Recursive Inertial Bisection}.
+        The \ac{RIB} algorithm is listed in \cref{alg:Recursive Inertial Bisection}.
 
         \begin{algorithm}
           \centering
@@ -309,8 +309,8 @@
           \begin{algorithmic}[1]
             \Procedure{REB}{$G(V,E)$}
               \State{Compute weighted centroid of the graph}
-              \State{Choose a starting vertex for the expanding domain: See rules in \cref{sssec:Recursive Expansion-Based Methods}}
-              \State{Expand the domain from the starting vertex. Let $V_s$ be the list of vertices in order of the expansion: See rules in \cref{sssec:Recursive Expansion-Based Methods}}
+              \State{Choose a starting vertex for the expanding domain: See rules in \cref{sssec:Spatial Decomposition:Recursive Expansion-Based Methods}}
+              \State{Expand the domain from the starting vertex. Let $V_s$ be the list of vertices in order of the expansion: See rules in \cref{sssec:Spatial Decomposition:Recursive Expansion-Based Methods}}
               \State{Cut graph into $G_1(V_1,E_1), G_2(V_2,E_2)$: \Cref{alg:Graph Cutting}}
               \State{REB($G_1(V_1,E_1)$)}
               \State{REB($G_2(V_2,E_2)$)}
@@ -322,7 +322,7 @@
           \centering
           \includegraphics[width=0.45\linewidth]{REB/SoI_Rectangular}
           \caption{
-              ``Sphere of influence'' example for 2D rectangular structured grid.
+              ``Sphere of influence'' example for 2-D rectangular structured grid.
               The primary vertex is shown in black, direct neighbors are blue, and additional vertices in the sphere are white \cite{Fitzgerald2017}.
               \label{fig:Spatial Decomposition:Sphere of Influence}
           }
@@ -332,7 +332,7 @@
           \centering
           \includegraphics[width=0.65\linewidth]{REB/Expansion}
           \caption{
-              An example of the REB method expansion on a small graph.
+              An example of the \ac{REB} method expansion on a small graph.
               The black lines show the square mesh cells.
               The expansion begins at the large black point in the center of a cell, and the red line from this shows the expansion's order.
               Each small black dot in the upper left of a cell indicates the reference vertices during expansion.
@@ -362,7 +362,7 @@
     A group of ray-tracing modules in MPACT can be abstracted into a graph.
     Each vertex will have weight corresponding to the number of cells contained in the module.
     Edges can be drawn between directly neighboring ray-tracing modules.
-    This represents communication in MPACT's MOC solver.
+    This represents communication in MPACT's \ac{MOC} solver.
     Transport source iterations converge slowly, so MPACT relies on the \ac{CMFD} \cite{Smith1983} acceleration method.
     \ac{CMFD} acceleration is performed by constructing a sparse linear system based on the finite differenced diffusion operator and then solving for the largest eigenpair of that linear system.
     In MPACT, solving the linear system is handled by a third-party library, PETSc \cite{Petsc}.
@@ -372,7 +372,7 @@
     MPACT's primary 3-D transport method is the 2D-1D method, in which the \ac{MOC} is used in the radial directions, and a lower-order solver couples axial planes \cite{Collins2016}.
     For 2D-1D simulations, MPACT currently restricts spatial domains to be aligned in both the radial and axial directions; this is due to implementation, and is not a general requirement of the methods.
 
-    To comply with MPACT's restrictions on 3D spatial domains, the current approach is to axially average module weights (numbers of cells), perform a 2-D graph partitioning on a single plane, and apply the resulting partitioning to all axial planes.
+    To comply with MPACT's restrictions on 3-D spatial domains, the current approach is to axially average module weights (numbers of cells), perform a 2-D graph partitioning on a single plane, and apply the resulting partitioning to all axial planes.
     This approach will restrict the number of spatial domains to be an integer multiple of the number of planes.
     This axially and radially aligned scheme is expected to work well in many cases since reactor cores do not typically vary significantly in the axial direction.
     However, for some designs, this may not be true, and planes near the top or bottom of the core have significantly fewer cells; in these cases, high load imbalance is to be expected.
@@ -414,7 +414,7 @@
       }
     \end{figure}
 
-    \Cref{fig:partitionAlignmentComparison} shows a comparison of the three hypothetical decomposition schemes, for the purposes of illustration.
+    \Cref{fig:Spatial Decomposition:partitionAlignmentComparison} shows a comparison of the three hypothetical decomposition schemes, for the purposes of illustration.
     Looking at the \ac{MMR}, as an indicator of load-balance, the strategies have clear differences.
     The \ac{MMR} for the axially aligned, radially aligned, and generalized strategies in this example are $4.00$, $2.67$, and $2.00$, respectively.
     However, it is important to note that the largest domain in each case has the same weight (16), so while the different schemes give different balances, the overall run-times are not expected to be different.
@@ -427,13 +427,13 @@
     % 2-D Results
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \subsection{2-D Results}{\label{ssec:Spatial Decomposition:2-D Results}
-      Results were generated for the planar 2D version of VERA progression problem 5a \cite{VERAProblems}.
+      Results were generated for the planar 2-D version of VERA progression problem 5a \cite{VERAProblems}.
       This problem is a quarter core with reflector, barrel, and neutron pad regions surrounding several fuel assemblies, as shown in \cref{fig:Spatial Decomposition:5a-2d}.
       In the model, there are 257 ray-tracing modules in total, which provides the upper bound for the number of domains.
       Each subdomain is assigned to a single processor, with a maximum of 36 processors (subdomains) per computational node.
       Each of the graph decomposition methods was applied to the geometry of this problem, and MPACT was run for each case without applying refinement methods.
       The assembly-based decomposition was run for all possible numbers of subdomains: 1, 4, 16, 73, and 257.
-      The possible numbers of subdomains are limited by powers of 4 (8 in 3D), until subdomains would be located entirely outside the core shape.
+      The possible numbers of subdomains are limited by powers of 4 (8 in 3-D), until subdomains would be located entirely outside the core shape.
       It is also possible to decompose into the fuel assemblies or ray-tracing modules, in this case 73 and 257 respectively.
       Example decompositions for 73 subdomains are shown in \cref{fig:Spatial Decomposition:5a-2d example decomp}.
 
@@ -488,7 +488,7 @@
 
         Higher parallel efficiency indicates better utilization of the available computational resources, and lower runtime.
         The expectation is that higher parallel efficiency can be obtained by having a largest cell fraction closer to the optimal cell fraction.
-        As seen in \cref{fig:Spatial Decomposition:Max/Optimal Ratio}, the REB method is expected to have slightly better parallel efficiency than the other methods for many cases.
+        As seen in \cref{fig:Spatial Decomposition:Max/Optimal Ratio}, the \ac{REB} method is expected to have slightly better parallel efficiency than the other methods for many cases.
         It is also expected that for a low number of subdomains, the assembly-based decomposition will result in significantly lower parallel efficiency.
         However, for large numbers of subdomains, the assembly-based decomposition is expected to result in comparable parallel efficiency to the graph partitioning methods.
 
@@ -524,19 +524,19 @@
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       \subsubsection{MPACT Results}{\label{sssec:MPACT Results}
         As expected, the total and \ac{MOC} run-times are highly correlated with the largest fraction of cells in any subdomain, as shown in \cref{fig:Spatial Decomposition:Runtime Correlation}.
-        Both total and MOC run-times are very highly correlated with the largest fraction of cells in a subdomain, indicating that this metric can be used to estimate the relative run-times of decompositions.
+        Both total and \ac{MOC} run-times are very highly correlated with the largest fraction of cells in a subdomain, indicating that this metric can be used to estimate the relative run-times of decompositions.
         The assembly-based decomposition method was not used in this correlation, as there are only a few data points available.
 
         \begin{figure}
           \centering
           \includegraphics[width=\resultwidth]{results/2D/Run_Time_Fraction_Correlation}
-          \caption{Correlation of total and MOC run-times to the largest fraction of cells in a subdomain for each partitioning method. \label{fig:Spatial Decomposition:Runtime Correlation}}
+          \caption{Correlation of total and \ac{MOC} run-times to the largest fraction of cells in a subdomain for each partitioning method. \label{fig:Spatial Decomposition:Runtime Correlation}}
         \end{figure}
 
         Utilization of computational resources is also an important aspect for a high performance simulation code; this can be measured by the parallel efficiency.
         The total parallel efficiency is shown in \cref{fig:Spatial Decomposition:Parallel Efficiency} for each decomposition method.
         As the core becomes more decomposed, the parallel efficiency drops off rapidly, approaching around 20\%.
-        Generally, the graph partitioning methods result in similar parallel efficiency, though the REB method appears to give very slightly higher efficiency in many cases.
+        Generally, the graph partitioning methods result in similar parallel efficiency, though the \ac{REB} method appears to give very slightly higher efficiency in many cases.
         The assembly-based decomposition method has significantly lower parallel efficiency when there are few subdomains.
         However, for the moderately decomposed problem (73 subdomains) the assembly-based decomposition method results in significantly higher parallel efficiency.
         This was not initially expected, as the largest subdomain has a cell fraction similar to that of the graph partitioning methods.
@@ -579,7 +579,7 @@
         \begin{figure}
           \centering
           \includegraphics[width=\resultwidth]{results/2D/Scaled_MOC_Parallel_Efficiency}
-          \caption{The MOC parallel efficiency per iteration for each partitioning method as a function of the number of domains. \label{fig:Spatial Decomposition:Scaled MOC Parallel Efficiency}}
+          \caption{The \ac{MOC} parallel efficiency per iteration for each partitioning method as a function of the number of domains. \label{fig:Spatial Decomposition:Scaled MOC Parallel Efficiency}}
         \end{figure}
 
 
@@ -587,12 +587,12 @@
         As shown in \cref{fig:Spatial Decomposition:MOC Parallel Efficiency Correlation}, the parallel efficiency is correlated with the the ratio of optimal-to-maximum cell fractions, though it is not correlated as strongly as the runtime with the maximum cell fraction.
         This indicates that this ratio can be used to estimate the parallel efficiency of the \ac{MOC} solver for a decomposition.
         Even isolating the effect due to increased numbers of iterations, there is a significant spread in parallel efficiency as a function of the optimal to maximum cell fraction ratio; this can be explained by the fact that significantly different numbers of domains (processes) can result in similar fractions.
-        This is clearly observed in \cref{fig:Max/Optimal Ratio}.
+        This is clearly observed in \cref{fig:Spatial Decomposition:Max/Optimal Ratio}.
 
         \begin{figure}
           \centering
           \includegraphics[width=\resultwidth]{results/2D/MOC_Parallel_Efficiency_Correlation}
-          \caption{Correlation of the MOC parallel efficiency per iteration and the ratio of optimal and maximum cell fractions for each of the partitioning methods. \label{fig:Spatial Decomposition:MOC Parallel Efficiency Correlation}}
+          \caption{Correlation of the \ac{MOC} parallel efficiency per iteration and the ratio of optimal and maximum cell fractions for each of the partitioning methods. \label{fig:Spatial Decomposition:MOC Parallel Efficiency Correlation}}
         \end{figure}
       }
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -626,8 +626,8 @@
     % 3-D Results
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \subsection{3-D Results}{\label{ssec:Spatial Decomposition:3-D Results}
-      As shown in \cref{ssec:Spatial Decomposition:2D Results}, decomposition metrics can be used to estimate the runtime and parallel efficiency without needing to run the simulations.
-      There are different approaches to decomposition in 3D; these are discussed in more detail in \cref{sec:Spatial Decomposition:Applications for MPACT}.
+      As shown in \cref{ssec:Spatial Decomposition:2-D Results}, decomposition metrics can be used to estimate the runtime and parallel efficiency without needing to run the simulations.
+      There are different approaches to decomposition in 3-D; these are discussed in more detail in \cref{sec:Spatial Decomposition:Applications for MPACT}.
       Decompositions were performed without refinement for three different 3-D decomposition schemes:  \ac{ARA}, \ac{RA}, and \ac{UR}.
       Given fewer restrictions, the resulting decompositions were expected to be more balanced.
       Decompositions were performed on VERA progression problem 5a-0 in 3-D \cite{VERAProblems} with 58 axial planes, but the simulations for this problem were not run.
@@ -635,7 +635,7 @@
       The ratio of maximum cell fraction to optimal cell fraction can easily be converted to the maximum cell fraction by dividing by $N$.
       For brevity, only this load balance metric is shown herein.
       The resulting decompositions from the \ac{ARA} approach are very similar to those in the 2-D case.
-      Just as in the 2-D case, the maximum-to-optimal cell fraction ratio is lowest for the \ac{REB} method as compared to the other partitioning methods for many cases, as seen in \cref{fig:3D AR Max. to Optimal Cell Ratio}.
+      Just as in the 2-D case, the maximum-to-optimal cell fraction ratio is lowest for the \ac{REB} method as compared to the other partitioning methods for many cases, as seen in \cref{fig:Spatial Decomposition:3D AR Max. to Optimal Cell Ratio}.
       This indicates that, barring any differences in the number of iterations, the \ac{REB} method is expected to have slightly higher parallel efficiencies.
 
       \begin{figure}
@@ -647,7 +647,7 @@
       In the \ac{RA} scheme, a separate decomposition is performed for each axial plane, with an appropriate number of subdomains based on the number of cells in the plane.
       Unlike in the 2-D case, the \ac{REB} method seems to perform significantly worse than the other two methods for low numbers of subdomains.
       For highly decomposed cores, the \ac{REB} method seems to perform slightly better than the other partitioning methods.
-      Additionally, by comparing the magnitude of the ratios in \cref{fig:Spatial Decomposition:3D R Max. to Optimal Cell Ratio} and \cref{fig:Spatial Decomposition:3D AR Max. to Optimal Cell Ratio}, it is clear that the RA approach typically has less imbalance.
+      Additionally, by comparing the magnitude of the ratios in \cref{fig:Spatial Decomposition:3D R Max. to Optimal Cell Ratio} and \cref{fig:Spatial Decomposition:3D AR Max. to Optimal Cell Ratio}, it is clear that the \ac{RA} approach typically has less imbalance.
 
       \begin{figure}
         \centering
@@ -655,7 +655,7 @@
         \caption{Maximum-to-optimal cell fraction ratio for each partitioning method as a function of number of domains in the \acf{RA} scheme. \label{fig:Spatial Decomposition:3D R Max. to Optimal Cell Ratio}}
       \end{figure}
 
-      Finally, the \ac{UR} approach decomposes the 3D core by directly abstracting the entire core into a graph.
+      Finally, the \ac{UR} approach decomposes the 3-D core by directly abstracting the entire core into a graph.
       The \ac{REB} method is significantly more imbalanced than other methods for lower numbers of subdomains; however, for highly decomposed cores, the \ac{REB} method outperforms the other methods, as shown in \cref{fig:Spatial Decomposition:3D U Max. to Optimal Cell Ratio}.
       Additionally, for highly decomposed problems, both the \ac{RSB} and \ac{RIB} methods seem to have worse balance when using the \ac{UR} scheme compared to the \ac{RA} scheme.
 
@@ -702,13 +702,179 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Partition Refinement Methods
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \section{Partition Refinement}{\label{sec:Spatial Decomposition:Parition Refinement}
-    \blindtext[8]
+  \section{Partition Refinement}{\label{sec:Spatial Decomposition:Partition Refinement}
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Partition Refinement Methods
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \subsection{Partition Refinement Methods}{\label{ssec:Spatial Decomposition:Partition Refinement Methods}
+      The Kernighan-Lin algorithm \cite{Kernighan1970} is often described as one of the earliest developed graph partitioning algorithms; however, the algorithm does not actually create a partitioning of the graph, it improves, or refines, the quality by reducing the number of edges cut between existing partitions \cite{Elsner1997}.
+      Therefore, in this work, this method and a modified version of it are called \emph{refinement methods}.
+
+      As suggested by Pothen \cite{Pothen1989}, the \ac{RSB} method or other partitioning methods can create a high quality initial partitioning to use in the Kernighan-Lin algorithm.
+      Significant improvements have been made to the efficiency of the original Kernighan-Lin algorithm \cite{Fiduccia1982}; however, the graphs of concern in this work are relatively small, and graph decomposition time is negligible when compared to the overall simulation runtime.
+      Two partition refinement methods were examined: the Kernighan-Lin algorithm \cite{Kernighan1970} and a modification to the Kernighan-Lin algorithm which takes some geometric information of the graph into account \cite{Fitzgerald2017}.
+
+      The investigated partition refinement algorithms reduce the weight of edges cut between two partitions by swapping vertex pairs between the partitions iteratively.
+      The original Kernighan-Lin algorithm operates entirely on the connectivity of the graph, while the modified Spatial Kernighan-Lin algorithm uses both connectivity and geometric information from the graph.
+
+      For each vertex in the graph, $D$ is defined as
+      \begin{equation}
+          \label{eq:Spatial Decomposition:KL D}
+          D_i \equiv E_{E,i} - E_{I,i},
+      \end{equation}
+      where $E_{E,i}$ is the sum of edge weights from vertex $i$ connecting with vertices outside the partition containing vertex $i$, and $E_{I,i}$ is the sum of edge weights from vertex $i$ connecting with vertices within the partition containing vertex $i$.
+      The reduction in communication or ``gain,'' from swapping a pair of vertices $(a,b)$ is defined as
+      \begin{equation}
+          \label{eq:Spatial Decomposition:KL gain}
+          g_{(a,b)} \equiv D_a + D_b - 2c_{a,b}.
+      \end{equation}
+
+      The Kernighan-Lin algorithm, given in \cref{alg:Kernighan-Lin}, is a greedy algorithm, in that it will swap a pair $(a,b)$ with maximal $g$ at the current step.
+      The idea is that by doing this iteratively, the algorithm will lead to a minimized cut-size; in reality, the algorithm will often get stuck in local minima that do not have a global minimized cut-size.
+      Additionally, there may be multiple pairs $(a,b)$ with the same maximal gain value: the algorithm will only consider one of these pairs.
+
+      The Spatial Kernighan-Lin algorithm, given in \cref{alg:Spatial Kernighan-Lin}, is an adaptation of the Kernighan-Lin algorithm which accounts for the multiple pairs with maximal gain.
+      This algorithm prioritizes vertex pairs which are geometrically distant from one another.
+      The idea behind this modification is that to minimize the edge-cut, the cut should be as straight as possible.
+      By prioritizing distant vertex pairs, the bisector is typically ``straightened'' out; this process can be likened to pulling on the ends of a string in order to straighten it.
+
+      \begin{algorithm}
+        \centering
+        \caption{Kernighan-Lin Algorithm, with input graph $G(V,E)$, and vertex sets $A$ and $B$ within the graph.}
+        \label{alg:Kernighan-Lin}
+        \begin{algorithmic}[1]
+          \Procedure{Kernighan-Lin}{$G(V,E), A, B$}
+            \State{$g_m = 1$}
+            \While{$g_m > 0$}
+              \State{$W_A = \suml[i \in A]w_i$}
+              \State{$W_B = \suml[i \in B]w_i$}
+              \State{Compute $D \ \forall \ V$ (\Cref{eq:Spatial Decomposition:KL D})}
+              \State{Let $a_v, b_v, g_v$ be empty sets}
+              \For{$n=1$~to~$N/2$}
+                \State{Find unmarked pair $(a,b)$ such that:
+                    \begin{enumerate}[leftmargin=2.5cm]
+                        \item{$a \in A$ and $b \in B$}
+                        \item{$g$ is maximized (\Cref{eq:Spatial Decomposition:KL gain})}
+                    \end{enumerate}
+                }
+                \State{$\widehat{W}_A = W_A + w_b - w_a$}
+                \State{$\widehat{W}_B = W_B + w_a - w_b$}
+                \If{MAX($W_A$, $W_B$) $\geq$ MAX($\widehat{W}_A, \widehat{W}_B$)}
+                  \State{Append $a$ to $a_v$, $b$ to $b_v$, and $g$ to $g_v$}
+                  \State{Update $D$ values as if $a,b$ have been swapped}
+                  \State{$W_A = \widehat{W}_A$}
+                  \State{$W_A = \widehat{W}_B$}
+                \Else
+                  \State{End search}
+                \EndIf
+              \EndFor
+              \State{Find $k$ maximizing $g_m = \suml[i=1][k]g_v(i)$}
+              \If{$g_m > 0$}
+                \State{Exchange vertices in $a_v(1:k)$ and $b_v(1:k)$}
+              \EndIf
+            \EndWhile
+          \EndProcedure
+        \end{algorithmic}
+      \end{algorithm}
+
+      \begin{algorithm}
+        \centering
+        \caption{Spatial Kernighan-Lin Algorithm, with input graph $G(V,E)$, and vertex sets $A$ and $B$ within the graph.}
+        \label{alg:Spatial Kernighan-Lin}
+        \begin{algorithmic}[1]
+          \Procedure{Spatial Kernighan-Lin}{$G(V,E), A, B$}
+            \State{$g_m = 1$}
+            \While{$g_m > 0$}
+              \State{$W_A = \suml[i \in A]w_i$}
+              \State{$W_B = \suml[i \in B]w_i$}
+              \State{Compute $D \ \forall \ V$ (\Cref{eq:Spatial Decomposition:KL D})}
+              \State{Let $a_v, b_v, g_v$ be empty sets}
+              \For{$n=1$~to~$N/2$}
+                \State{Allow $(f_a,f_b)$ to be sets from $A,B$ satisfying:
+                    \begin{enumerate}
+                        \item{$a \in A$, $b \in B$}
+                        \item{$g$ is maximized (\Cref{eq:Spatial Decomposition:KL gain})}
+                        \item{$a$ and $b$ are on the boundary between $A$ and $B$}
+                    \end{enumerate}
+                }
+                \State{Find pair $(f_a',f_b')$ such that distance is maximized}
+                \If{No pair found}
+                  \State{Search using standard Kernighan-Lin rules}
+                \EndIf
+                \State{$\widehat{W}_A = W_A + w_b - w_a$}
+                \State{$\widehat{W}_B = W_B + w_a - w_b$}
+                \If{MAX($W_A$, $W_B$) $\geq$ MAX($\widehat{W}_A, \widehat{W}_B$)}
+                  \State{Append $a$ to $a_v$, $b$ to $b_v$, and $g$ to $g_v$}
+                  \State{Update $D$ values as if $a,b$ have been swapped}
+                  \State{$W_A = \widehat{W}_A$}
+                  \State{$W_A = \widehat{W}_B$}
+                \Else
+                  \State{End search}
+                \EndIf
+              \EndFor
+              \State{Find $k$ maximizing $g_m = \suml[i=1][k]g_v(i)$}
+              \If{$g_m > 0$}
+                \State{Exchange vertices in $a_v(1:k)$ and $b_v(1:k)$}
+              \EndIf
+            \EndWhile
+          \EndProcedure
+        \end{algorithmic}
+      \end{algorithm}
+    }
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Partition Refinement Results
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \subsection{Partition Refinement Results}{\label{ssec:Spatial Decomposition:Partition Refinement Results}
+      In \cref{ssec:Spatial Decomposition:Partition Refinement Methods}, refinement methods are introduced as a method for further reducing communication.
+      \Cref{fig:Spatial Decomposition:2D RSB Refinement} shows that both refinement methods are able to slightly reduce the number of edges cut compared to the cases without refinement for \ac{RSB}.
+      Similar trends are observed for the other partitioning methods.
+      While these refinement methods offer a slight reduction in communication, the parallel efficiency due to load imbalance may be negatively affected by applying refinement, as shown in \cref{fig:Spatial Decomposition:RSB Refinement Balance}.
+      Communication is not expected to have as significant of an effect as load imbalance, so for the simulations in MPACT, partitioning methods were used without refinement.
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/2D/RSB_Edges_Cut_Relative}
+        \caption{Communication relative to the \ac{RSB} method without refinement as a function of number of domains for each refinement method using the \ac{RSB} partitioning method.\label{fig:Spatial Decomposition:2D RSB Refinement}}
+      \end{figure}
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/2D/RSB_Size_to_Optimal}
+        \caption{Ratio of maximum cell fraction to optimal cell fraction for the \ac{RSB} partitioning method with each refinement method. \label{fig:Spatial Decomposition:RSB Refinement Balance}}
+      \end{figure}
+    }
   }
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Conclusions
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Conclusions}{\label{sec:Spatial Decomposition:Conclusions}
-    \blindtext[4]
+    Spatial decomposition is a useful technique for reducing the runtime of simulations and is necessary to run whole-core high fidelity reactor calculations.
+    Using graph partitioning methods to decompose the spatial domain of a core has significant advantages when compared to previous decomposition methods.
+    Graph partitioning allows for the usage of an arbitrary number of spatial subdomains, and it generalizes to different module geometries such as a hexagonal lattice.
+    Graph partitioning methods generally provide high quality decompositions that increase parallel efficiency.
+    These automated spatial decomposition methods improve code usability and flexibility by allowing users to easily fit simulations to any number of processors.
+
+    However, for highly decomposed cores, the convergence rate decreases due to jagged subdomain boundaries.
+    This caused graph partitioning methods to significantly reduce runtime for problems that were not highly decomposed but actually increase runtime for highly decomposed problems.
+    This is because the assembly-based decomposition method used rectangular (non-jagged) subdomains.
+    This indicates that it may be advantageous to create a high quality decomposition method that enforces rectangular subdomains.
+    However, this approach will not generalize to other lattice types, such as hexagonal lattices.
+
+    In the current MPACT implementation, there is no significant difference in run-times when using any of the three partitioning methods discussed, although \ac{REB} typically results in slightly lower \ac{MOC} run-times.
+    The 2-D results indicate that the maximum fraction of cells in a subdomain is highly correlated with the runtime of the simulation.
+    Furthermore, 2-D results indicate that the parallel efficiency of \ac{MOC} is highly correlated with the ratio of the optimal cell fraction per subdomain to the maximum cell fraction in a subdomain.
+
+    In 3-D, MPACT currently requires spatial domains to be axially and radially aligned.
+    If these restrictions are lifted, then other approaches can be used to perform the 3-D spatial decomposition.
+    Three 3-D decomposition approaches were investigated in this work: radial and axial aligned subdomains, radially aligned subdomains, and an approach with no alignment restrictions.
+    The radially aligned approach is expected to out perform the current approach by an average of 10\% for typical cases.
+    However, the unrestricted approach is actually expected to perform worse than the current approach on average.
+    This analysis was performed on a 3-D core, which was relatively homogeneous in the axial direction; if a core design were to be more axially heterogeneous, then a more significant increase in performance might be expected.
+
+    The parallel efficiency is a measure of how well computational resources are utilized in parallel applications.
+    MPACT's overall parallel efficiency decreases rapidly as more domains are used due to two factors: increased number of iterations, and the inefficiency of parallel \ac{CMFD} solves.
+    For the 2-D VERA progression problem 5a, the overall parallel efficiency of MPACT dropped to nearly 20\%.
+    The parallel efficiency of only the \ac{MOC} computations in MPACT drops to between 40--60\%, while the parallel efficiency of the \ac{CMFD} computation drops to $<\!\!20$\%.
+    This causes the \ac{CMFD} computation to dominate runtime in spatially decomposed cases, and motivates the implementation of a more efficient parallel linear system operator in MPACT rather than using a third-party library.
   }
 }
