@@ -1,2 +1,9 @@
 output/*
 .vscode
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.tkzfct.gnuplot
+*.tkzfct.table
+*.pdf
