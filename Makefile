@@ -20,5 +20,6 @@ TIKZ_FIGURES:
 clean:
 	rm -rf output/*;									\
 	for figname in $(TIKZ_NAMES); do 	\
-		rm $$figname.pdf;									\
+		rm -f $$figname.pdf;								\
+		rm -f *.log *.aux *.fdb_latexmk *.fls *.gnuplot *.table;	\
 	done

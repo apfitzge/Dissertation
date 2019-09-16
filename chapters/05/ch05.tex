@@ -1,6 +1,7 @@
 \chapter{Spatial Decomposition}{\label{ch:Spatial Decomposition}
   \def\figpath{chapters/05/figures/}
   \graphicspath{ {\figpath} }
+  \newcommand{\resultwidth}{0.85\linewidth}
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Introduction
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -125,7 +126,7 @@
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \subsection{Graph Partitioning Methods}{\label{ssec:Spatial Decomposition:Graph Partitioning Methods}
       In this work, recursive partition methods were considered due to their capability to partition into arbitrary numbers of domains.
-      Each of these recursive partitioning methods sorts the graph, using different methods, and then divides or ``cuts'' the graph into two subgraphs with approximately equal vertex weights.
+      Each of these recursive partitioning methods sorts the graph, using different methods, and then divides or ``cuts'' the graph into two sub-graphs with approximately equal vertex weights.
       Once a graph's vertices are sorted into a list, $V_s$, the graph can be bisected using \cref{alg:Graph Cutting}.
 
       Multi-level partitioning methods are widely used in other fields such as networking, where graphs can become very large; however, in MPACT, the number of ray-tracing modules is on the order of a few hundred to several thousand, which directly correlates to the size of the graph.
@@ -134,7 +135,7 @@
 
       \begin{algorithm}[ht]
         \centering
-        \caption{The algorithm used to determine how to cut a graph, $G(V,E)$, into two subgraphs based on a sorted vertex list $V_s$, and that the graph will be recursively partitioned into $N$ groups.}
+        \caption{The algorithm used to determine how to cut a graph, $G(V,E)$, into two sub-graphs based on a sorted vertex list $V_s$, and that the graph will be recursively partitioned into $N$ groups.}
         \label{alg:Graph Cutting}
         \begin{algorithmic}[1]
           \Procedure{Graph Cut}{$G(V,E), V_s, N$}
@@ -426,13 +427,276 @@
     % 2-D Results
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \subsection{2-D Results}{\label{ssec:Spatial Decomposition:2-D Results}
-      \blindtext[8]
+      Results were generated for the planar 2D version of VERA progression problem 5a \cite{VERAProblems}.
+      This problem is a quarter core with reflector, barrel, and neutron pad regions surrounding several fuel assemblies, as shown in \cref{fig:Spatial Decomposition:5a-2d}.
+      In the model, there are 257 ray-tracing modules in total, which provides the upper bound for the number of domains.
+      Each subdomain is assigned to a single processor, with a maximum of 36 processors (subdomains) per computational node.
+      Each of the graph decomposition methods was applied to the geometry of this problem, and MPACT was run for each case without applying refinement methods.
+      The assembly-based decomposition was run for all possible numbers of subdomains: 1, 4, 16, 73, and 257.
+      The possible numbers of subdomains are limited by powers of 4 (8 in 3D), until subdomains would be located entirely outside the core shape.
+      It is also possible to decompose into the fuel assemblies or ray-tracing modules, in this case 73 and 257 respectively.
+      Example decompositions for 73 subdomains are shown in \cref{fig:Spatial Decomposition:5a-2d example decomp}.
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=0.35\textwidth]{5a-2d_core}
+        \caption{VERA progression problem 5a-2d core configuration. \label{fig:Spatial Decomposition:5a-2d}}
+      \end{figure}
+
+      \begin{figure}[H]
+        \centering
+        \begin{subfigure}[t]{0.45\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{results/2D/Assembly}
+          \caption{Assembly-based decomposition method. \label{fig:Spatial Decomposition:5a-2d 73 Assembly}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.45\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{results/2D/REB_none}
+          \caption{\ac{REB} partitioning method. \label{fig:Spatial Decomposition:5a-2d 73 REB None}}
+        \end{subfigure}
+        \caption{
+          Example decompositions for 73 subdomains for VERA progression problem 5a-2d.
+          Each color represents a different subdomain.
+          \label{fig:Spatial Decomposition:5a-2d example decomp}
+        }
+      \end{figure}
+
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % Load-Balance
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \subsubsection{Load-Balance}{\label{sssec:Spatial Decomposition:Load-Balance}
+        In MPACT, each spatial subdomain is simulated concurrently.
+        After each iteration, parallel boundary conditions are communicated and updated in parallel.
+        The time for solve routines is measured for each subdomain, as is the \ac{MOC} communication time.
+        However, the communication time includes time spent waiting for other subdomains to finish computation; that is, blocking communication.
+
+        This parallel iteration scheme means that the wall-time of each iteration is controlled by the subdomain with the longest run-time; this is expected to be the subdomain with the largest number of cells.
+        However, the wall-time is not the only important consideration; it is important to consider how well the computational resources are used.
+        A measure for how well computational resources are used is the parallel efficiency, as defined by
+        \begin{equation}
+            \label{eq:Spatial Decomposition:Parallel Efficiency}
+            E \defined \frac{T_s}{N \cdot T},
+        \end{equation}
+        where $T_s$ is the time in serial, and $T$ is the time in parallel with $N$ processes.
+
+        If runtime is highly correlated with the largest number of cells in a subdomain, then this efficiency is expected to be related to the largest \emph{fraction} of cells in a subdomain.
+        Specifically, the parallel efficiency is expected to be inversely proportional to the ratio of the largest fraction of cells to the optimal fraction of cells.
+        In an ideally balanced decomposition, each subdomain would have $1/N$ cell fraction.
+        By comparing the maximum cell fraction to this optimal value, one can estimate how much longer the simulation will take compared to an ideal decomposition, neglecting serial code sections and overhead.
+
+        Higher parallel efficiency indicates better utilization of the available computational resources, and lower runtime.
+        The expectation is that higher parallel efficiency can be obtained by having a largest cell fraction closer to the optimal cell fraction.
+        As seen in \cref{fig:Spatial Decomposition:Max/Optimal Ratio}, the REB method is expected to have slightly better parallel efficiency than the other methods for many cases.
+        It is also expected that for a low number of subdomains, the assembly-based decomposition will result in significantly lower parallel efficiency.
+        However, for large numbers of subdomains, the assembly-based decomposition is expected to result in comparable parallel efficiency to the graph partitioning methods.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Size_to_Optimal}
+          \caption{Ratio of largest fraction of cells to the optimal fraction of cells as a function of number of subdomains for each partitioning method without refinement.\label{fig:Spatial Decomposition:Max/Optimal Ratio}}
+        \end{figure}
+      }
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % Communication
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \subsubsection{Communication}{\label{sssec:Communication}
+        In MPACT, parallel boundary conditions are communicated concurrently.
+        However, the measurement of communication time includes any time spent waiting for other subdomains to complete their calculations.
+        Generally, the time spent sending receiving parallel boundary conditions is relatively small.
+        This time is expected to increase with the weight of edges cut by parallel boundaries.
+
+        \Cref{fig:Spatial Decomposition:2D Communication} shows that the number of edges cut increases as the number of domains increases.
+        This indicates that time sending and receiving parallel boundary conditions is expected to increase with the number of subdomains.
+        As the number of subdomains increases, the time spent sending and receiving parallel boundary conditions is expected to increase as more data is communicated.
+        However, the time difference between the slowest and fastest subdomains decreases, so the overall communication time measurement is expected to decrease.
+        Because subdomains in the assembly-based decomposition are rectangular, the number of edges cut is typically lower than in the graph partitioning methods.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Edges_Cut}
+          \caption{Number of edges cut as a fraction of number of domains for each partitioning method without refinement. \label{fig:Spatial Decomposition:2D Communication}}
+        \end{figure}
+      }
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % MPACT Results
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \subsubsection{MPACT Results}{\label{sssec:MPACT Results}
+        As expected, the total and \ac{MOC} run-times are highly correlated with the largest fraction of cells in any subdomain, as shown in \cref{fig:Spatial Decomposition:Runtime Correlation}.
+        Both total and MOC run-times are very highly correlated with the largest fraction of cells in a subdomain, indicating that this metric can be used to estimate the relative run-times of decompositions.
+        The assembly-based decomposition method was not used in this correlation, as there are only a few data points available.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Run_Time_Fraction_Correlation}
+          \caption{Correlation of total and MOC run-times to the largest fraction of cells in a subdomain for each partitioning method. \label{fig:Spatial Decomposition:Runtime Correlation}}
+        \end{figure}
+
+        Utilization of computational resources is also an important aspect for a high performance simulation code; this can be measured by the parallel efficiency.
+        The total parallel efficiency is shown in \cref{fig:Spatial Decomposition:Parallel Efficiency} for each decomposition method.
+        As the core becomes more decomposed, the parallel efficiency drops off rapidly, approaching around 20\%.
+        Generally, the graph partitioning methods result in similar parallel efficiency, though the REB method appears to give very slightly higher efficiency in many cases.
+        The assembly-based decomposition method has significantly lower parallel efficiency when there are few subdomains.
+        However, for the moderately decomposed problem (73 subdomains) the assembly-based decomposition method results in significantly higher parallel efficiency.
+        This was not initially expected, as the largest subdomain has a cell fraction similar to that of the graph partitioning methods.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Total_Parallel_Efficiency}
+          \caption{The total parallel efficiency for each partitioning method as a function of the number of domains. \label{fig:Spatial Decomposition:Parallel Efficiency}}
+        \end{figure}
+
+        As parallel boundary conditions have a more significant effect on the solution within each subdomain, the convergence rate decreases.
+        This occurs as subdomains become smaller (geometrically), or as they become more ``jagged.''
+        These jagged parallel boundaries cause re-entrant rays, in which a single ray in the \ac{MOC} will re-enter the subdomain after leaving.
+        These re-entrant rays will \emph{not} occur in the assembly-based decomposition, because subdomains are forced to be rectangular.
+        This can be observed in \cref{fig:Spatial Decomposition:5a-2d example decomp}.
+        The number of \ac{MOC} iterations required for convergence in each case is shown in \cref{fig:Spatial Decomposition:Convergence}.
+        There is not a significant increase in the number of outer iterations as the subdomains become smaller, this is consistent with previous results in parallel accelerated transport calculations \cite{Kelley2012,Stimpson2014,Kochunas2014}.
+        The increase in number of iterations would be expected to be much more significant in an unaccelerated transport calculation.
+        It may be possible to consider spectral information, such as subdomain optical thickness or scattering ratios, during decomposition to allow for a smaller increase in required iterations; however, this will only have an effect at moderately decomposed problems.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Convergence_Rates}
+          \caption{The number of iterations used by each decomposition method as a function of the number of subdomains. \label{fig:Spatial Decomposition:Convergence}}
+        \end{figure}
+
+        By examining the parallel efficiency of \emph{runtime per iteration} these spectral effects are eliminated and the scaling of the solvers in parallel can be determined.
+        As shown in \cref{fig:Spatial Decomposition:Scaled Parallel Efficiency}, the total parallel efficiency per iteration decreases as the core becomes more decomposed, limiting toward 25\%.
+        However, if only the \ac{MOC} solver time is being examined, the parallel efficiency per iteration decreases at a much slower rate as shown in \cref{fig:Spatial Decomposition:Scaled MOC Parallel Efficiency}.
+        This indicates that the \ac{MOC} solver in MPACT is highly efficient in parallel, and that other components of MPACT are the bottleneck in parallel simulations.
+        Furthermore, for both total and \ac{MOC} run-times, the graph partitioning methods give comparable parallel efficiencies.
+        The assembly-based decomposition method still results in lower efficiency when using few subdomains, but for high numbers of subdomains, it is comparable with the graph partitioning methods.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Scaled_Total_Parallel_Efficiency}
+          \caption{The total parallel efficiency per iteration for each partitioning method as a function of the number of domains. \label{fig:Spatial Decomposition:Scaled Parallel Efficiency}}
+        \end{figure}
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Scaled_MOC_Parallel_Efficiency}
+          \caption{The MOC parallel efficiency per iteration for each partitioning method as a function of the number of domains. \label{fig:Spatial Decomposition:Scaled MOC Parallel Efficiency}}
+        \end{figure}
+
+
+        Finally, the ratio of the optimal cell fraction to the maximum cell fraction is expected to be proportional to the parallel efficiency per iteration of the \ac{MOC} solver.
+        As shown in \cref{fig:Spatial Decomposition:MOC Parallel Efficiency Correlation}, the parallel efficiency is correlated with the the ratio of optimal-to-maximum cell fractions, though it is not correlated as strongly as the runtime with the maximum cell fraction.
+        This indicates that this ratio can be used to estimate the parallel efficiency of the \ac{MOC} solver for a decomposition.
+        Even isolating the effect due to increased numbers of iterations, there is a significant spread in parallel efficiency as a function of the optimal to maximum cell fraction ratio; this can be explained by the fact that significantly different numbers of domains (processes) can result in similar fractions.
+        This is clearly observed in \cref{fig:Max/Optimal Ratio}.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/MOC_Parallel_Efficiency_Correlation}
+          \caption{Correlation of the MOC parallel efficiency per iteration and the ratio of optimal and maximum cell fractions for each of the partitioning methods. \label{fig:Spatial Decomposition:MOC Parallel Efficiency Correlation}}
+        \end{figure}
+      }
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % CMFD Acceleration
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \subsubsection{CMFD Acceleration}{\label{sssec:CMFD Acceleration}
+        In MPACT, the two main solvers contributing to runtime are the \ac{MOC} solver and \ac{CMFD} acceleration, each of which is parallelized using the same computational resources.
+        From \cref{fig:Spatial Decomposition:Fractional Runtimes}, the \ac{MOC} and \ac{CMFD} solvers take similar amounts of time in serial; however, as more subdomains are used, the fractional runtime of \ac{CMFD} increases to almost 70\% of the total.
+        This indicates that the parallel efficiency is quite low for MPACT's \ac{CMFD} linear system solvers, which heavily leverage PETSc \cite{Petsc} for parallelism.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/Fractional_Runtimes}
+          \caption{Fractional runtime of the \ac{MOC} solver and \ac{CMFD} acceleration method in MPACT for varying number of domains with the \ac{REB} partitioning method. \label{fig:Spatial Decomposition:Fractional Runtimes}}
+        \end{figure}
+
+        Similar as the number of outer transport iterations, as subdomains become smaller, it is expected the \ac{CMFD} linear system will require more iterations for convergence; this is shown for the \ac{REB} partitioning method in \cref{fig:Spatial Decomposition:CMFD Efficiency Summary}.
+        However, by considering the parallel efficiency per inner iteration, these convergence effects can be eliminated, and the parallel scaling of the linear system solvers can be examined.
+        \Cref{fig:Spatial Decomposition:CMFD Efficiency Summary} shows that the parallel efficiency of the linear system solvers used in MPACT for \ac{CMFD} calculations is quite low, limiting to around 30\%.
+        By using a linear system solver that has better parallel scaling \cite{Hao2018}, the overall parallel efficiency of MPACT may be increased.
+        However, these results also indicate that the parallel efficiency is, in part, lowered by spectral effects, which will not be eliminated by a more efficient parallel linear solver.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=\resultwidth]{results/2D/CMFD_Efficiency_Summary.pdf}
+          \caption{The total number of \ac{CMFD} inner iterations, parallel efficiency, and parallel efficiency per inner iteration for varying number of domains with the \ac{REB} partitioning method. \label{fig:Spatial Decomposition:CMFD Efficiency Summary}}
+        \end{figure}
+      }
     }
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 3-D Results
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \subsection{3-D Results}{\label{ssec:Spatial Decomposition:3-D Results}
-      \blindtext[4]
+      As shown in \cref{ssec:Spatial Decomposition:2D Results}, decomposition metrics can be used to estimate the runtime and parallel efficiency without needing to run the simulations.
+      There are different approaches to decomposition in 3D; these are discussed in more detail in \cref{sec:Spatial Decomposition:Applications for MPACT}.
+      Decompositions were performed without refinement for three different 3-D decomposition schemes:  \ac{ARA}, \ac{RA}, and \ac{UR}.
+      Given fewer restrictions, the resulting decompositions were expected to be more balanced.
+      Decompositions were performed on VERA progression problem 5a-0 in 3-D \cite{VERAProblems} with 58 axial planes, but the simulations for this problem were not run.
+
+      The ratio of maximum cell fraction to optimal cell fraction can easily be converted to the maximum cell fraction by dividing by $N$.
+      For brevity, only this load balance metric is shown herein.
+      The resulting decompositions from the \ac{ARA} approach are very similar to those in the 2-D case.
+      Just as in the 2-D case, the maximum-to-optimal cell fraction ratio is lowest for the \ac{REB} method as compared to the other partitioning methods for many cases, as seen in \cref{fig:3D AR Max. to Optimal Cell Ratio}.
+      This indicates that, barring any differences in the number of iterations, the \ac{REB} method is expected to have slightly higher parallel efficiencies.
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/3D/AxialRadial_Comparison_Ratio}
+        \caption{Maximum-to-optimal cell fraction ratio for each partitioning method as a function of number of domains in the \acf{ARA} scheme. \label{fig:Spatial Decomposition:3D AR Max. to Optimal Cell Ratio}}
+      \end{figure}
+
+      In the \ac{RA} scheme, a separate decomposition is performed for each axial plane, with an appropriate number of subdomains based on the number of cells in the plane.
+      Unlike in the 2-D case, the \ac{REB} method seems to perform significantly worse than the other two methods for low numbers of subdomains.
+      For highly decomposed cores, the \ac{REB} method seems to perform slightly better than the other partitioning methods.
+      Additionally, by comparing the magnitude of the ratios in \cref{fig:Spatial Decomposition:3D R Max. to Optimal Cell Ratio} and \cref{fig:Spatial Decomposition:3D AR Max. to Optimal Cell Ratio}, it is clear that the RA approach typically has less imbalance.
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/3D/Radial_Comparison_Ratio}
+        \caption{Maximum-to-optimal cell fraction ratio for each partitioning method as a function of number of domains in the \acf{RA} scheme. \label{fig:Spatial Decomposition:3D R Max. to Optimal Cell Ratio}}
+      \end{figure}
+
+      Finally, the \ac{UR} approach decomposes the 3D core by directly abstracting the entire core into a graph.
+      The \ac{REB} method is significantly more imbalanced than other methods for lower numbers of subdomains; however, for highly decomposed cores, the \ac{REB} method outperforms the other methods, as shown in \cref{fig:Spatial Decomposition:3D U Max. to Optimal Cell Ratio}.
+      Additionally, for highly decomposed problems, both the \ac{RSB} and \ac{RIB} methods seem to have worse balance when using the \ac{UR} scheme compared to the \ac{RA} scheme.
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/3D/General_Comparison_Ratio}
+        \caption{Maximum-to-optimal cell fraction ratio for each partitioning method as a function of number of domains in the \acf{UR} scheme. \label{fig:Spatial Decomposition:3D U Max. to Optimal Cell Ratio}}
+      \end{figure}
+
+      The approach currently used in MPACT is the axially and radially aligned 3-D decomposition scheme.
+      If other approaches were to be used, the implementation of parallel communication in the 2D-1D method would need to be reworked.
+      To justify these changes, the less restricted approaches would need to offer significant advantages over the current approach.
+      \Cref{fig:Spatial Decomposition:RSB 3D Comparison,fig:Spatial Decomposition:RIB 3D Comparison,fig:Spatial Decomposition:REB 3D Comparison} examine the maximum cell fraction of each scheme relative to the current scheme.
+      The smaller the relative maximum cell fraction, the lower the expected runtime will be.
+
+      For most applications, reactor cores in MPACT are not highly decomposed with, at maximum, on the order of 30 subdomains per axial plane.
+      In this context, modestly decomposed cores are defined as those with fewer than 2,000 subdomains; otherwise, the core is considered highly decomposed.
+      For the \ac{RSB} and \ac{RIB} methods, the \ac{RA} approach is expected to give 10\% better performance than the \ac{ARA} approach on average.
+      For highly decomposed cases, these partitioning methods are only expected to give an average of 2 -- 3\% better performance.
+      On average, the \ac{UR} approach is expected to give \emph{worse} performance by more than 10\% using these partitioning methods.
+      However, for the \ac{REB} partitioning method, the \ac{RA} approach is only expected to give 3\% better performance on average.
+      Typically, the \ac{UR} approach is still expected to result in worse performance.
+      This may be a result of the problem examined in this work which had axial planes that were fairly well balanced.
+      By giving the graph partitioning methods more degrees of freedom the heuristic graph partitioning methods perform worse overall.
+      Multi-level partitioning methods reduce the degrees of freedom during coarsening and may be more appropriate in these cases.
+
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/3D/RSB_Comparison}
+        \caption{Maximum cell fraction relative to the \acf{ARA} approach for the \ac{RSB} partitioning method. \label{fig:Spatial Decomposition:RSB 3D Comparison}}
+      \end{figure}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/3D/RIB_Comparison}
+        \caption{Maximum cell fraction relative to the \acf{ARA} approach for the \ac{RIB} partitioning method. \label{fig:Spatial Decomposition:RIB 3D Comparison}}
+      \end{figure}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\resultwidth]{results/3D/REB_Comparison}
+        \caption{Maximum cell fraction relative to the \acf{ARA} approach for the \ac{REB} partitioning method. \label{fig:Spatial Decomposition:REB 3D Comparison}}
+      \end{figure}
     }
   }
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
