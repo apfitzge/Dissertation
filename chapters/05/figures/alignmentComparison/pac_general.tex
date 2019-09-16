@@ -1,0 +1,46 @@
+\documentclass[tikz,crop]{standalone}
+
+%%% Packages %%%
+\usepackage{pgfplots}
+\usepackage{subcaption}
+
+\begin{document}
+  %%% Commands for figures %%%
+  \newcounter{krow}
+  \newcounter{kcol}
+  \newcommand\setkrow[5]{
+    \setcounter{kcol}{1}
+    \foreach \n in {#1, #2, #3, #4, #5} {
+      \edef\x{\value{kcol} - 0.5}
+      \edef\y{6.5 - \value{krow}}
+      \node[anchor=center] at (\x, \y) {\n};
+      \stepcounter{kcol}
+    }
+    \stepcounter{krow}
+  }
+  \colorlet{lightgrey}{gray!35}
+  \begin{tikzpicture}[scale=0.5]
+    \draw[lightgrey,very thin] (0, 0) grid (5, 6);
+
+    \setcounter{krow}{1}
+    \setkrow{2}{2}{2}{2}{2}
+    \setkrow{6}{6}{2}{2}{2}
+    \setkrow{8}{8}{8}{8}{2}
+    \setkrow{8}{8}{8}{8}{2}
+    \setkrow{6}{6}{2}{2}{2}
+    \setkrow{2}{2}{2}{2}{2}
+
+    % Horizontal domain boundaries
+    \draw[black, very thick] (0,1) -- (5,1);
+    \draw[black, very thick] (0,2) -- (2,2);
+    \draw[black, very thick] (1,3) -- (4,3);
+    \draw[black, very thick] (0,4) -- (2,4);
+    \draw[black, very thick] (0,5) -- (5,5);
+
+    % Vertical domain boundaries
+    \draw[black, very thick] (1,2) -- (1,4);
+    \draw[black, very thick] (2,1) -- (2,5);
+    \draw[black, very thick] (3,1) -- (3,5);
+    \draw[black, very thick] (4,1) -- (4,5);
+  \end{tikzpicture}
+\end{document}

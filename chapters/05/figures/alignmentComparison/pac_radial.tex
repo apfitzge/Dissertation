@@ -1,0 +1,46 @@
+\documentclass[tikz,crop]{standalone}
+
+%%% Packages %%%
+\usepackage{pgfplots}
+\usepackage{subcaption}
+
+\begin{document}
+  %%% Commands for figures %%%
+  \newcounter{jrow}
+  \newcounter{jcol}
+  \newcommand\setjrow[5]{
+    \setcounter{jcol}{1}
+    \foreach \n in {#1, #2, #3, #4, #5} {
+      \edef\x{\value{jcol} - 0.5}
+      \edef\y{6.5 - \value{jrow}}
+      \node[anchor=center] at (\x, \y) {\n};
+      \stepcounter{jcol}
+    }
+    \stepcounter{jrow}
+  }
+  \colorlet{lightgrey}{gray!35}
+  \begin{tikzpicture}[scale=0.5]
+    \draw[lightgrey,very thin] (0, 0) grid (5, 6);
+
+    \setcounter{jrow}{1}
+    \setjrow{2}{2}{2}{2}{2}
+    \setjrow{6}{6}{2}{2}{2}
+    \setjrow{8}{8}{8}{8}{2}
+    \setjrow{8}{8}{8}{8}{2}
+    \setjrow{6}{6}{2}{2}{2}
+    \setjrow{2}{2}{2}{2}{2}
+
+    % Horizontal domain boundaries
+    \draw[black, very thick] (0,1) -- (5,1);
+    \draw[black, very thick] (0,2) -- (5,2);
+    \draw[black, very thick] (0,3) -- (5,3);
+    \draw[black, very thick] (0,4) -- (5,4);
+    \draw[black, very thick] (0,5) -- (5,5);
+
+    % Vertical domain boundaries
+    \draw[black, very thick] (1,2) -- (1,4);
+    \draw[black, very thick] (3,2) -- (3,4);
+    \draw[black, very thick] (2,1) -- (2,2);
+    \draw[black, very thick] (2,4) -- (2,5);
+  \end{tikzpicture}
+\end{document}

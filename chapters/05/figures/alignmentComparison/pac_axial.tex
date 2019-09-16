@@ -1,0 +1,40 @@
+\documentclass[tikz,crop]{standalone}
+
+%%% Packages %%%
+\usepackage{pgfplots}
+\usepackage{subcaption}
+
+\begin{document}
+  %%% Commands for figures %%%
+  \newcounter{lrow}
+  \newcounter{lcol}
+  \newcommand\setlrow[5]{
+    \setcounter{lcol}{1}
+    \foreach \n in {#1, #2, #3, #4, #5} {
+      \edef\x{\value{lcol} - 0.5}
+      \edef\y{6.5 - \value{lrow}}
+      \node[anchor=center] at (\x, \y) {\n};
+      \stepcounter{lcol}
+    }
+    \stepcounter{lrow}
+  }
+  \colorlet{lightgrey}{gray!35}
+  \begin{tikzpicture}[scale=0.5]
+    \draw[lightgrey,very thin] (0, 0) grid (5, 6);
+
+    \setcounter{lrow}{1}
+    \setlrow{2}{2}{2}{2}{2}
+    \setlrow{6}{6}{2}{2}{2}
+    \setlrow{8}{8}{8}{8}{2}
+    \setlrow{8}{8}{8}{8}{2}
+    \setlrow{6}{6}{2}{2}{2}
+    \setlrow{2}{2}{2}{2}{2}
+
+    \draw[black, very thick] (0,1) -- (5,1);
+    \draw[black, very thick] (0,2) -- (5,2);
+    \draw[black, very thick] (0,3) -- (5,3);
+    \draw[black, very thick] (0,4) -- (5,4);
+    \draw[black, very thick] (0,5) -- (5,5);
+    \draw[black, very thick] (2,0) -- (2,6);
+  \end{tikzpicture}
+\end{document}

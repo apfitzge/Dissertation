@@ -1,0 +1,52 @@
+\documentclass[tikz,crop]{standalone}
+
+%%% Packages %%%
+\usepackage{pgfplots}
+\usepackage{tkz-fct}
+\usepackage{tkz-euclide}
+\usetkzobj{all}
+\begin{document}
+  \begin{tikzpicture}[scale=1.0]
+    \tkzInit[xmin=0, xmax=10, ymin=0, ymax=6]
+    %%% Points %%%
+    \tkzDefPoint(4.912119900853410,4.751382658126040){1}
+    \tkzDefPoint(5.632790741948160,5.307021941725050){2}
+    \tkzDefPoint(3.919203068809660,1.857553775083130){3}
+    \tkzDefPoint(7.401451304142060,0.862306629103963){4}
+    \tkzDefPoint(3.621924450916090,4.225550156472460){5}
+    \tkzDefPoint(5.912745422286070,0.179201963216980){6}
+    \tkzDefPoint(3.827373650722350,1.612003112263260){7}
+    \tkzDefPoint(9.370749386231200,3.110716207424280){8}
+    \tkzDefPoint(3.260579388972250,2.219777256945890){9}
+    \tkzDefPoint(2.969389474510860,4.050270003072240){10}
+    \tkzDefPoint(6.303834893775260,2.543900867905370){11}
+    \tkzDefPoint(8.795323575938080,3.016469650310640){12}
+    \tkzDefPoint(0.981222170189231,3.579708634846500){13}
+    \tkzDefPoint(1.713199761918370,4.015006375100010){14}
+    \tkzDefPoint(1.835480192114760,3.475870524009830){15}
+    \tkzDefPoint(5.507066321683400,0.610978614321078){16}
+    \tkzDefPoint(3.230441618534210,5.168242929195080){17}
+    \tkzDefPoint(5.892189455031940,0.586581250939334){18}
+    \tkzDefPoint(1.077577809735000,3.428179743449840){19}
+    \tkzDefPoint(9.738798286017860,3.649870531399090){20}
+    \tkzDefPoint(6.026378012690850,4.225223100034250){21}
+    \tkzDefPoint(4.256685528883790,0.513108482598120){22}
+    \tkzDefPoint(2.603466626469520,3.241787504192890){23}
+    \tkzDefPoint(5.991464222500600,3.848932129534630){24}
+    %%% Centroids %%%
+    \tkzDefPoint(4.782560636036460,2.919985168386250){C}
+    \tkzDefPoint(4.684167327053530,2.937838928421330){CS}
+    %%% Bisectors %%%
+    %%% Largest %%%
+    \tkzFct[domain=0:10, black, thick]{(5.51106930918504*(x-4.782560636036460)+2.919985168386250)}
+    %%% Smallest %%%
+    \tkzFct[domain=0:10, black, thick, dashed]{(-0.181452989229032*(x-4.782560636036460)+2.919985168386250))}
+    %%% Largest - Shifted %%%
+    \tkzFct[domain=0:10, black, thick, opacity=0.25]{(5.51106930918504*(x-4.684167327053530)+2.937838928421330)}
+    %%% Draw Points %%%
+    \tkzDrawPoints[fill=black](1,...,24)
+    %%% Draw Ellipse Container %%%
+    % \tkzFct[domain=0:10, gray, opacity=0.25]{(3 + sqrt(9*(1-((x-5)**2)/25)))}
+    % \tkzFct[domain=0:10, gray, opacity=0.25]{(3 - sqrt(9*(1-((x-5)**2)/25)))}
+  \end{tikzpicture}
+\end{document}
