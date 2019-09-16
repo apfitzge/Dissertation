@@ -347,13 +347,76 @@
   % Applications for MPACT
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Applications for MPACT}{\label{sec:Spatial Decomposition:Applications for MPACT}
-    \blindtext[8]
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % CMFD Acceleration
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \subsection{CMFD Acceleration}{\label{ssec:Spatial Decomposition:CMFD Acceleration}
-      \blindtext[3]
-    }
+    As described in \cref{sec:Spatial Decomposition:Spatial Decomposition in MPACT}, MPACT's spatial decomposition is performed on the ray-tracing module mesh.
+    However, there are a couple of restrictions on spatial subdomains in MPACT.
+    Each spatial subdomain must be contiguous, and cannot wrap around other spatial subdomains.
+    To account for these restrictions, adaptations are made to the graph partitioning process.
+
+    Due to restrictions in MPACT, at each recursive step, each subdomain in a bisection is made contiguous.
+    If a partitioning method results in a noncontiguous subdomain, then each noncontiguous group of modules will be moved into the other subdomain except for the largest group.
+    This fix is done at the expense of load-balance, but is necessary for these methods to be robust in MPACT.
+    To ensure that no subdomain wraps around another, a fix is applied after the graph partitioning process.
+    If a subdomain wraps around another, then the concave subdomain will be given the modules it wraps around.
+
+    A group of ray-tracing modules in MPACT can be abstracted into a graph.
+    Each vertex will have weight corresponding to the number of cells contained in the module.
+    Edges can be drawn between directly neighboring ray-tracing modules.
+    This represents communication in MPACT's MOC solver.
+    Transport source iterations converge slowly, so MPACT relies on the \ac{CMFD} \cite{Smith1983} acceleration method.
+    \ac{CMFD} acceleration is performed by constructing a sparse linear system based on the finite differenced diffusion operator and then solving for the largest eigenpair of that linear system.
+    In MPACT, solving the linear system is handled by a third-party library, PETSc \cite{Petsc}.
+
+    For 2-D simulations, the application of graph partitioning methods is clear: abstract the 2-D mesh into a graph for partitioning.
+    However, for 3-D, there are additional concerns.
+    MPACT's primary 3-D transport method is the 2D-1D method, in which the \ac{MOC} is used in the radial directions, and a lower-order solver couples axial planes \cite{Collins2016}.
+    For 2D-1D simulations, MPACT currently restricts spatial domains to be aligned in both the radial and axial directions; this is due to implementation, and is not a general requirement of the methods.
+
+    To comply with MPACT's restrictions on 3D spatial domains, the current approach is to axially average module weights (numbers of cells), perform a 2-D graph partitioning on a single plane, and apply the resulting partitioning to all axial planes.
+    This approach will restrict the number of spatial domains to be an integer multiple of the number of planes.
+    This axially and radially aligned scheme is expected to work well in many cases since reactor cores do not typically vary significantly in the axial direction.
+    However, for some designs, this may not be true, and planes near the top or bottom of the core have significantly fewer cells; in these cases, high load imbalance is to be expected.
+
+    It is possible to change MPACT's implementation to lift these alignment restrictions.
+    If spatial domains were aligned in only the radial direction, there may be some benefit to load-balance.
+    In this scheme, each axial plane can be assigned an appropriate number of processes, and a separate 2-D decomposition can be performed for each plane.
+    This also lifts restrictions on the number of domains; the number of domains must only be greater than or equal to the number of planes.
+
+    If all alignment restrictions were lifted on MPACT's spatial domains, then a direct partitioning of the 3-D core can be performed by abstracting the entire core to a graph.
+    This scheme provides the most freedom and would be expected to give the most balanced decompositions.
+    In MPACT's 2D-1D solver, the amount of data communicated radially is significantly larger than that communicated axially, so it may be advantageous to assign the edges connecting the neighboring modules in the axial direction lower weights than those in radial directions.
+    By doing so, the overall communication would be expected to be decreased.
+
+    \begin{figure}
+      \centering
+      \begin{subfigure}[t]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{alignmentComparison/pac_axial}
+        \caption{}
+      \end{subfigure}%
+      ~
+      \begin{subfigure}[t]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{alignmentComparison/pac_radial}
+        \caption{}
+      \end{subfigure}%
+      ~
+      \begin{subfigure}[t]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{alignmentComparison/pac_general}
+        \caption{}
+      \end{subfigure}
+      \caption{
+        Sample decompositions for (a) axially aligned, (b) radially aligned, and (c) generalized decomposition strategies.
+        Rows represent axial planes.
+        Numbers are the vertex weights.
+        \label{fig:Spatial Decomposition:partitionAlignmentComparison}
+      }
+    \end{figure}
+
+    \Cref{fig:partitionAlignmentComparison} shows a comparison of the three hypothetical decomposition schemes, for the purposes of illustration.
+    Looking at the \ac{MMR}, as an indicator of load-balance, the strategies have clear differences.
+    The \ac{MMR} for the axially aligned, radially aligned, and generalized strategies in this example are $4.00$, $2.67$, and $2.00$, respectively.
+    However, it is important to note that the largest domain in each case has the same weight (16), so while the different schemes give different balances, the overall run-times are not expected to be different.
   }
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Results
