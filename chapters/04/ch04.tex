@@ -194,9 +194,11 @@
             All three-dimensional tracks are generated and temporarily stored during the transport sweep (on-the-fly), leading to significant memory savings (94\% reduction), with minimal computational overhead \cite{Gunow2016}.
         }
         \subsection{Macroray}{\label{ssec:RT:Macroray}
-            The \emph{macroray} method is a three-dimensional extension of the two-dimensional macroband method.
-            This method is currently being implemented as part of this work, and, to the best of the author's knowledge, has never been studied.
-            The name has been changed to the more general ``macroray'' as three-dimensional tracks are no longer two-dimensional ``bands''.
+            The \emph{macroray} method is a three-dimensional extension of the two-dimensional macroband method, and is a central contribution of this work.
+            This method has been implemented as part of this work, and, to the best of the author's knowledge, has never been studied.
+            The macroray is a extension of the macroband into three-dimensions, in which along each radial ray the macroband method is used to generate axial rays on the characteristic plane.
+            This follows the general procedure used for three-dimensional ray-tracing, but a limitation of this approach is explained in more detail in \cref{sec:RT:Interface Flux Approximations}.
+            In three-dimensions, rays can more generally be separated into ``parallel pipes'', to simplify notation these are referred to as macrorays.
 
             The motivation for investigating this method is for three primary reasons.
             The first, is that 2-D results \cite{Yamamoto2005,Fevotte2007,Yamamoto2008} have indicated that the macroband method allows for coarser ray-spacing (thus fewer rays) while maintaining accuracy.
@@ -263,6 +265,36 @@
             \caption{Pin-by-pin sweeping order for a $2\times2$ domain with colors representing the order starting from the bottom left pin.}
             \label{fig:RT:Macroband Sweep Order}
         \end{figure}
+    }
+    \section{Interface Flux Approximations}{\label{sec:Interface Flux Approximations}
+      The macroband and macroray ray-tracing methods are fundamentally incompatible with \acf{DNPL}.
+      Although ray-tracing can be performed on smaller unique subsystems, similarly to the \ac{MRT} method, the rays on module interfaces are no longer guaranteed to be aligned.
+      Approximations to the angular flux at these interfaces are thus necessary.
+      \citet{Yamamoto2005} proposed performing linear interpolation of flux on these interfaces in the macroband method.
+      However, linear interpolation, without adjustment, does not guarantee that the net current is conserved; which is an important aspect when considering \ac{CMFD} acceleration techniques.
+
+      \citet{Liu2014} proposed a sub-boundary averaging method for use with 3-D \ac{CDP}.
+      Although this technique was used in the context of a modular ray-tracing approach, it can be adapted to conserve net current on surfaces.
+      The proposed sub-boundary averaging method partitioned surfaces into sub-boundaries.
+      Each sub-boundary was assigned a single angular flux value, which was the average of the angular flux of all rays with centroids that intersected the sub-boundary.
+
+      Only the centroid of the ray was considered, and not the actual shape of the intersection between the ray and surface.
+      By not considering the shape of the ray, only a very fine ray-spacing can be used.
+      If one considers the shape of the ray, and stores partial contributions to each surface, a coarser ray-spacing can be used, although this is a more expensive operation.
+      This approach was the one taken for this work, and the details of this averaging scheme are examined in the subsequent subsections.
+
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % 2-D Sub-Boundary Averaging
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \subsection{2-D Sub-Boundary Averaging}{\label{ssec:RT:2-D Sub-Boundary Averaging}
+        \blindtext[4]
+      }
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      % 3-D Sub-Boundary Averaging
+      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \subsection{3-D Sub-Boundary Averaging}{\label{ssec:3-D Sub-Boundary Averaging}
+        \blindtext[8]
+      }
     }
     % References
     % \printbibliography
