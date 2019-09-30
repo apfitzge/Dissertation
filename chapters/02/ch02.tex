@@ -388,20 +388,68 @@
             While \cref{alg:NTT:Source Iteration} is valid, it typically converges very slowly, requiring many iterations to get reasonable results.
             In full-core calculations, a single transport sweep can become computationally expensive and using \cref{alg:NTT:Source Iteration} is not feasible.
             There has been considerable effort in developing methods that accelerate transport calculations by using a lower-order calculation, typically based on the diffusion approximation.
+            These method reduce the spectral radius of the iteration scheme, and thus fewer transport iterations are necessary to provide converged results.
+
             While other acceleration methods exist \cite{Hebert2017}, the most common are \ac{NDA} methods \cite{Smith2002}, typically using the \ac{CMFD} method \cite{Smith1983}.
+            \Cref{alg:NTT:NDA} lists the standard \ac{NDA} algorithm for a 1-D mono-energetic $k$-eigenvalue problem.
+            The primary difference between \ac{CMFD} and \ac{NDA} is that \ac{CMFD} uses a coarser mesh than the transport problem, while \ac{NDA} uses the same mesh as the transport problem.
 
             The \ac{CMFD} acceleration method has been shown to significantly reduce computational transport run-times \cite{Smith2002,Anistratov2011,Collins2016}.
-            Improvements upon the original \ac{CMFD} formulation \cite{Smith1983}.
+            Improvements upon the original \ac{CMFD} formulation \cite{Smith1983}, such as p\ac{CMFD} \cite{Cho2002} and od\ac{CMFD} \cite{Zhu2016}.
             The p\ac{CMFD} method preserves partial currents rather than net currents, and has been shown to be unconditionally stable for transport problems at fixed conditions \cite{Cho2002}.
             The od\ac{CMFD} method generalizes the \ac{CMFD} and p\ac{CMFD} methods by adding an artificial term to the diffusion coefficient, and has faster convergence properties than p\ac{CMFD} \cite{Zhu2016}.
 
             Utilization of \ac{CMFD} acceleration in transport calculations with \ac{TH} feedback has not had the favorable stability and convergence properties as calculations without feedback \cite{Kochunas2017}.
             Many transport codes have required under-relaxation of the scalar flux in the iteration schemes for stability in these calculations; there is ongoing research investigating a less ad-hoc approach \cite{Kochunas2017}.
-            This instability and convergence slow-down in problems with feedback has prevented full utilization of more advanced multi-level solvers \cite{Yee2018a}.
+            This instability and convergence slow-down in problems with feedback has prevented full utilization of more advanced multi-level solvers \cite{Kochunas2017,Yee2018a}.
 
-            % \subsubsection{Coarse Mesh Finite Difference}{\label{sssec:NTT:CMFD}
+            \begin{algorithm}
+              \caption{\ac{NDA} Acceleration algorithm for the $k$-eigenvalue transport problem.}
+              \label{alg:NTT:NDA}
+              \newcommand{\ndaCurrent}[1][j]{J^{(#1)}(x)}
+              \newcommand{\ndaFlux}[1][j]{\ScalarFlux^{(#1)}(x)}
+              \newcommand{\ndaXST}{\CrossSection_{t}(x)}
+              \newcommand{\ndaXSA}{\CrossSection_{a}(x)}
+              \newcommand{\ndaNUFIS}{\nu\CrossSection_{f}(x)}
+              \newcommand{\ndaD}{\frac{1}{3\ndaXST}}
+              \newcommand{\ndaDHAT}{\widehat{D}^{(j)}(x)}
 
-            % }
+              \begin{algorithmic}[1]
+                \State{Begin iteration $i$ with known boundary conditions, scalar flux estimate, $\ScalarFlux^{(j)}(x)$, a net current estimate, $\Current^{(j)}(x)$, and a $k$-eigenvalue estimate, $\keff$.}
+                \State{Compute linear and non-linear correction factors for low-order diffusion equation:
+                  \begin{equation}\label{eq:NTT:NDA:Dhat}
+                    \ndaDHAT = \frac{\deriv{}{x}\left[\ndaCurrent + \ndaD\deriv{\ndaFlux}{x}\right]}{\ndaFlux}
+                  \end{equation}
+                }
+                \State{Solve the low-order diffusion eigenvalue problem:
+                  \begin{equation}\label{eq:NTT:NDA:NDA Equation}
+                    -\deriv{}{x}\ndaD\deriv{\ndaFlux[j+1/2]}{x}
+                    +\left[\ndaXSA + \ndaDHAT\right]\ndaFlux[j+1/2] = \frac{1}{\keff}\ndaNUFIS\ndaFlux[j+1/2].
+                  \end{equation}
+                }
+                \State{Perform a transport sweep using the scalar flux, and eigenvalue estimates from the low-order diffusion calculation:
+                  \begin{equation}\label{eq:NTT:NDA:Transport Sweep}
+                    \left[\PolarCos\pderiv{}{x} + \ndaXST\right]\AngularFlux^{(j+1)}(x,\PolarCos) = \frac{1}{2}\left[\CrossSection_s(x) + \frac{1}{\keff^{(j)}}\nu\CrossSection_f(x)\right]\ScalarFlux^{(j)}(x),
+                  \end{equation}
+                  \begin{equation*}
+                      \forall x\in [0,X], \quad \forall\PolarCos \in [-1, 1].
+                  \end{equation*}
+                }
+                \State{Update the scalar flux, current, and eigenvalue estimates for next iteration:
+                  \begin{subequations}\label{eqs:NTT:NDA:Update}
+                    \begin{equation}\label{eq:NTT:NDA:Scalar Flux Update}
+                      \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
+                    \end{equation}
+                    \begin{equation}\label{eq:NTT:NDA:Current Update}
+                      \Current^{(j+1)}(x) = \intl[-1][1]\PolarCos\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
+                    \end{equation}
+                    \begin{equation}\label{eq:NTT:NDA:Eigenvalue Update}
+                      \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x}}.
+                    \end{equation}
+                  \end{subequations}
+                }
+              \end{algorithmic}
+            \end{algorithm}
         }
     }
     % References
