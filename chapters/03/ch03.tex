@@ -343,11 +343,11 @@
             This can be expressed as
             \begin{subequations}\label{eqs:MOC:LSA:Source Shape}
                 \begin{equation}\label{eq:MOC:LSA:Source Shape}
-                    \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL,
+                    \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL[][mi],
                 \end{equation}
-                where $\srcL$ is a column vector of source spatial expansion coefficients,
+                where $\srcL[][mi]$ is a column vector of source spatial expansion coefficients,
                 \begin{equation}
-                    \srcL \defined\begin{bmatrix}\srcL[x]\\\srcL[y]\\\srcL[z]\end{bmatrix},
+                    \srcL[][mi] \defined\begin{bmatrix}\srcL[x][mi]\\\srcL[y][mi]\\\srcL[z][mi]\end{bmatrix},
                 \end{equation}
                 and $\loc$ is the position in \emph{local} coordinates.
             \end{subequations}
@@ -363,7 +363,7 @@
             \end{equation}
             and the linear expansion coefficients are explicitly given by
             \begin{equation}\label{eq:MOC:LSA:Linear Source Coefficients}
-                \srcL
+                \srcL[][mi]
                     = \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\fluxL[\gprime]
                     + \frac{\spect}{\keff}\suml[\gprime]\nufis\sfluxL[\gprime].
             \end{equation}
@@ -416,11 +416,11 @@
                 \end{equation}
                 where
                 \begin{equation}\label{eq:MOC:LSA:Track Average Source}
-                    \tsrcF \defined \rfourpi\left[\srcF[mi] + \locCent \vdot \srcL\right],
+                    \tsrcF \defined \rfourpi\left[\srcF[mi] + \locCent \vdot \srcL[][mi]\right],
                 \end{equation}
                 and
                 \begin{equation}\label{eq:MOC:LSA:Track Linear Source}
-                    \tsrcL \defined \rfourpi\left[\frac{\dirm\vdot\srcL}{\renorm[mi]}\right].
+                    \tsrcL \defined \rfourpi\left[\frac{\dirm\vdot\srcL[][mi]}{\renorm[mi]}\right].
                 \end{equation}
             \end{subequations}
             This can be solved analytically for the angular flux along the track,
@@ -439,37 +439,90 @@
             \end{subequations}
 
             As discussed in \cref{ssec:MOC:FSA:Derivation}, there are two \emph{equivalent} methods with which one could determine the track-averaged angular flux values.
-            However, it is the author's opinion that defining these moments implicitly, by taking the moments of the characteristic equation (\cref{eq:MOC:LSA:Characteristic Form}), results in a form that is simpler.
-            The original basis of this work \cite{Ferrer2016}, evaluated the linear moment explicitly; for brevity, the derivation will only be shown here with the implicitly defined moment.
-            Previous work \cite{Fitzgerald2019} has also shown that by using the form given by the implicit definition, there are significant benefits in multi-physics applications.
-            The implicitly defined moments, given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$ and $\MOCTrackIntegral{\nlen(\vdot)}$, are given by
+            The original derivation of the \ac{LSA} method by \citet{Ferrer2016} used the \emph{implicit} definition for the track-average angular flux, but the \emph{explicit} definition for the track-average slope of the angular flux.
+            In \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}, the implicit definition is taken for the slope as well, which allows for additional improvements for the method in multi-physics and 2D/1D applications.
+            For the remainder of this section, the formulation as it was originally derived by \citet{Ferrer2016} is shown.
+
+            The implicitly defined track-average flux, given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$, and the explicitly defined track-average flux slope given by operating on \cref{eq:MOC:LSA:Angular Flux Solution} by $\MOCTrackIntegral{\nlen(\vdot)}$, are given by
             \begin{subequations}\label{eqs:MOC:LSA:Track-Averaged Moments}
                 \begin{equation}\label{eq:MOC:LSA:Track-Averaged Angular Flux}
                     \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF}{\xst} + \frac{\dflux}{\segopt},
                 \end{equation}
                 and
                 \begin{equation}\label{eq:MOC:LSA:Track-Averaged Linear Angular Flux}
-                    \MOCTrackIntegral{\nlen\aflux[][g][]} = \frac{\MOCTrackIntegral{\aflux[][g][]} - \afluxout}{\xst} + \frac{\nsegl}{2}\left[\frac{\tsrcF}{\xst} + \frac{\tsrcL}{\xst}\frac{\nsegl}{6}\right].
+                    \MOCTrackIntegral{\nlen\aflux[][g][]} =
+                      \afluxin\frac{\nsegl}{2} + \left(\frac{\tsrcF}{\xst} - \afluxin\right)\frac{G_1(\segopt)}{\xst}
+                      + \frac{\tsrcL}{2(\xst)^2}\nsegl G_2(\segopt),
                 \end{equation}
             \end{subequations}
-            Due to the presence of the $\dflux/\segopt$ term in \cref{eq:MOC:LSA:Track-Averaged Linear Angular Flux}, it is beneficial to stability and performance \cite{Fitzgerald2018,Fitzgerald2019} to compute this quantity directly, rather than computing $\dflux$ (as is done for \ac{FSMOC}).
-            \begin{subequations}\label{eqs:MOC:LSA:Delta Flux over Optical Thickness}
-                This can be found explicitly by subtracting \cref{eq:MOC:LSA:Angular Flux Solution} evaluated at the exiting location from $\afluxin$ and dividing by $\segopt$, to get
-                \begin{equation}\label{eq:MOC:LSA:Delta Flux over Optical Thickness}
-                    \frac{\dflux}{\segopt} = \left(\afluxin-\frac{\tsrcF}{\xst}\right)E_1(\segopt) - \frac{\nsegl}{2}\frac{\tsrcL}{\xst}T_2(\segopt),
+            where
+            \begin{subequations}\label{eqs:MOC:LSA:G Functions}
+              \begin{equation}\label{eq:MOC:LSA:G1}
+                  G_1(\segopt) \defined 1 + \frac{\segopt}{2} - \left(1+\frac{1}{\segopt}\right)F_1(\segopt),
+              \end{equation}
+              and
+              \begin{equation}\label{eq:MOC:LSA:G2}
+                  G_2(\segopt) \defined \frac{2}{3}\segopt - \left(1+\frac{2}{\segopt}\right)G_1(\segopt).
+              \end{equation}
+            \end{subequations}
+
+            % Ferrer & Rhodes derivation
+            The original derivation further simplified \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions} into the following form.
+            \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments}
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments}
+                    \fluxF = \frac{\fourpi}{\xst V_i}\suml[m]\wt[m]\SH[\ell][n][\dirm] \xst \FerrerFlatPsi,
                 \end{equation}
-                where
-                \begin{equation}\label{eq:MOC:LSA:E1}
-                    E_1(\segopt) \defined \frac{F_1(\segopt)}{\segopt},
+                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments}
+                  \MOCIntegral{\loc\SH\aflux[][g][]} = \frac{\fourpi}{\xst V_i}\suml[m]\wt[m]\SH[\ell][n][\dirm] \xst \left(\FerrerLinearPsi + \dirm\FerrerLinearPsiHat/\renorm\right),
                 \end{equation}
-                \begin{equation}\label{eq:MOC:LSA:T2}
-                    T_2(\segopt) \defined 2E_2(\segopt) - E_1(\segopt),
+            \end{subequations}
+            where
+            \begin{subequations}{\label{eqs:MOC:LSA:Ferrer Psis}}
+                \begin{equation}\label{eq:MOC:LSA:Ferrer Flat Psi}
+                    \FerrerFlatPsi \defined
+                      \frac{1}{\xst}\left[
+                          \frac{\srcF[mi]}{\fourpi}\suml[k]\tA\nsegl
+                        + \frac{\srcL[][mi]}{\fourpi}\vdot\suml[k]\tA\locCent\nsegl
+                        + \suml[k]\tA\dflux
+                      \right],
+                \end{equation}
+                \begin{equation}\label{eq:MOC:LSA:Ferrer Linear Psi}
+                  \begin{aligned}
+                    \FerrerLinearPsi \defined
+                      \frac{1}{\xst}\Bigg[
+                          &\left(\suml[k]\tA\nsegl\locIn\right)\frac{\srcF[mi]}{\fourpi}
+                        + \left(\suml[k]\tA\nsegl\locIn(\locCent)^T\right)\frac{\srcL[][mi]}{\fourpi}\\
+                        &+ \suml[k]\tA\locIn\dflux
+                      \Bigg],
+                  \end{aligned}
                 \end{equation}
                 and
-                \begin{equation}\label{eq:MOC:LSA:E2}
-                    E_2(\segopt) \defined \frac{1-E_1(\segopt)}{\segopt}.
+                \begin{equation}\label{eq:MOC:LSA:Ferrer Linear PsiHat}
+                    \FerrerLinearPsiHat \defined
+                      \frac{1}{\xst}\left[
+                          \frac{\srcF[mi]}{\fourpi}\FerrerAnisotropicFlatC
+                         +\frac{\srcL[][mi]}{\fourpi}\vdot\FerrerAnisotropicLinearC
+                         +\suml[k]\tA\nsegl\afluxin H(\segopt)
+                      \right],
                 \end{equation}
             \end{subequations}
+            where
+            \begin{subequations}
+              \begin{equation}\label{eq:MOC:LSA:Ferrer Ansitropic Flat C}
+                \FerrerAnisotropicFlatC \defined
+                  \frac{1}{\xst}\suml[k]\tA\nsegl G_1(\segopt),
+              \end{equation}
+              \begin{equation}\label{eq:MOC:LSA:Ferrer Ansitropic Linear C}
+                \FerrerAnisotropicLinearC \defined
+                  \frac{1}{\xst}\suml[k]\tA\nsegl\left(
+                      \locCent G_1(\segopt) + \dirm\frac{\segl}{2}G_2(\segopt)
+                  \right),
+              \end{equation}
+            \end{subequations}
+            and
+            \begin{equation}\label{eq:MOC:LSA:H Function}
+              H(\segopt) \defined \frac{\segopt}{2} - G_1(\segopt).
+            \end{equation}
         }
         \subsection{Particle Conservation}{\label{ssec:MOC:LSA:Particle Conservation}
             In consideration to particle balance, use of the \ac{LSA} results in additional constraints on the calculations.
@@ -484,51 +537,31 @@
                 \MOCSingleAngleIntegral{\loc} = 0.
             \end{equation}
             This is equivalent to stating that the local coordinate system must be defined with respect to direction-dependent global centroids, as is given by \cref{eq:MOC:LSA:Direction-Dependent Centroids}.
-
-            If these constraints are satisfied, \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions} can be simplified,
-            \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments}
-                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Scalar Flux}
-                    \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
-                \end{equation}
-                \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments of Flux}
-                    \fluxF = \frac{\tsrcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
-                \end{equation}
-                and
-                \begin{aequation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}
-                    \MOCIntegral{\loc\SH\aflux[][g][]}
-                        &= \suml[m]\wt\SH[\ell][n][\dirm]\M[][mi]\frac{\srcL[][mi]}{\xst}\\
-                        &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]
-                            \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout + \frac{\tsrcF}{\xst}\right)\right]
-                \end{aequation}
-                where
-                \begin{equation}\label{eq:MOC:LSA:Delta Flux}
-                    \dflux \defined \afluxin - \afluxout,
-                \end{equation}
-                and
-                \begin{equation}\label{eq:MOC:LSA:Direction Dependent M}
-                  \M[][mi] \defined \MOCSingleAngleIntegral{\loc^T\loc}.
-                \end{equation}
-            \end{subequations}
         }
-        \subsection{Spatial and Isotropic Simplifications}{\label{ssec:MOC:LSA:Isotropic Simplifications}
-            The work introducing the original formulation of the moment-based \ac{LSA} suggests that it is beneficial to allow only the isotropic moments of the source and flux to be spatially linear, while higher order moments are spatially flat.
-            The reformulation introduced as part of this work \cite{Fitzgerald2019} was extended to make this simplification in the so called \acf{LIFA} source [CITATION].
-            The linear moment equations can then be simplified to
-            \begin{aequation}\label{eq:MOC:LSA:LIFA Region-Averaged Spatial Moments of Flux}
-                \MOCIntegral{\loc\aflux[][g][]}
-                    &= \M\frac{\srcL}{\xst}
-                    + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]
-                        \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt} - \afluxout + \frac{\tsrcF}{\xst}\right)\right].
-            \end{aequation}
+        \subsection{Isotropic Simplifications}{\label{ssec:MOC:LSA:Isotropic Simplifications}
+            \citet{Ferrer2016} suggested that allowing only the flat source components to consider anisotropic scattering has performance benefits, while not significantly affecting accuracy.
+            It was demonstrated for the \acf{BandW} experiments [CITATION] that considering anisotropic scattering only in the spatially flat flux moments that only $\sim$10 pcm error in eigenvalue resulted.
+            However, by making this simplification, run-times were reduced significantly (up to 45\%), while memory savings were even more significant (up to 89\%) \cite{Ferrer2016}.
 
-            In the case of an isotropic source, the constraints for particle balance are relaxed.
-            Track-length renormalization as well as numerical centroid definitions can be direction-independent while still preserving particle conservation \cite{Ferrer2018}, as given by \cref{eq:MOC:Region Renormalization}, and \cref{eq:MOC:LSA:Direction-Independent Centroids} respectively.
-            The calculation of angular flux spatial moments, given in \cref{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}, can also be simplified into the form
-            \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux Isotropic}
-                \MOCIntegral{\loc\aflux[][g][]}
-                        = \M\frac{\srcL}{\xst}
-                        + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA
-                            \left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right).
+            As stated in \cref{ssec:MOC:FSA:Isotropic Simplifications}, it is very common in reactor simulations to use \ac{TCP0} cross-sections (which are isotropic).
+            Assuming isotropic scattering, \cref{eqs:MOC:LSA:Region-Averaged Flux Moments} become
+            \begin{subequations}\label{eqs:MOC:LSA:Isotropic Region-Averaged Flux Moments}
+              \begin{equation}\label{eq:MOC:LSA:Isotropic Scalar Flux}
+                \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{\xst V_i}\suml[m]\wt[m]\suml[k]\tA\dflux,
+              \end{equation}
+              \begin{equation}\label{eq:MOC:LSA:Isotropic Spatial Moments of Flux}
+                \MOCIntegral{\loc\aflux[][g][]} =
+                    \C\frac{\srcL}{\xst}
+                  + \frac{\fourpi}{\xst V_i}\suml[m]\wt\suml[k]\tA\left[
+                        \locIn\dflux + \dirm\segl\afluxin H(\segopt)
+                    \right],
+              \end{equation}
+            \end{subequations}w
+            where
+            \begin{equation}\label{eq:MOC:LSA:C Matrix}
+              \C \defined
+                \frac{1}{\xst V_i}\suml[m/2]\wt\suml[k]\tA\dirm\dirm^{T}\segl^2G_2(\segopt)
+                + \frac{2}{V_i}\suml[m/2]wt\suml[k]\tA\loc\loc^T\nsegl.
             \end{equation}
         }
         \subsection{Applications}{\label{ssec:MOC:LSA:Applications}
@@ -536,7 +569,7 @@
             Result have indicated that by using a \ac{LSA}, the spatial mesh discretization can be made coarser, relative to with a \ac{FSA}, while maintaining accuracy.
             Although each segment calculation is more expensive when using a \ac{LSA}, the number of calculations (due to the coarser spatial mesh) can be significantly reduced, leading to reduced run-times.
             Additionally, the reduction in spatial mesh elements generally reduces the amount of memory used by the calculation.
-            As part of this work, a spatial mesh discretization study was performed on problems with multi-physics applications in mind \cite{Fitzgerald2019}; this is presented in more detail in \cref{sec:Results:2-D Linear Source}.
+            As part of this work, a spatial mesh discretization study was performed on problems with multi-physics applications in mind \cite{Fitzgerald2019}; this is presented in more detail in \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}.
         }
     }
     \section{Parallelism}{\label{sec:MOC:Parallelism}
@@ -563,6 +596,4 @@
         As part of this thesis work, a more efficient method of spatial decomposition has been investigated and developed in MPACT \cite{Fitzgerald2019a}.
         Details on the spatial decomposition techniques used in this work are given in \cref{ch:Spatial Decomposition}.
     }
-    % References
-    % \printbibliography
 }
