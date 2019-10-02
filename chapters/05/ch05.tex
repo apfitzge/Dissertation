@@ -1,19 +1,139 @@
 \chapter{Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}{
   \label{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}
+  \input{macros/multigroup.tex}
+  \input{macros/DiscreteOrdinates.tex}
+  \input{macros/MOC.tex}
+  \def\figpath{chapters/05/figures/}
+  \graphicspath{ {\figpath} }
+
   The studies performed in this thesis have made extensive use of the \acf{LSA} introduced by \citet{Ferrer2016}.
   Through the use of the approximation, as presented in the original work, instabilities and inefficiencies were found.
-  This chapter aims to present two improvements made to this approximation that have been a focus of this research: improved exponential tabulation, and an improved formulation for multi-physics and 2D/1D applications.
+  This chapter aims to present two improvements made to this approximation that have been a focus of this research: improved exponential tabulation \cite{Fitzgerald2018}, and an improved formulation for multi-physics and 2D/1D applications \cite{Fitzgerald2019}.
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Exponential Tabulation
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Exponential Tabulation}{\label{sec:LSMOC:Exponential Tabulation}
-    \blindtext
-    \subsection{Theory of Function Interpolation}{\label{ssec:LSMOC:ET:Theory of Function Interpolation}
-      \blindtext[5]
-    }
+    The original moment-based \ac{LSMOC} formulation \cite{Ferrer2016}, detailed in \cref{sec:MOC:LSA}, uses several exponential functions:
+    \begin{subequations}\label{eqs:LSMOC:ET:Exponential Functions}
+      \begin{equation}\label{eq:LSMOC:ET:F1}
+        F_1(\opt) \defined 1 - e^{\opt},
+      \end{equation}
+      \begin{equation}\label{eq:LSMOC:ET:F2}
+        F_2(\opt) \defined 2\left[\opt - F_1(\opt)\right] - \segopt F_1(\opt),
+      \end{equation}
+      \begin{equation}\label{eq:LSMOC:ET:G1}
+        G_1(\segopt) \defined 1 + \frac{\segopt}{2} - \left(1 + \frac{1}{\segopt}\right)F_1(\segopt),
+      \end{equation}
+      \begin{equation}\label{eq:LSMOC:ET:G2}
+        G_2(\segopt) \defined \frac{2}{3}\segopt - \left(1 + \frac{2}{\segopt}\right)G_1(\segopt),
+      \end{equation}
+      and
+      \begin{equation}\label{eq:LSMOC:ET:H}
+        H(\segopt) \defined \frac{\segopt}{2} - G_1(\segopt),
+      \end{equation}
+    \end{subequations}
+    where $\opt$ is the variable optical thickness, and $\segopt$ is the total optical thickness of a segment.
+    Although the functions $F_1(\opt)$, and $F_2(\opt)$ are functions of variable $\opt$, in the implementation of this method in code they are only ever evaluated over the full optical thickness, $\segopt$.
+    The functions, $G_1(\segopt)$, $G_2(\segopt)$, and $H(\segopt)$ all require special treatment around $\segopt = 0$, in this work this is handled via Taylor interpolation about $\segopt=0$.
+
+    [FIGURE][ADD PLOT OF THE FUNCTIONS]
+
+    These functions all involve an exponential, $e^{-\segopt}$; although this does not present a problem mathematically, the exponential function is a transcendental function that tends to be slow when evaluated computationally.
+    For efficient transport codes, this presents a challenge.
+    Previous works have demonstrated that function interpolation can provide significant run-time reduction \cite{Yamamoto2004}, and the original formulation \cite{Ferrer2016} suggested the use of function interpolation (though no details were provided).
+
     \subsection{First Approach: Improved Accuracy}{\label{ssec:LSMOC:ET:First Approach: Improved Accuracy}
-      \blindtext[5]
+      With the implementation of \ac{LSA} into MPACT, stability issues were observed in problems with very small transport cross sections, such as the fuel-clad gap in \acp{LWR}.
+      These stability issues were only observed when exponential function interpolation was used, and the simplest method for addressing the issue was to increase the accuracy of the exponential interpolation.
+      It was discovered that the root of the problem was the $F_2(\segopt)$ function in the transmission equation
+      \begin{equation}\label{eq:LSMOC:ET:Transmission Original}
+        \afluxout = \afluxin
+                  + \left(\frac{\tsrcF}{\xst}-\afluxin\right)F_1(\segopt)
+                  + \frac{\tsrcL}{2\left(\xst\right)^2}F_2(\segopt).
+      \end{equation}
+      In MPACT, source terms are actually computed and stored as $q/\xst$; however the $F_2(\segopt)$ term has an additional inverse $\xst$.
+      In problems with near-void regions, where $\xst$ is small, any error in $F_2(\segopt)$ interpolation will be magnified.
+      The simplest approach is to increase the accuracy of the exponential interpolation to account for the lowest expected cross sections; in the test problem this was on the order of $10^{-5}$.
+      Thus, the expectation is that an interpolation 5 orders of magnitude more accurate than previous accuracy would be sufficient.
+      Previous work \cite{Yamamoto2004} indicated that for \ac{FSMOC} calculations an max interpolation error of $10^{-7}$ was sufficient, i.e. for \ac{LSMOC} the max error would be within $10^{-12}$.
+
+      Creating interpolation tables with the necessary accuracy for these problems requires some care.
+      The original investigation of exponential interpolation for transport calculations  done by \citet{Yamamoto2004} indicated two methods of controlling interpolation accuracy.
+      One method to increase interpolation accuracy is to increase the number of intervals (decreased interval width); however, this increased the memory.
+      Alternatively, higher order polynomials can be used in the interpolation, which overall tends to reduce memory at the expense of increased run-times.
+
+
+
+      In this investigation, two additional methods for controlling accuracy were investigated: interpolation node choice, and non-uniform interval widths.
+      \subsubsection{Interpolation Points}{\label{sssec:ET:Interpolation Points}
+        Within each interval of an interpolation table, the function is computed at interpolation points and an approximation of the function is made as the polynomial passing through these points.
+        The placement of these points within each interval can greatly affect the accuracy of the approximation.
+        Previous works \cite{Yamamoto2004,Kochunas2013} used evenly spaced interpolation points within each interval; however, this does not minimize the error in the approximation.
+        An example is shown in \cref{fig:LSMOC:ET:Interpolation Example}.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=0.90\linewidth]{exponentials/interpolation-example}
+          \caption{Example of linear interpolation with uniform interval widths and interpolation points on the edge of the domain.\label{fig:LSMOC:ET:Interpolation Example}}
+        \end{figure}
+
+        Let $P_n(x)$ be the order $n$ polynomial approximating a function, $f(x)$, on an arbitrary interval $[a,b]$.
+        The maximum error, $\epsilon$, within an interval is given by
+        \begin{equation}\label{eq:LSMOC:ET:Interpolation Error}
+          \epsilon = \frac{1}{(n+1)!}\left(\max_{\xi\in[a,b]}\lrabs{f^{(n+1)}(\xi)}\right)\left(\max_{x\in[a,b]}\lrabs{\prodl[j=1][n+1](x-x_j)}\right),
+        \end{equation}
+        for some value $\xi\in[a,b]$, where $f^{(n+1)}$ is the $n+1$-th derivative of $f(x)$.
+        The choice of interpolation points will only affect the last term enclosed in parentheses.
+
+        The Chebyshev points \cite{Stewart1996} are a set of values in $[a,b]$ that minimize $\max_{x\in[a,b]}\lrabs{\prodl[j=1][n+1](x-x_j)}$, and are given by
+        \begin{equation}\label{eq:LSMOC:ET:Chebyshev Points}
+          x_k = \frac{1}{2}\left[(a+b)+(b-1)\cos\left(\frac{2k-1}{2(n+1)}\pi\right)\right], \forall k\in\{1,2,...,n,n+1\}.
+        \end{equation}
+        By using the Chebyshev points, the maximum interpolation error, $\epsilon$, can be simplified to
+        \begin{equation}\label{eq:LSMOC:ET:Chebyshev Interpolation Error}
+          \epsilon = \frac{1}{2^n(n+1)!}\left(\frac{b-a}{2}\right)^{n+1}\max_{\xi\in[a,b]}\lrabs{f^{(n+1)}(\xi)}.
+        \end{equation}
+        Because the Chebyshev points do not include the end-points of the interval, there is additional cost in setting up the interpolation table, but this is negligible to typical \ac{MOC} calculation times.
+        An interpolation table using Chebyshev points \emph{reduces error at no run-time cost} compared to a table using evenly spaced points.
+        For this reason, Chebyshev points will be assumed for the remainder of this section.
+        \Cref{tab:LSMOC:ET:Chebyshev Error} shows maximum errors for $F_1(\opt)$ interpolation for uniformly spaced points and Chebyshev points for an interval width $\Delta=b-a$.
+        \begin{table}
+          \centering
+          \renewcommand{\arraystretch}{1.45}
+          \caption{Maximum error in $F_1(\opt)$ for interval width $\Delta$.}
+          \label{tab:LSMOC:ET:Chebyshev Error}
+          \begin{tabular}{@{}ccc@{}}\toprule
+            Polynomial Order & Uniform points   & Chebyshev points\\\midrule
+            1                & $\frac{\Delta^2}{8}$           & $\frac{\Delta^2}{16}$\\
+            2                & $\frac{\Delta^3}{72\sqrt{3}}$  & $\frac{\Delta^3}{192}$\\
+            3                & $\frac{\Delta^4}{1536}$        & $\frac{\Delta^4}{3072}$\\\bottomrule
+          \end{tabular}
+        \end{table}
+      }
+      \subsubsection{Interval Width}{\label{sssec:LSMOC:ET:Interval Width}
+        The conventional approach for interpolation tables has been to use a constant interval width, $\Delta$, for all intervals in the domain.
+        This interval width is then used to control the error of the table.
+        \Cref{eq:LSMOC:ET:Interpolation Error} shows that the interval bounds affect the interpolation error through the derivative term.
+        The second and higher order derivatives of each of the exponential functions (\cref{eqs:LSMOC:ET:Exponential Functions}) approach zero as $\segopt$ approaches infinity.
+        This indicates that the interpolation error typically decreases as the optical thickness increases in the conventional approach.
+
+        However, is is possible to maintain the same maximum error over each interval if a variable interval width, $\Delta_i$, is used, where $i$ indicates the interval index.
+        By using a variable interval width, a table can use fewer intervals while maintaining the same maximum error.
+        However, since the widths are no longer constant, there is no longer a simple/direct conversion from $\segopt$ to $i$.
+        Although there may be better ways, for this work the smallest interval is used to break up the domain into a map which points to the correct interval for that range of values.
+
+        It was found that the use of non-uniform interval widths allowed for significantly fewer total intervals, reducing the memory usage, but incurring overhead for the additional mapping to index.
+        \Cref{fig:LSMOC:ET:Memory Analysis} shows the memory usage for a polar-independent interpolation table for $F_1(\segopt)$.
+        Using a non-uniform table typically decreases the memory usage by nearly an order of magnitude.
+        For polar-dependent tables, the memory usage will be multiplied by the largest inverse sine of the polar angle, and the number of polar angles.
+
+        \begin{figure}
+          \centering
+          \includegraphics[width=0.90\linewidth]{exponentials/MemoryAnalysis}
+          \caption{The memory usage of a single interpolation table (polar independent) for $F_1(\segopt)$ is shown as a function of the maximum error for different interpolation orders and tabulation methods.\label{fig:LSMOC:ET:Memory Analysis}}
+        \end{figure}
+      }
     }
     \subsection{Function Modification}{\label{ssec:LSMOC:ET:Function Modification}
       \blindtext[5]
@@ -35,3 +155,198 @@
     }
   }
 }
+
+
+% \subsection{Derivation}{\label{ssec:MOC:LSA:Derivation}
+% The moment-based \ac{LSA} assumes the shape of the source, $\source[mi][g][\loc]$, is spatially linear within each cell, $\Region$.
+% This can be expressed as
+% \begin{subequations}\label{eqs:MOC:LSA:Source Shape}
+%     \begin{equation}\label{eq:MOC:LSA:Source Shape}
+%         \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL,
+%     \end{equation}
+%     where $\srcL$ is a column vector of source spatial expansion coefficients,
+%     \begin{equation}
+%         \srcL \defined\begin{bmatrix}\srcL[x]\\\srcL[y]\\\srcL[z]\end{bmatrix},
+%     \end{equation}
+%     and $\loc$ is the position in \emph{local} coordinates.
+% \end{subequations}
+% A similar spatial expansion of the angular moments of the flux can be performed,
+% \begin{equation}\label{eq:MOC:LSA:Flux Expansion}
+%     \fluxA(\loc) = \fluxF + \loc\vdot\fluxL,
+% \end{equation}
+% the source can then be expressed as
+% \begin{equation}\label{eq:MOC:LSA:Linear Source Computation}
+%     \source[mi][g][\loc]
+%         = \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\fluxA[\gprime](\loc)
+%         + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime](\loc),
+% \end{equation}
+% and the linear expansion coefficients are explicitly given by
+% \begin{equation}\label{eq:MOC:LSA:Linear Source Coefficients}
+%     \srcL
+%         = \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\fluxL[\gprime]
+%         + \frac{\spect}{\keff}\suml[\gprime]\nufis\sfluxL[\gprime].
+% \end{equation}
+
+% In the spatial moment-base \ac{LSA}, it is convenient to define the spatially linear source (and flux) in terms of a cell-local coordinate system.
+% Allow $\Loc$ to be the position variable in the global coordinate system, the local coordinates are then defined as
+% \begin{equation}\label{eq:MOC:LSA:Global to Local Coordinates}
+%     \loc = \Loc - \centroid[\Loc][mi],
+% \end{equation}
+% where $\centroid[\Loc][mi]$ is the numerical centroid of the cell $i$.
+
+% These numerical centroids can be defined as either direction-dependent, or direction-independent, which will have implications on particle conservation, as discussed in \cref{ssec:MOC:LSA:Particle Conservation}.
+% The direction-dependent centroids are defined by
+% \begin{equation}\label{eq:MOC:LSA:Direction-Dependent Centroids}
+%     \centroid[\Loc][mi] \defined \MOCSingleAngleIntegral{\Loc} = \frac{1}{V_i}\suml[k]\tA[mki]\nsegl\locCent[\Loc],
+% \end{equation}
+% where $\locCent[\Loc]$ is the global coordinate vector of the track-segment mid-point.
+% Similarly, the direction-independent centroids are defined by
+% \begin{equation}\label{eq:MOC:LSA:Direction-Independent Centroids}
+%     \centroid[\Loc][i] \defined \rfourpi\MOCIntegral{\Loc} = \frac{1}{V_i}\suml[m]\wt\suml[k]\tA[mki]\nsegl\locCent[\Loc].
+% \end{equation}
+
+% Following the same approach as the \ac{FSMOC} derivation, in \cref{ssec:MOC:FSA:Derivation}, computing the source the region-averaged flux moment, $\fluxF$, and the flux expansion coefficients, $\fluxL$, are required.
+% \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
+%     The region-averaged flux moment can be found using the same definition as previously,
+%     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Flux Moment Definition}
+%         \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
+%     \end{equation}
+%     In order to determine the spatial expansion coefficients of the flux moments, \cref{eq:MOC:LSA:Flux Expansion} is operated on by $\MOCIntegral{\SH(\vdot)\loc^T}$.
+%     Recognizing that this should be directly proportional to angular flux operated on by $\MOCIntegral{\SH\aflux[][g][]\loc^T}$, a system of equations is found
+%     \begin{equation}\label{eq:MOC:LSA:Moment to Expansion Coefficient}
+%         \M\fluxL = \MOCIntegral{\SH\loc\aflux[][g][]},
+%     \end{equation}
+%     where
+%     \begin{equation}\label{eq:MOC:LSA:Geometric Moments}
+%         \M \defined \MOCIntegral{\loc^T\loc}.
+%     \end{equation}
+%     The spatial angular flux moments, $\MOCIntegral{\SH\loc\aflux[][g][]}$, are then defined as
+%     \begin{equation}\label{eq:MOC:LSA:Revion-Averaged Spatial Angular Flux Moments Definition}
+%         \MOCIntegral{\SH\loc\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\left(\locIn\MOCTrackIntegral{\aflux[][g][]} + \dirm\MOCTrackIntegral{\nlen\aflux[][g][]} / \renorm[mi]\right).
+%     \end{equation}
+% \end{subequations}
+
+% In order to evaluate the flux moments defined in \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, the track-averaged angular flux values, $\MOCTrackIntegral{\aflux[][g][]}$, and $\MOCTrackIntegral{\nlen\aflux[][g][]}$, must be determined.
+% First, the transport equation must be put into characteristic form, using \cref{eq:MOC:Renormalized Location Variable} the spatially expanded source, \cref{eq:MOC:LSA:Source Shape}, can be defined along the characteristic.
+% \begin{subequations}\label{eqs:MOC:LSA:Characteristic Form}
+%     The characteristic transport equation becomes
+%     \begin{equation}\label{eq:MOC:LSA:Characteristic Form}
+%         \left[\deriv{}{\nlen} + \xst\right]\aflux = \tsrcF + \tsrcL\left(\nlen - \frac{\nsegl}{2}\right),
+%     \end{equation}
+%     where
+%     \begin{equation}\label{eq:MOC:LSA:Track Average Source}
+%         \tsrcF \defined \rfourpi\left[\srcF[mi] + \locCent \vdot \srcL\right],
+%     \end{equation}
+%     and
+%     \begin{equation}\label{eq:MOC:LSA:Track Linear Source}
+%         \tsrcL \defined \rfourpi\left[\frac{\dirm\vdot\srcL}{\renorm[mi]}\right].
+%     \end{equation}
+% \end{subequations}
+% This can be solved analytically for the angular flux along the track,
+% \begin{subequations}\label{eqs:MOC:LSA:Angular Flux Solution}
+%     \begin{equation}\label{eq:MOC:LSA:Angular Flux Solution}
+%         \aflux = \afluxin + \left(\frac{\tsrcF}{\xst} - \afluxin\right)F_1(\opt) + \frac{\tsrcL}{2(\xst)^2}F_2(\opt),
+%     \end{equation}
+%     where
+%     \begin{equation}\label{eq:MOC:LSA:F1}
+%         F_1(\opt) \defined 1 - \exp(-\opt),
+%     \end{equation}
+%     and
+%     \begin{equation}\label{eq:MOC:LSA:F2}
+%         F_2(\opt) \defined 2[\opt-F_1(\opt)] - \segopt F_1(\opt).
+%     \end{equation}
+% \end{subequations}
+
+% As discussed in \cref{ssec:MOC:FSA:Derivation}, there are two \emph{equivalent} methods with which one could determine the track-averaged angular flux values.
+% However, it is the author's opinion that defining these moments implicitly, by taking the moments of the characteristic equation (\cref{eq:MOC:LSA:Characteristic Form}), results in a form that is simpler.
+% The original basis of this work \cite{Ferrer2016}, evaluated the linear moment explicitly; for brevity, the derivation will only be shown here with the implicitly defined moment.
+% Previous work \cite{Fitzgerald2019} has also shown that by using the form given by the implicit definition, there are significant benefits in multi-physics applications.
+% The implicitly defined moments, given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$ and $\MOCTrackIntegral{\nlen(\vdot)}$, are given by
+% \begin{subequations}\label{eqs:MOC:LSA:Track-Averaged Moments}
+%     \begin{equation}\label{eq:MOC:LSA:Track-Averaged Angular Flux}
+%         \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF}{\xst} + \frac{\dflux}{\segopt},
+%     \end{equation}
+%     and
+%     \begin{equation}\label{eq:MOC:LSA:Track-Averaged Linear Angular Flux}
+%         \MOCTrackIntegral{\nlen\aflux[][g][]} = \frac{\MOCTrackIntegral{\aflux[][g][]} - \afluxout}{\xst} + \frac{\nsegl}{2}\left[\frac{\tsrcF}{\xst} + \frac{\tsrcL}{\xst}\frac{\nsegl}{6}\right].
+%     \end{equation}
+% \end{subequations}
+% Due to the presence of the $\dflux/\segopt$ term in \cref{eq:MOC:LSA:Track-Averaged Linear Angular Flux}, it is beneficial to stability and performance \cite{Fitzgerald2018,Fitzgerald2019} to compute this quantity directly, rather than computing $\dflux$ (as is done for \ac{FSMOC}).
+% \begin{subequations}\label{eqs:MOC:LSA:Delta Flux over Optical Thickness}
+%     This can be found explicitly by subtracting \cref{eq:MOC:LSA:Angular Flux Solution} evaluated at the exiting location from $\afluxin$ and dividing by $\segopt$, to get
+%     \begin{equation}\label{eq:MOC:LSA:Delta Flux over Optical Thickness}
+%         \frac{\dflux}{\segopt} = \left(\afluxin-\frac{\tsrcF}{\xst}\right)E_1(\segopt) - \frac{\nsegl}{2}\frac{\tsrcL}{\xst}T_2(\segopt),
+%     \end{equation}
+%     where
+%     \begin{equation}\label{eq:MOC:LSA:E1}
+%         E_1(\segopt) \defined \frac{F_1(\segopt)}{\segopt},
+%     \end{equation}
+%     \begin{equation}\label{eq:MOC:LSA:T2}
+%         T_2(\segopt) \defined 2E_2(\segopt) - E_1(\segopt),
+%     \end{equation}
+%     and
+%     \begin{equation}\label{eq:MOC:LSA:E2}
+%         E_2(\segopt) \defined \frac{1-E_1(\segopt)}{\segopt}.
+%     \end{equation}
+% \end{subequations}
+% }
+% \subsection{Particle Conservation}{\label{ssec:MOC:LSA:Particle Conservation}
+% In consideration to particle balance, use of the \ac{LSA} results in additional constraints on the calculations.
+% Similarly to \cref{ssec:MOC:FSA:Particle Conservation}, the track-based integration of the source must exactly integrate to the spatial and angular moments of the source.
+% The conservation of spatial moments is the basis of this \ac{LSA} \cite{Ferrer2018}, so this constraint is satisfied without additional constraints on the method.
+% The angular moment constraint is expressed as
+% \begin{equation}\label{eq:MOC:LSA:Angular Moment Constaint}
+%     \rfourpi\MOCIntegral{\SH\source[mi][g][\loc]} = \srcF[i,\ell][g,n].
+% \end{equation}
+% In addition to the constraints introduced in \cref{ssec:MOC:FSA:Particle Conservation}, namely direction-dependent renormalization, and directional quadrature restrictions, this places constraints on the definition of the local coordinate system:
+% \begin{equation}\label{eq:MOC:LSA:Anisotropic Coordinate Constraint}
+%     \MOCSingleAngleIntegral{\loc} = 0.
+% \end{equation}
+% This is equivalent to stating that the local coordinate system must be defined with respect to direction-dependent global centroids, as is given by \cref{eq:MOC:LSA:Direction-Dependent Centroids}.
+
+% If these constraints are satisfied, \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions} can be simplified,
+% \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments}
+%     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Scalar Flux}
+%         \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
+%     \end{equation}
+%     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments of Flux}
+%         \fluxF = \frac{\tsrcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
+%     \end{equation}
+%     and
+%     \begin{aequation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}
+%         \MOCIntegral{\loc\SH\aflux[][g][]}
+%             &= \suml[m]\wt\SH[\ell][n][\dirm]\M[][mi]\frac{\srcL[][mi]}{\xst}\\
+%             &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]
+%                 \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout + \frac{\tsrcF}{\xst}\right)\right]
+%     \end{aequation}
+%     where
+%     \begin{equation}\label{eq:MOC:LSA:Delta Flux}
+%         \dflux \defined \afluxin - \afluxout,
+%     \end{equation}
+%     and
+%     \begin{equation}\label{eq:MOC:LSA:Direction Dependent M}
+%       \M[][mi] \defined \MOCSingleAngleIntegral{\loc^T\loc}.
+%     \end{equation}
+% \end{subequations}
+% }
+% \subsection{Spatial and Isotropic Simplifications}{\label{ssec:MOC:LSA:Isotropic Simplifications}
+% The work introducing the original formulation of the moment-based \ac{LSA} suggests that it is beneficial to allow only the isotropic moments of the source and flux to be spatially linear, while higher order moments are spatially flat.
+% The reformulation introduced as part of this work \cite{Fitzgerald2019} was extended to make this simplification in the so called \acf{LIFA} source [CITATION].
+% The linear moment equations can then be simplified to
+% \begin{aequation}\label{eq:MOC:LSA:LIFA Region-Averaged Spatial Moments of Flux}
+%     \MOCIntegral{\loc\aflux[][g][]}
+%         &= \M\frac{\srcL}{\xst}
+%         + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]
+%             \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt} - \afluxout + \frac{\tsrcF}{\xst}\right)\right].
+% \end{aequation}
+
+% In the case of an isotropic source, the constraints for particle balance are relaxed.
+% Track-length renormalization as well as numerical centroid definitions can be direction-independent while still preserving particle conservation \cite{Ferrer2018}, as given by \cref{eq:MOC:Region Renormalization}, and \cref{eq:MOC:LSA:Direction-Independent Centroids} respectively.
+% The calculation of angular flux spatial moments, given in \cref{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}, can also be simplified into the form
+% \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux Isotropic}
+%     \MOCIntegral{\loc\aflux[][g][]}
+%             = \M\frac{\srcL}{\xst}
+%             + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA
+%                 \left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right).
+% \end{equation}
+% }
