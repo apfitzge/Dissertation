@@ -215,6 +215,7 @@
       }
       \subsubsection{Results using Modified Function}{\label{sssec:LSMOC:ET:Results using Modified Function}
         Results were generated for the same cases as the more accurate table, but the interpolation accuracy was $10^{-7}$ rather than $10^{-12}$, as the function modification addressed the cause of the instability.
+        The results are summarized in \cref{tab:LSMOC:ET:Final Results}.
         In one approach the three functions are tabulated, in the other $E_1(\segopt)$ is tabulated and used to compute the three functions.
         Previous results showed that the polar-independent and non-uniform interval width tables were slower than uniform polar-dependent tables; here the results are only shown for the uniform polar-dependent interpolation tables.
 
@@ -223,7 +224,43 @@
         In fact, the linear tables are the fastest option for both 3-table and single-table interpolation methods.
         Interpolating $E_1(\segopt)$ and computing the other functions from the result was the fastest approach overall.
         As before, this is expected because this method favors \acp{FLOP} over memory accesses.
+
+        This approach also significantly reduces the number of intervals necessary (by about 3 orders of magnitude).
+        Although the higher-order interpolation ended up not being more efficient than the linear interpolation tables, the number of intervals is extremely small.
+        These methods may be useful on different architectures (such as \acp{GPGPU}\footnote{this statement was not confirmed as part of this study, and is speculation based on knowledge of architecture constraints.}) where memory is more limited than on a single-threaded \ac{CPU} calculation.
+
+        \begin{table}
+          \centering
+          \caption{Results using the modified $\modFunc$ function, with maximum interpolation error of $10^{-7}$. Memory is under 1 MB in all cases.}
+          \label{tab:LSMOC:ET:Final Results}
+          \begin{tabular}{@{}ccccc@{}}\toprule
+            Method & Order & Exp.     & \ac{MOC}& \# Intervals \\
+                   &       & Time (s) & Time (s) & \\\midrule
+            \multirow{3}{*}{3-Functions}      & 1 &  88.4 & 307.9 & 4774\\
+                                              & 2 &  99.7 & 316.8 &  225\\
+                                              & 3 & 116.5 & 333.1 &   46\\\midrule
+            \multirow{3}{*}{$E_1(\opt)$ Only} & 1 &  80.5 & 299.0 & 2739\\
+                                              & 2 &  87.6 & 307.3 &  158\\
+                                              & 3 &  99.0 & 317.7 &   38\\\bottomrule
+          \end{tabular}
+        \end{table}
       }
+    }
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Conclusions
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \subsection{Conclusions}{\label{ssec:LSMOC:ET:Conclusions}
+      This study focused on the investigation of efficient approximation of the exponential functions in the \ac{LSMOC}.
+      Methods for efficiently approximating the exponential function for \ac{FSMOC} have previously been investigated.
+      However, these methods, applied without modification to the \ac{LSMOC} can lead to numerical instability in problems with near-void regions.
+      One approach to deal with these instabilities is to improve the accuracy of the interpolation tables based on the lowest cross section in the problem.
+      While this approach can be made efficient, if cross sections become too small the tables may become exceedingly large and significantly hamper performance.
+
+      This investigation revealed that the cause of the instability was the $F_2(\segopt)$ function in the transmission equation.
+      By instead manipulating the term including this function, the cause of the instabilities can be addressed.
+      This approach no longer requires excessively large interpolation tables; however, some key-findings from the first approach can be applied to make this appraoch faster.
+      First, the use of Chebyshev points significantly increases interpolation accuracy for the same number of intervals as uniformly spaced points, at no run-time cost.
+      Additionally, by interpolating a single function and using the result to compute the other functions performance can be significantly improved.
     }
   }
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
