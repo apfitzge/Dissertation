@@ -6,6 +6,8 @@
   \def\figpath{chapters/05/figures/}
   \graphicspath{ {\figpath} }
 
+  \NewDocumentCommand{\modFunc}{}{\widehat{F}_2(\segopt)}
+
   The studies performed in this thesis have made extensive use of the \acf{LSA} introduced by \citet{Ferrer2016}.
   Through the use of the approximation, as presented in the original work, instabilities and inefficiencies were found.
   This chapter aims to present two improvements made to this approximation that have been a focus of this research: improved exponential tabulation \cite{Fitzgerald2018}, and an improved formulation for multi-physics and 2D/1D applications \cite{Fitzgerald2019}.
@@ -62,8 +64,6 @@
       The original investigation of exponential interpolation for transport calculations  done by \citet{Yamamoto2004} indicated two methods of controlling interpolation accuracy.
       One method to increase interpolation accuracy is to increase the number of intervals (decreased interval width); however, this increased the memory.
       Alternatively, higher order polynomials can be used in the interpolation, which overall tends to reduce memory at the expense of increased run-times.
-
-
 
       In this investigation, two additional methods for controlling accuracy were investigated: interpolation node choice, and non-uniform interval widths.
       \subsubsection{Interpolation Points}{\label{sssec:ET:Interpolation Points}
@@ -133,10 +133,35 @@
           \includegraphics[width=0.90\linewidth]{exponentials/MemoryAnalysis}
           \caption{The memory usage of a single interpolation table (polar independent) for $F_1(\segopt)$ is shown as a function of the maximum error for different interpolation orders and tabulation methods.\label{fig:LSMOC:ET:Memory Analysis}}
         \end{figure}
+
+        Because all the functions of \cref{eq:LSMOC:ET:Exponential Functions} are related, it is possible to tabulate only a single function and compute the others from the resulting interpolated value.
+        However, if $F_1(\segopt)$ is known accurately, it is not possible to compute $H(\segopt)$ for very small $\segopt$ due to round-off errors.
+        Instead one can tabulate $H(\segopt)$ and use the result to compute the other functions; however, this may incur more error than directly interpolating these functions.
       }
     }
     \subsection{Function Modification}{\label{ssec:LSMOC:ET:Function Modification}
-      \blindtext[5]
+      A second approach for addressing the instability due to inaccurate function interpolation was taken: change the functions.
+      Recall that the highly accurate interpolation tables of \cref{ssec:LSMOC:ET:First Approach: Improved Accuracy} were necessary due to the inverse total (or transport) cross section on the $F_2(\segopt)$ term of \cref{eq:LSMOC:ET:Transmission Original}.
+      Manipulating this term, we define a new function
+      \begin{equation}\label{eq:LSMOC:ET:F2 Modified Definition}
+        \frac{F_2(\segopt)}{\xst} = \nlen\modFunc,
+      \end{equation}
+      where
+      \begin{equation}\label{eq:LSMOC:ET:F2 Modified}
+        \modFunc \defined 2\left(1-\frac{F_1(\segopt)}{\segopt}\right) - F_1(\segopt).
+      \end{equation}
+      The $\modFunc$ function can be tabulated in place of $F_2(\segopt)$; this will require an additional multiplication by the segment length $\nsegl$ causing slight reduction in performance.
+      But, by using the modified $\modFunc$ function, the underlying cause of the numerical instability is addressed, and the more accurate interpolation is no longer necessary.
+
+      One approach is to tabulate the $\modFunc$ function in place of the $F_2(\segopt)$ function, and multiply by $\nsegl$ during evaluation.
+      However, as stated in the previous section, it is possible to tabulate a single function and compute the others.
+      The $H(\segopt)$ function could be tabulated again; but tabulating an intermediate function,
+      \begin{equation}\label{eq:LSMOC:ET:E1}
+        E_1(\segopt) \defined \frac{1-e^{-\segopt}}{\segopt},
+      \end{equation}
+      uses the same number of operations to compute the other functions.
+      This $E_1(\segopt)$ function also has smaller derivative terms around $\segopt=0$, allowing for larger interval widths with no loss in accuracy.
+      Therefore, it is expected that $E_1(\segopt)$ tabulation will be more efficient.
     }
     \subsection{Results}{\label{ssec:LSMOC:ET:Results}
       \blindtext[5]
