@@ -134,7 +134,7 @@
           \caption{The memory usage of a single interpolation table (polar independent) for $F_1(\segopt)$ is shown as a function of the maximum error for different interpolation orders and tabulation methods.\label{fig:LSMOC:ET:Memory Analysis}}
         \end{figure}
 
-        Because all the functions of \cref{eq:LSMOC:ET:Exponential Functions} are related, it is possible to tabulate only a single function and compute the others from the resulting interpolated value.
+        Because all the functions of \cref{eqs:LSMOC:ET:Exponential Functions} are related, it is possible to tabulate only a single function and compute the others from the resulting interpolated value.
         However, if $F_1(\segopt)$ is known accurately, it is not possible to compute $H(\segopt)$ for very small $\segopt$ due to round-off errors.
         Instead one can tabulate $H(\segopt)$ and use the result to compute the other functions; however, this may incur more error than directly interpolating these functions.
       }
@@ -164,7 +164,66 @@
       Therefore, it is expected that $E_1(\segopt)$ tabulation will be more efficient.
     }
     \subsection{Results}{\label{ssec:LSMOC:ET:Results}
-      \blindtext[5]
+      The results of this section were generated in serial on a Linux system with an Intel Xeon E3-1241 v3 (3.50 GHz) processors with 8 MB L3 cache.
+      Results were generated for a 2-D \ac{MOC} transport calculation.
+      In 2-D it is sometimes convenient to store separate interpolation tables for each polar angle.
+      Both polar dependent and independent tables were tested.
+
+      In both of the results sections, results were generated using tables for the three functions ($F_1(\segopt)$, $F_2(\segopt)$, $H(\segopt)$), or a single function (which is then used to compute the others).
+      In the results, it is considered 3 functions, as the $G_1(\segopt)$, and $G_2(\segopt)$ functions are only used in pre-computing coefficients, and not in the main \ac{MOC} solver routine.
+
+      \subsubsection{Results using More Accurate Tables}{\label{sssec:LSMOC:ET:Results using More Accurate Tables}
+        \Cref{tab:LSMOC:ET:Naive Results} shows results for the different interpolation methods in a 2-D \ac{MOC} calculation.
+        The use of non-uniform intervals significantly reduced the memory usage, but the run-times generally increased.
+        This is likely due to the overhead from the additional index mapping operation; it is possible that a more efficient index mapping would change these results.
+
+        The linear tables were significantly slower than higher-order interpolations, and the non-uniform linear tables were actually slower than just using the builtin transcendental functions.
+        The poor performance is due to the main memory accesses caused by the table size exceeding the largest (L3) cache size.
+        The polar independent tables were faster only in the case of the linear tables, due primarily to the reduction in memory.
+        In all other cases the polar-dependent tables were able to more efficiently approximate the functions.
+        Using either second or third order tables gave reasonably low run-times; compared to the analytic evaluations the order 2 uniform polar dependent table led to $\sim 3.5$x speed-up in the exponential time, and $\sim 1.9$x speed-up in the overall \ac{MOC} run-time.
+        The results for both second and third order interpolation tables did not vary significantly, the second order was slightly faster for uniform tables.
+
+        However, if a single function is tabulated and used to compute the others, the memory footprint of the interpolation tables can be significantly reduced.
+        Moreover, the memory accesses are reduced in favor of floating point operations which increases the computational intensity and temporal cache locality of the implementation.
+        Generally, this is a favorable strategy for improving code performance as a memory access is expected to take \emph{at minimum} the same time as a single \ac{FLOP}, with cache-misses increasing that time.
+        Indeed, \cref{tab:LSMOC:ET:Naive Results} shows that tabulating the single function reduced run-time in all cases.
+
+        \begin{table}
+          \centering
+          \caption{Results for different exponential function evaluation methods. Maximum interpolation error of $10^{-12}$. ``w/ pol'' indicates a table with polar dependence, and ``w/o pol'' indicates a table without polar dependence.}
+          \label{tab:LSMOC:ET:Naive Results}
+          \footnotesize
+          \begin{tabular}{@{}ccrrrrrrrrr@{}}\toprule
+            Method & Table Type & Order & \multicolumn{2}{c}{\shortstack[c]{Exponential\\Time (s)}} & & \multicolumn{2}{c}{\ac{MOC} Time (s)} && \multicolumn{2}{c}{Intervals (Memory)}\\\cmidrule{4-5}\cmidrule{7-8}\cmidrule{10-11}
+                  &            &       & w/ pol & w/o pol & \phantom{}                           & w/ pol & w/o pol & \phantom{}  &  \multicolumn{1}{c}{w/ pol} & \multicolumn{1}{c}{w/o pol}\\\midrule
+            Analytic & N/A & N/A & \multicolumn{2}{c}{432.5} && \multicolumn{2}{c}{654.7} && \multicolumn{2}{c}{N/A}\\\midrule
+            \multirow{6}{*}{3-Functions}     & \multirow{3}{*}{Uniform}        & 1 & 382.6 & 360.3 && 622.5 & 591.0 && 6.00E7 (8.04 GB) & 1.00E7 (458 MB) \\\addlinespace[-0.2em]
+                                                                              && 2 & 121.3 & 151.7 && 343.2 & 372.1 && 416080 (85.7 MB) & 69360  (4.8 MB) \\\addlinespace[-0.2em]
+                                                                              && 3 & 124.1 & 169.0 && 347.5 & 388.7 && 32280  (9079 KB) & 5400   (506 KB) \\\cmidrule{2-11}\addlinespace[-0.2em]
+                                                & \multirow{3}{*}{Non-Uniform} & 1 & 592.9 & 559.2 && 825.8 & 800.6 && 4.07E6  (878 MB) & 840658 (76.6 MB)\\\addlinespace[-0.2em]
+                                                                              && 2 & 144.6 & 178.5 && 364.3 & 397.8 && 45265  (10.9 MB) & 8020    (835 KB)\\\addlinespace[-0.2em]
+                                                                              && 3 & 139.6 & 199.8 && 358.5 & 420.0 && 4491    (1.4 MB) & 796    (85.2 KB)\\\midrule
+            \multirow{6}{*}{1-Function}       & \multirow{3}{*}{Uniform}       & 1 & 296.2 & 259.3 && 523.9 & 484.5 && 6.00E7 (2.68 GB) & 1.00E7  (153 MB)\\\addlinespace[-0.2em]
+                                                                              && 2 &  91.4 & 123.2 && 310.2 & 345.7 && 416080 (28.6 MB) & 69360  (1.59 MB)\\\addlinespace[-0.2em]
+                                                                              && 3 &  87.2 & 133.2 && 305.4 & 353.6 && 32280  (2.96 MB) & 5400    (169 KB)\\\cmidrule{2-11}\addlinespace[-0.2em]
+                                                & \multirow{3}{*}{Non-Uniform} & 1 & 474.6 & 424.0 && 714.6 & 653.9 && 4.07E6  (415 MB) & 722899 (49.2 MB)\\\addlinespace[-0.2em]
+                                                                              && 2 & 105.8 & 146.4 && 326.6 & 367.7 && 41444   (4.4 MB) & 7338   (443  KB)\\\addlinespace[-0.2em]
+                                                                              && 3 &  98.9 & 153.3 && 318.8 & 373.2 && 4152    (515 KB) & 735    (33.5 KB)\\\bottomrule
+          \end{tabular}
+        \end{table}
+      }
+      \subsubsection{Results using Modified Function}{\label{sssec:LSMOC:ET:Results using Modified Function}
+        Results were generated for the same cases as the more accurate table, but the interpolation accuracy was $10^{-7}$ rather than $10^{-12}$, as the function modification addressed the cause of the instability.
+        In one approach the three functions are tabulated, in the other $E_1(\segopt)$ is tabulated and used to compute the three functions.
+        Previous results showed that the polar-independent and non-uniform interval width tables were slower than uniform polar-dependent tables; here the results are only shown for the uniform polar-dependent interpolation tables.
+
+        The interpolation accuracy is not required to be as high as in the previous cases, thus the tables are significantly smaller in memory size.
+        The linear tables no longer exceed the L3 cache size and are not prohibitively slow to use.
+        In fact, the linear tables are the fastest option for both 3-table and single-table interpolation methods.
+        Interpolating $E_1(\segopt)$ and computing the other functions from the result was the fastest approach overall.
+        As before, this is expected because this method favors \acp{FLOP} over memory accesses.
+      }
     }
   }
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
