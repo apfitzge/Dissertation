@@ -34,7 +34,7 @@
         This additionally requires that all modules have the same spatial dimensions, given by the pitches $P_x$ and $P_y$, and that the spacing between all tracks in a direction are constant.
         Let $\tA[a0]$ be the desired ray-spacing for an azimuthal angle $a$, and $\Azimuthal_{a0}$ be the desired azimuthal angle.
         The number of rays on the $x$ and $y$ module boundaries can be determined as
-        \begin{subequations}\label{eqs:MRT:Nx/y}
+        \begin{subequations}\label[subeqs]{eqs:MRT:Nx/y}
             \begin{equation}\label{eq:MRT:Nx}
                 N_x = \ceil*{\frac{P_x \sin(\Azimuthal_{a0})}{\tA[a0]}},
             \end{equation}
@@ -44,7 +44,7 @@
             \end{equation}
         \end{subequations}
         The $x$ and $y$ distance between rays can be determined by
-        \begin{subequations}\label{eqs:MRT:x/y ray-spacing}
+        \begin{subequations}\label[subeqs]{eqs:MRT:x/y ray-spacing}
             \begin{equation}\label{eq:MRT:x ray-spacing}
                 \delta_x = \frac{P_x}{N_x},
             \end{equation}

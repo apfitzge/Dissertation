@@ -203,7 +203,7 @@
             where the $\sflux[\gprime]$ is the region-averaged scalar flux, and $\afluxmom[\gprime]$ are the region-averaged higher-order angular moments of the flux.
 
             In order to get these region-averaged flux moments, the spatial and directional integration operators, introduced in \cref{ssec:MOC:Track-Based Integration}, are used.
-            \begin{subequations}\label{eqs:MOC:FSA:Region-Averaged Flux Moments Definition}
+            \begin{subequations}\label[subeqs]{eqs:MOC:FSA:Region-Averaged Flux Moments Definition}
                 The region-averaged scalar flux is given by
                 \begin{equation}\label{eq:MOC:FSA:Region-Averaged Scalar Flux Definition}
                     \sflux = \MOCIntegral{\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt[m]\suml[k]\nsegl\tA[mki]\MOCTrackIntegral{\aflux[][g][]},
@@ -225,7 +225,7 @@
               \tsrcF[mi] \defined \rfourpi\srcF[mi].
             \end{equation}
             This can be solved analytically for the angular flux along the track,
-            \begin{subequations}\label{eqs:MOC:FSA:Angular Flux Solution}
+            \begin{subequations}\label[subeqs]{eqs:MOC:FSA:Angular Flux Solution}
                 \begin{equation}\label{eq:MOC:FSA:Angular Flux Solution}
                     \aflux[mki][g][\nlen] = \afluxin + \left(\frac{\tsrcF[mi]}{\xst} - \afluxin\right)F_1(\opt),
                 \end{equation}
@@ -260,7 +260,7 @@
                 \rfourpi\MOCIntegral{\SH\srcF[mi]} = \srcF[i,\ell][g,n].
             \end{equation}
             Substituting \cref{eq:MOC:FSA:Source Shape} into \cref{eq:MOC:FSA:Anisotropic Source Conservation}, requires that
-            \begin{subequations}\label{eqs:MOC:FSA:Anisotropic Constraints}
+            \begin{subequations}\label[subeqs]{eqs:MOC:FSA:Anisotropic Constraints}
                 \begin{equation}\label{eq:MOC:FSA:Quadrature Constraint}
                     \suml[m]\wt[m]\SH[\ell][n][\dirm]\SH[\ell'][n'][\dirm] = \delta_{\ell\ell'}\delta_{nn'},
                 \end{equation}
@@ -273,7 +273,7 @@
             \Cref{eq:MOC:FSA:Track Constraint} requires that direction-dependent renormalization, \cref{eq:MOC:Direction-Dependent Renormalization}, is used.
 
             If the constraints on directional quadrature, and characteristic tracks, are satisfied several simplifications to \cref{eqs:MOC:FSA:Region-Averaged Flux Moments Definition} can be made.
-            \begin{subequations}\label{eqs:MOC:FSA:Region-Averaged Flux Moments}
+            \begin{subequations}\label[subeqs]{eqs:MOC:FSA:Region-Averaged Flux Moments}
                 \begin{equation}\label{eq:MOC:FSA:Region-Averaged Scalar Flux}
                     \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
                 \end{equation}
@@ -343,7 +343,7 @@
         \subsection{Derivation}{\label{ssec:MOC:LSA:Derivation}
             The moment-based \ac{LSA} assumes the shape of the source, $\source[mi][g][\loc]$, is spatially linear within each cell, $\Region$.
             This can be expressed as
-            \begin{subequations}\label{eqs:MOC:LSA:Source Shape}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Source Shape}
                 \begin{equation}\label{eq:MOC:LSA:Source Shape}
                     \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL[][mi],
                 \end{equation}
@@ -389,7 +389,7 @@
             \end{equation}
 
             Following the same approach as the \ac{FSMOC} derivation, in \cref{ssec:MOC:FSA:Derivation}, computing the source requires the region-averaged flux moments, $\fluxF$, and the flux expansion coefficients, $\fluxL$.
-            \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
                 The region-averaged flux moment can be found using the same definition as previously,
                 \begin{equation}\label{eq:MOC:LSA:Region-Averaged Flux Moment Definition}
                     \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
@@ -411,7 +411,7 @@
 
             In order to evaluate the flux moments defined in \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, the track-averaged angular flux values, $\MOCTrackIntegral{\aflux[][g][]}$, and $\MOCTrackIntegral{\nlen\aflux[][g][]}$, must be determined.
             First, the transport equation must be put into characteristic form, using \cref{eq:MOC:Renormalized Location Variable} the spatially expanded source, \cref{eq:MOC:LSA:Source Shape}, can be defined along the characteristic.
-            \begin{subequations}\label{eqs:MOC:LSA:Characteristic Form}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Characteristic Form}
                 The characteristic transport equation becomes
                 \begin{equation}\label{eq:MOC:LSA:Characteristic Form}
                     \left[\deriv{}{\nlen} + \xst\right]\aflux = \tsrcF + \tsrcL\left(\nlen - \frac{\nsegl}{2}\right),
@@ -426,7 +426,7 @@
                 \end{equation}
             \end{subequations}
             This can be solved analytically for the angular flux along the track,
-            \begin{subequations}\label{eqs:MOC:LSA:Angular Flux Solution}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Angular Flux Solution}
                 \begin{equation}\label{eq:MOC:LSA:Angular Flux Solution}
                     \aflux = \afluxin + \left(\frac{\tsrcF}{\xst} - \afluxin\right)F_1(\opt) + \frac{\tsrcL}{2(\xst)^2}F_2(\opt),
                 \end{equation}
@@ -446,7 +446,7 @@
             For the remainder of this section, the formulation as it was originally derived by \citet{Ferrer2016} is shown, using the explicit form of $\MOCTrackIntegral{\nlen\aflux[][g][]}$.
 
             The implicitly defined track-average flux, given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$, and the explicitly defined track-average flux slope given by operating on \cref{eq:MOC:LSA:Angular Flux Solution} by $\MOCTrackIntegral{\nlen(\vdot)}$, are given by
-            \begin{subequations}\label{eqs:MOC:LSA:Track-Averaged Moments}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Track-Averaged Moments}
                 \begin{equation}\label{eq:MOC:LSA:Track-Averaged Angular Flux}
                     \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF}{\xst} + \frac{\dflux}{\segopt},
                 \end{equation}
@@ -458,7 +458,7 @@
                 \end{equation}
             \end{subequations}
             respectively, where
-            \begin{subequations}\label{eqs:MOC:LSA:G Functions}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:G Functions}
               \begin{equation}\label{eq:MOC:LSA:G1}
                   G_1(\segopt) \defined 1 + \frac{\segopt}{2} - \left(1+\frac{1}{\segopt}\right)F_1(\segopt),
               \end{equation}
@@ -470,7 +470,7 @@
 
             % Ferrer & Rhodes derivation
             The original derivation further simplified \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions} into the following forms.
-            \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Region-Averaged Flux Moments}
                 \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments}
                     \fluxF = \frac{\fourpi}{\xst V_i}\suml[m]\wt[m]\SH[\ell][n][\dirm] \xst \FerrerFlatPsi,
                 \end{equation}
@@ -479,7 +479,7 @@
                 \end{equation}
             \end{subequations}
             where
-            \begin{subequations}{\label{eqs:MOC:LSA:Ferrer Psis}}
+            \begin{subequations}{\label[subeqs]{eqs:MOC:LSA:Ferrer Psis}}
                 \begin{equation}\label{eq:MOC:LSA:Ferrer Flat Psi}
                     \FerrerFlatPsi \defined
                       \frac{1}{\xst}\left[
@@ -553,7 +553,7 @@
 
             As stated in \cref{ssec:MOC:FSA:Isotropic Simplifications}, it is very common in reactor simulations to use \ac{TCP0} cross-sections (which are isotropic).
             Assuming isotropic scattering, \cref{eqs:MOC:LSA:Region-Averaged Flux Moments} become
-            \begin{subequations}\label{eqs:MOC:LSA:Isotropic Region-Averaged Flux Moments}
+            \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Isotropic Region-Averaged Flux Moments}
               \begin{equation}\label{eq:MOC:LSA:Isotropic Scalar Flux}
                 \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{\xst V_i}\suml[m]\wt[m]\suml[k]\tA\dflux,
               \end{equation}

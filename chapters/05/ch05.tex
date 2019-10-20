@@ -17,7 +17,7 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Exponential Tabulation}{\label{sec:LSMOC:Exponential Tabulation}
     The original moment-based \ac{LSMOC} formulation \cite{Ferrer2016}, detailed in \cref{sec:MOC:LSA}, uses several exponential functions:
-    \begin{subequations}\label{eqs:LSMOC:ET:Exponential Functions}
+    \begin{subequations}\label[subeqs]{eqs:LSMOC:ET:Exponential Functions}
       \begin{equation}\label{eq:LSMOC:ET:F1}
         F_1(\opt) \defined 1 - e^{\opt},
       \end{equation}
@@ -285,7 +285,7 @@
 % \subsection{Derivation}{\label{ssec:MOC:LSA:Derivation}
 % The moment-based \ac{LSA} assumes the shape of the source, $\source[mi][g][\loc]$, is spatially linear within each cell, $\Region$.
 % This can be expressed as
-% \begin{subequations}\label{eqs:MOC:LSA:Source Shape}
+% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Source Shape}
 %     \begin{equation}\label{eq:MOC:LSA:Source Shape}
 %         \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL,
 %     \end{equation}
@@ -331,7 +331,7 @@
 % \end{equation}
 
 % Following the same approach as the \ac{FSMOC} derivation, in \cref{ssec:MOC:FSA:Derivation}, computing the source the region-averaged flux moment, $\fluxF$, and the flux expansion coefficients, $\fluxL$, are required.
-% \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
+% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
 %     The region-averaged flux moment can be found using the same definition as previously,
 %     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Flux Moment Definition}
 %         \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
@@ -353,7 +353,7 @@
 
 % In order to evaluate the flux moments defined in \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, the track-averaged angular flux values, $\MOCTrackIntegral{\aflux[][g][]}$, and $\MOCTrackIntegral{\nlen\aflux[][g][]}$, must be determined.
 % First, the transport equation must be put into characteristic form, using \cref{eq:MOC:Renormalized Location Variable} the spatially expanded source, \cref{eq:MOC:LSA:Source Shape}, can be defined along the characteristic.
-% \begin{subequations}\label{eqs:MOC:LSA:Characteristic Form}
+% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Characteristic Form}
 %     The characteristic transport equation becomes
 %     \begin{equation}\label{eq:MOC:LSA:Characteristic Form}
 %         \left[\deriv{}{\nlen} + \xst\right]\aflux = \tsrcF + \tsrcL\left(\nlen - \frac{\nsegl}{2}\right),
@@ -368,7 +368,7 @@
 %     \end{equation}
 % \end{subequations}
 % This can be solved analytically for the angular flux along the track,
-% \begin{subequations}\label{eqs:MOC:LSA:Angular Flux Solution}
+% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Angular Flux Solution}
 %     \begin{equation}\label{eq:MOC:LSA:Angular Flux Solution}
 %         \aflux = \afluxin + \left(\frac{\tsrcF}{\xst} - \afluxin\right)F_1(\opt) + \frac{\tsrcL}{2(\xst)^2}F_2(\opt),
 %     \end{equation}
@@ -387,7 +387,7 @@
 % The original basis of this work \cite{Ferrer2016}, evaluated the linear moment explicitly; for brevity, the derivation will only be shown here with the implicitly defined moment.
 % Previous work \cite{Fitzgerald2019} has also shown that by using the form given by the implicit definition, there are significant benefits in multi-physics applications.
 % The implicitly defined moments, given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$ and $\MOCTrackIntegral{\nlen(\vdot)}$, are given by
-% \begin{subequations}\label{eqs:MOC:LSA:Track-Averaged Moments}
+% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Track-Averaged Moments}
 %     \begin{equation}\label{eq:MOC:LSA:Track-Averaged Angular Flux}
 %         \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF}{\xst} + \frac{\dflux}{\segopt},
 %     \end{equation}
@@ -397,7 +397,7 @@
 %     \end{equation}
 % \end{subequations}
 % Due to the presence of the $\dflux/\segopt$ term in \cref{eq:MOC:LSA:Track-Averaged Linear Angular Flux}, it is beneficial to stability and performance \cite{Fitzgerald2018,Fitzgerald2019} to compute this quantity directly, rather than computing $\dflux$ (as is done for \ac{FSMOC}).
-% \begin{subequations}\label{eqs:MOC:LSA:Delta Flux over Optical Thickness}
+% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Delta Flux over Optical Thickness}
 %     This can be found explicitly by subtracting \cref{eq:MOC:LSA:Angular Flux Solution} evaluated at the exiting location from $\afluxin$ and dividing by $\segopt$, to get
 %     \begin{equation}\label{eq:MOC:LSA:Delta Flux over Optical Thickness}
 %         \frac{\dflux}{\segopt} = \left(\afluxin-\frac{\tsrcF}{\xst}\right)E_1(\segopt) - \frac{\nsegl}{2}\frac{\tsrcL}{\xst}T_2(\segopt),
@@ -430,7 +430,7 @@
 % This is equivalent to stating that the local coordinate system must be defined with respect to direction-dependent global centroids, as is given by \cref{eq:MOC:LSA:Direction-Dependent Centroids}.
 
 % If these constraints are satisfied, \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions} can be simplified,
-% \begin{subequations}\label{eqs:MOC:LSA:Region-Averaged Flux Moments}
+% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Region-Averaged Flux Moments}
 %     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Scalar Flux}
 %         \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
 %     \end{equation}

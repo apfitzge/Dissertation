@@ -26,7 +26,7 @@
             \loc \defined \begin{bmatrix}x\\y\\z\end{bmatrix}.
         \end{equation}
         The direction vector, $\dir$, is a column unit-vector which gives the direction of flight for neutrons, and is defined by
-        \begin{subequations}\label{eqs:NTT:Direction Definitions}
+        \begin{subequations}\label[subeqs]{eqs:NTT:Direction Definitions}
             \begin{equation}\label{eq:NTT:Direction Vector}
                 \dir \defined
                     \begin{bmatrix}
@@ -181,7 +181,7 @@
                     \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
                 \end{equation*}
                 where the multigroup quantities are defined by
-                \begin{subequations}\label{eqs:NTT:Multigroup Quantities Anisotropic}
+                \begin{subequations}\label[subeqs]{eqs:NTT:Multigroup Quantities Anisotropic}
                     \begin{equation}\label{eq:NTT:Multigroup Angular Flux}
                         \aflux \defined \intl[E_g][E_{g-1}]\AngularFlux(\loc,\dir,E)\dif{E},
                     \end{equation}
@@ -209,7 +209,7 @@
                 \begin{equation}\label{eq:NTT:Multigroup Isotropic Spectrum}
                     \AngularFlux(\loc,\dir,E) \approx \rfourpi\FluxSpectrum(\loc, E).
                 \end{equation}
-                Using this approximate angular flux as the weighting function for multigroup cross sections in \cref{eqs:NTT:Multigroup Quantities Anisotropic,eq:NTT:MGEV Transport Problem w/ Anisotropic XS} can be simplified to
+                Using this approximate angular flux as the weighting function for multigroup cross sections in \cref{eq:NTT:MGEV Transport Problem w/ Anisotropic XS,eqs:NTT:Multigroup Quantities Anisotropic} can be simplified to
                 \begin{aequation}\label{eq:NTT:MGEV Transport Problem}
                     \left[\dir\vdot\grad + \xst\right]\aflux = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\gprime]\ddirprime\\
                         + \frac{\spect}{\keff}&\suml[\gprime=1][G]\nufis\intl[\fourpi]\aflux[\loc][\dirprime][\gprime]\ddirprime\Bigg],
@@ -218,7 +218,7 @@
                     \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
                 \end{equation*}
                 where the approximated multigroup cross sections are defined as
-                \begin{subequations}\label{eqs:NTT:Multigroup Cross Sections}
+                \begin{subequations}\label[subeqs]{eqs:NTT:Multigroup Cross Sections}
                     \begin{equation}\label{eq:NTT:Multigroup Total Cross Section}
                         \xst \defined \frac{\intl[E_{g}][E_{g-1}]\CrossSection_{t}(\loc,E)\FluxSpectrum(\loc,E)\dif{E}}{\intl[E_{g}][E_{g-1}]\FluxSpectrum(\loc,E)\dif{E}},
                     \end{equation}
@@ -279,7 +279,7 @@
                 The simplest expansion of order 1, reduces to the diffusion approximation.
 
                 The \acf{SN} method is a discretization of the directional variable $\dir$ by a quadrature.
-                \begin{subequations}\label{eqs:NTT:Directional Quadrature}
+                \begin{subequations}\label[subeqs]{eqs:NTT:Directional Quadrature}
                     Let the $\angquad$ be the set of discrete directions, and weights,
                     \begin{equation}\label{eq:NTT:Directional Quadrature Definition}
                         \angquad \defined \left\{\dirm \in \{\dir_1,\dir_2,\ldots,\dir_N\}, \wt \in \{\wt[1], \wt[2], \ldots,\wt[N]\}\right\},
@@ -372,7 +372,7 @@
                     \end{equation*}
                 }
                 \State{Update the scalar flux, and the eigenvalue for the next iteration:
-                    \begin{subequations}\label{eqs:NTT:Source Iteration:Update}
+                    \begin{subequations}\label[subeqs]{eqs:NTT:Source Iteration:Update}
                         \begin{equation}\label{eq:NTT:Source Iteration:Scalar Flux Update}
                             \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
                         \end{equation}
@@ -438,7 +438,7 @@
                   \end{equation*}
                 }
                 \State{Update the scalar flux, current, and eigenvalue estimates for next iteration:
-                  \begin{subequations}\label{eqs:NTT:NDA:Update}
+                  \begin{subequations}\label[subeqs]{eqs:NTT:NDA:Update}
                     \begin{equation}\label{eq:NTT:NDA:Scalar Flux Update}
                       \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
                     \end{equation}
