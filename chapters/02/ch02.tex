@@ -156,8 +156,8 @@
             Thus these methods rely on discretization of the transport equation.
             In particular, spatial, directional, and energy discretization are common in these methods.
             \input{macros/multigroup.tex}
-            \subsubsection{The Multi-group Approximation}{\label{sssec:NTT:The Multi-group Approximation}
-                The multi-group approximation is an approximation that is common in nearly every deterministic neutron transport method.
+            \subsubsection{The Multigroup Approximation}{\label{sssec:NTT:The Multigroup Approximation}
+                The multigroup approximation is an approximation that is common in nearly every deterministic neutron transport method.
                 This approximation discretizes the energy variable into discrete energy groups.
                 Generally, cross sections have strong dependence on the energy of incident neutrons; this dependence is typically not smooth due to the presence of resonances.
                 Around resonance energies, the cross sections are increased significantly, as observed in \cref{fig:NTT:Cross Section plot}.
@@ -171,7 +171,7 @@
 
                 The complicated dependence on energy would require hundreds of thousands of energy points to faithfully represent all the resonances of interest in thermal reactors.
                 Modeling of this many energy points in whole-core simulations would be computationally impractical.
-                The multi-group eigenvalue transport equation can be found by integrating the \cref{eq:NTT:Eigenvalue Transport Problem} over an energy energy interval $[E_{g}, E_{g-1})$, where $E_{g} > E_{g-1}$.
+                The multigroup eigenvalue transport equation can be found by integrating the \cref{eq:NTT:Eigenvalue Transport Problem} over an energy energy interval $[E_{g}, E_{g-1})$, where $E_{g} > E_{g-1}$.
                 \begin{aequation}\label{eq:NTT:MGEV Transport Problem w/ Anisotropic XS}
                     \left[\dir\vdot\grad + \xst[\loc,\dir]\right]\aflux
                         = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss[][\loc][\dir,\dirprime]\aflux[\loc][\dirprime][\gprime]\ddirprime \\
@@ -180,21 +180,21 @@
                 \begin{equation*}
                     \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
                 \end{equation*}
-                where the multi-group quantities are defined by
-                \begin{subequations}\label{eqs:NTT:Multi-group Quantities Anisotropic}
-                    \begin{equation}\label{eq:NTT:Multi-group Angular Flux}
+                where the multigroup quantities are defined by
+                \begin{subequations}\label{eqs:NTT:Multigroup Quantities Anisotropic}
+                    \begin{equation}\label{eq:NTT:Multigroup Angular Flux}
                         \aflux \defined \intl[E_g][E_{g-1}]\AngularFlux(\loc,\dir,E)\dif{E},
                     \end{equation}
-                    \begin{equation}\label{eq:NTT:Multi-group Spectrum}
+                    \begin{equation}\label{eq:NTT:Multigroup Spectrum}
                         \spect \defined \intl[E_g][E_{g-1}]\Spectrum(\loc,E)\dif{E},
                     \end{equation}
-                    \begin{equation}\label{eq:NTT:Multi-group Total Cross Section Anisotropic}
+                    \begin{equation}\label{eq:NTT:Multigroup Total Cross Section Anisotropic}
                         \xst[\loc,\dir] \defined \frac{\intl[E_{g}][E_{g-1}]\CrossSection_{t}(\loc,E)\AngularFlux(\loc,\dir,E)\dif{E}}{\aflux},
                     \end{equation}
-                    \begin{equation}\label{eq:NTT:Multi-group Fission Cross Section Anisotropic}
+                    \begin{equation}\label{eq:NTT:Multigroup Fission Cross Section Anisotropic}
                         \nufis[\loc,\dir][g] \defined \frac{\intl[E_{g}][E_{g-1}]\nu\CrossSection_{f}(\loc,E)\AngularFlux(\loc,\dir,E)\dif{E}}{\aflux},
                     \end{equation}
-                    \begin{equation}\label{eq:NTT:Multi-group Scattering Cross Section Anisotropic}
+                    \begin{equation}\label{eq:NTT:Multigroup Scattering Cross Section Anisotropic}
                         \xss[][\loc][\dir,\dirprime] \defined \frac{\intl[E_{g}][E_{g-1}]\intl[E_{\gprime}][E_{\gprime-1}]\CrossSection_{s}(\loc,\dirprime\vdot\dir,\Eprime\to E)\AngularFlux(\loc,\dirprime,\Eprime)\dif{\Eprime}\dif{E}}{\aflux[\loc][\dirprime][\gprime]}.
                     \end{equation}
                 \end{subequations}
@@ -202,14 +202,14 @@
                 By defining the cross sections in this way, no approximations have been made, and the reaction rates of each energy group are preserved.
                 However, this approach has two issues: the cross sections are dependent on the angular flux which is not known \textit{a priori}, and have dependence on the neutron direction of flight.
                 Generally, the dependence on the angular flux is addressed by solving a \emph{spatially} simplified problem to generate a continuous or fine-group neutron energy spectrum.
-                This spectrum is then used as the weighting function (in place of $\aflux$) to ``collapse'' the cross sections into coarser multi-group values \cite{Knott2010}.
+                This spectrum is then used as the weighting function (in place of $\aflux$) to ``collapse'' the cross sections into coarser multigroup values \cite{Knott2010}.
                 This introduces an approximation into the transport equation.
 
-                To eliminate the directional dependence of the multi-group cross sections, an additional approximation is made: isotropic angular flux spectrum,
-                \begin{equation}\label{eq:NTT:Multi-group Isotropic Spectrum}
+                To eliminate the directional dependence of the multigroup cross sections, an additional approximation is made: isotropic angular flux spectrum,
+                \begin{equation}\label{eq:NTT:Multigroup Isotropic Spectrum}
                     \AngularFlux(\loc,\dir,E) \approx \rfourpi\FluxSpectrum(\loc, E).
                 \end{equation}
-                Using this approximate angular flux as the weighting function for multi-group cross sections in \cref{eqs:NTT:Multi-group Quantities Anisotropic,eq:NTT:MGEV Transport Problem w/ Anisotropic XS} can be simplified to
+                Using this approximate angular flux as the weighting function for multigroup cross sections in \cref{eqs:NTT:Multigroup Quantities Anisotropic,eq:NTT:MGEV Transport Problem w/ Anisotropic XS} can be simplified to
                 \begin{aequation}\label{eq:NTT:MGEV Transport Problem}
                     \left[\dir\vdot\grad + \xst\right]\aflux = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\gprime]\ddirprime\\
                         + \frac{\spect}{\keff}&\suml[\gprime=1][G]\nufis\intl[\fourpi]\aflux[\loc][\dirprime][\gprime]\ddirprime\Bigg],
@@ -218,14 +218,14 @@
                     \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
                 \end{equation*}
                 where the approximated multigroup cross sections are defined as
-                \begin{subequations}\label{eqs:NTT:Multi-group Cross Sections}
-                    \begin{equation}\label{eq:NTT:Multi-group Total Cross Section}
+                \begin{subequations}\label{eqs:NTT:Multigroup Cross Sections}
+                    \begin{equation}\label{eq:NTT:Multigroup Total Cross Section}
                         \xst \defined \frac{\intl[E_{g}][E_{g-1}]\CrossSection_{t}(\loc,E)\FluxSpectrum(\loc,E)\dif{E}}{\intl[E_{g}][E_{g-1}]\FluxSpectrum(\loc,E)\dif{E}},
                     \end{equation}
-                    \begin{equation}\label{eq:NTT:Multi-group Fission Cross Section}
+                    \begin{equation}\label{eq:NTT:Multigroup Fission Cross Section}
                         \nufis[\loc][g] \defined \frac{\intl[E_{g}][E_{g-1}]\nu\CrossSection_{f}(\loc,E)\FluxSpectrum(\loc,E)\dif{E}}{\intl[E_{g}][E_{g-1}]\FluxSpectrum(\loc,E)\dif{E}},
                     \end{equation}
-                    \begin{equation}\label{eq:NTT:Multi-group Scattering Cross Section}
+                    \begin{equation}\label{eq:NTT:Multigroup Scattering Cross Section}
                         \xss \defined \frac{\intl[E_{g}][E_{g-1}]\intl[E_{\gprime}][E_{\gprime-1}]\CrossSection_{s}(\loc,\dirprime\vdot\dir,\Eprime\to E)\FluxSpectrum(\loc,\Eprime)\dif{\Eprime}\dif{E}}{\intl[E_{\gprime}][E_{\gprime-1}]\FluxSpectrum(\loc,\Eprime)\dif{\Eprime}}.
                     \end{equation}
                 \end{subequations}
