@@ -442,206 +442,71 @@
       \end{aequation}
     }
     \subsection{Results}{\label{ssec:LSMOC:Results}
-      \blindtext[5]
+      \subsubsection{C5G7 Benchmark}{\label{sssec:LSMOC:C5G7 Benchmark}
+        [C5G7 2-D Benchmark problem results]
+      }
+      \subsubsection{Typical Pin Cell Depletion}{\label{sssec:LSMOC:Typical Pin Cell Depletion}
+        In order to evaluate the benefits of this new formulation, the first multiphysics case studied was a typical \ac{UO2} fuel cell, as specified by \ac{VERA} progression problem 1a \cite{VERAProblems}.
+        Isotopic depletion calculations were run up to 70 \ac{GWDMT} ($\sim$1820 \ac{EFPD}) as \ac{HFP} conditions.
+        Using the current default meshing parameters in MPACT as a starting point, various mesh parameters were coarsened to study their affect when using the \ac{LSMOC}.
+        These cases were compared against a reference case which was very finely meshed with fine ray-spacing (0.001 cm), and a Tabuchi-Yamamoto \cite{Yamamoto2005} quadrature using 128 azimuthal angles and 4 polar angles over $\fourpi$
+        All other cases were run using a Tabuchi-Yamamoto quadrature with 64 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.05 cm.
+
+        \paragraph{Default Mesh}{
+          MPACT's current default meshing parameters were used as a starting point.
+          Flat and linear source calculations were run on this mesh, to set a baseline for ``acceptable'' levels of error in the eigenvalue.
+          Compared to the reference case, the \ac{LS} calculation had a larger maximum error in eigenvalue of 89.2 \ac{pcm}, whereas the \ac{FS} calculation had a maximum error of 65.5 \ac{pcm}.
+          However, the average errors over the depletion were approximately the same: 31.6 and 33.7 \ac{pcm}, for the \ac{FS} and \ac{LS} calculations, respectively.
+          The eigenvalue differences over the depletion calculation are shown in \cref{fig:LSMOC:1a:DefaultMesh:Eigenvalue}.
+          The goal in this mesh refinement study is to determine acceptable meshing parameters without worse maximum or average eigenvalue errors.
+
+          \begin{figure}
+              \centering
+              \includegraphics[width=\linewidth]{1a/DefaultMesh-Eigenvalues}
+              \caption{Reference eigenvalues and differences for the default mesh pin cell case with isotopic depletion. \label{fig:LSMOC:1a:DefaultMesh:Eigenvalue}}
+          \end{figure}
+        }
+        \paragraph{Fuel Radius}{
+          During isotopic depletion, it is important to accurately capture the radial distribution of Plutonium, due to self-shielding effects.
+          Plutonium is primarily produced in the outer rim of the pin, this is well known as the rim-effect.
+          The default mesh uses three equal volume rings in the fuel region; however, we expect that two rings will be sufficient, when using the \ac{LSA}, if the extra ring is placed in such a way that it captures this rim-effect.
+          Experimental studies of the rim-effect \cite{Lassmann1994} have found that there is a sharp rise in Plutonium at around between 80-90\% of the outer radius of the fuel.
+
+          A series of calculations were run using two fuel rings with varying inner radius.
+          The eigenvalue and Plutonium comparisons are shown in \cref{fig:LSMOC:1a:FuelRadius:Eigenvalue,fig:LSMOC:1a:FuelRadius:Pu239}.
+          Comparing eigenvalues, a fractional radius between .825 and 0.875 seem to have little effect on the mean or worst-case eigenvalue difference.
+          By comparing the concentration of Pu-239, these radii are again shown to be the most accurate; a fractional radius of 0.875 was chosen to be sufficient, and used in the remainder of the studies.
+
+          \begin{figure}
+              \centering
+              \includegraphics[width=\linewidth]{1a/FuelRadius-Eigenvalues}
+              \caption{Eigenvalue comparisons for problem 1a using various inner fuel radii. \label{fig:LSMOC:1a:FuelRadius:Eigenvalue}}
+          \end{figure}
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{1a/FuelRadius-Pu239}
+            \caption{Pu-239 concentration comparisons for problem 1a using various inner fuel radii. \label{fig:LSMOC:1a:FuelRadius:Pu239}}
+          \end{figure}
+        }
+        \paragraph{Moderator Ring and Azimuthal Divisions} {
+          The remaining mesh parameters are the azimuthal divisions in the fuel, clad, gap, and moderator regions, and the presence of an additional surrounding ring of moderator.
+          While it may be sufficient to use a single azimuthal division in some regions in larger cases, due to symmetry of this single pin case, using a single azimuthal region would cause the linear components of the source to be zero (i.e. it is equivalent to the \ac{FSA}).
+          It was found that the coarsening of these parameters have an insignificant affect on the resulting eigenvalue when using the \ac{LSA}, with less than 1 \ac{pcm} difference over the entire depletion.
+          Thus, four azimuthal divisions in each material region, and no additional surrounding moderator ring was found to be sufficiently accurate in this case.
+        }
+      }
+      \subsubsection{2-D Lattices}{\label{sssec:LSMOC:2-D Lattices}
+        [Lattice Cases]
+      }
+      \subsubsection{Assembly with Feedback}{\label{sssec:LSMOC:Assembly with Feedback}
+        [Problem 6]
+      }
+      \subsubsection{Core Depletion with Feedback}{\label{sssec:LSMOC:Core Depletion with Feedback}
+        [Problem 9]
+      }
     }
   }
-
 
   % References
   \printbibliography
 }
-
-
-% \subsection{Derivation}{\label{ssec:MOC:LSA:Derivation}
-% The moment-based \ac{LSA} assumes the shape of the source, $\source[mi][g][\loc]$, is spatially linear within each cell, $\Region$.
-% This can be expressed as
-% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Source Shape}
-%     \begin{equation}\label{eq:MOC:LSA:Source Shape}
-%         \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL,
-%     \end{equation}
-%     where $\srcL$ is a column vector of source spatial expansion coefficients,
-%     \begin{equation}
-%         \srcL \defined\begin{bmatrix}\srcL[x]\\\srcL[y]\\\srcL[z]\end{bmatrix},
-%     \end{equation}
-%     and $\loc$ is the position in \emph{local} coordinates.
-% \end{subequations}
-% A similar spatial expansion of the angular moments of the flux can be performed,
-% \begin{equation}\label{eq:MOC:LSA:Flux Expansion}
-%     \fluxA(\loc) = \fluxF + \loc\vdot\fluxL,
-% \end{equation}
-% the source can then be expressed as
-% \begin{equation}\label{eq:MOC:LSA:Linear Source Computation}
-%     \source[mi][g][\loc]
-%         = \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\fluxA[\gprime](\loc)
-%         + \frac{\spect}{\keff}\suml[\gprime]\nufis\sflux[\gprime](\loc),
-% \end{equation}
-% and the linear expansion coefficients are explicitly given by
-% \begin{equation}\label{eq:MOC:LSA:Linear Source Coefficients}
-%     \srcL
-%         = \suml[\gprime]\suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\xss[\ell]\fluxL[\gprime]
-%         + \frac{\spect}{\keff}\suml[\gprime]\nufis\sfluxL[\gprime].
-% \end{equation}
-
-% In the spatial moment-base \ac{LSA}, it is convenient to define the spatially linear source (and flux) in terms of a cell-local coordinate system.
-% Allow $\Loc$ to be the position variable in the global coordinate system, the local coordinates are then defined as
-% \begin{equation}\label{eq:MOC:LSA:Global to Local Coordinates}
-%     \loc = \Loc - \centroid[\Loc][mi],
-% \end{equation}
-% where $\centroid[\Loc][mi]$ is the numerical centroid of the cell $i$.
-
-% These numerical centroids can be defined as either direction-dependent, or direction-independent, which will have implications on particle conservation, as discussed in \cref{ssec:MOC:LSA:Particle Conservation}.
-% The direction-dependent centroids are defined by
-% \begin{equation}\label{eq:MOC:LSA:Direction-Dependent Centroids}
-%     \centroid[\Loc][mi] \defined \MOCSingleAngleIntegral{\Loc} = \frac{1}{V_i}\suml[k]\tA[mki]\nsegl\locCent[\Loc],
-% \end{equation}
-% where $\locCent[\Loc]$ is the global coordinate vector of the track-segment mid-point.
-% Similarly, the direction-independent centroids are defined by
-% \begin{equation}\label{eq:MOC:LSA:Direction-Independent Centroids}
-%     \centroid[\Loc][i] \defined \rfourpi\MOCIntegral{\Loc} = \frac{1}{V_i}\suml[m]\wt\suml[k]\tA[mki]\nsegl\locCent[\Loc].
-% \end{equation}
-
-% Following the same approach as the \ac{FSMOC} derivation, in \cref{ssec:MOC:FSA:Derivation}, computing the source the region-averaged flux moment, $\fluxF$, and the flux expansion coefficients, $\fluxL$, are required.
-% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}
-%     The region-averaged flux moment can be found using the same definition as previously,
-%     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Flux Moment Definition}
-%         \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
-%     \end{equation}
-%     In order to determine the spatial expansion coefficients of the flux moments, \cref{eq:MOC:LSA:Flux Expansion} is operated on by $\MOCIntegral{\SH(\vdot)\loc^T}$.
-%     Recognizing that this should be directly proportional to angular flux operated on by $\MOCIntegral{\SH\aflux[][g][]\loc^T}$, a system of equations is found
-%     \begin{equation}\label{eq:MOC:LSA:Moment to Expansion Coefficient}
-%         \M\fluxL = \MOCIntegral{\SH\loc\aflux[][g][]},
-%     \end{equation}
-%     where
-%     \begin{equation}\label{eq:MOC:LSA:Geometric Moments}
-%         \M \defined \MOCIntegral{\loc^T\loc}.
-%     \end{equation}
-%     The spatial angular flux moments, $\MOCIntegral{\SH\loc\aflux[][g][]}$, are then defined as
-%     \begin{equation}\label{eq:MOC:LSA:Revion-Averaged Spatial Angular Flux Moments Definition}
-%         \MOCIntegral{\SH\loc\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\left(\locIn\MOCTrackIntegral{\aflux[][g][]} + \dirm\MOCTrackIntegral{\nlen\aflux[][g][]} / \renorm[mi]\right).
-%     \end{equation}
-% \end{subequations}
-
-% In order to evaluate the flux moments defined in \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, the track-averaged angular flux values, $\MOCTrackIntegral{\aflux[][g][]}$, and $\MOCTrackIntegral{\nlen\aflux[][g][]}$, must be determined.
-% First, the transport equation must be put into characteristic form, using \cref{eq:MOC:Renormalized Location Variable} the spatially expanded source, \cref{eq:MOC:LSA:Source Shape}, can be defined along the characteristic.
-% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Characteristic Form}
-%     The characteristic transport equation becomes
-%     \begin{equation}\label{eq:MOC:LSA:Characteristic Form}
-%         \left[\deriv{}{\nlen} + \xst\right]\aflux = \tsrcF + \tsrcL\left(\nlen - \frac{\nsegl}{2}\right),
-%     \end{equation}
-%     where
-%     \begin{equation}\label{eq:MOC:LSA:Track Average Source}
-%         \tsrcF \defined \rfourpi\left[\srcF[mi] + \locCent \vdot \srcL\right],
-%     \end{equation}
-%     and
-%     \begin{equation}\label{eq:MOC:LSA:Track Linear Source}
-%         \tsrcL \defined \rfourpi\left[\frac{\dirm\vdot\srcL}{\renorm[mi]}\right].
-%     \end{equation}
-% \end{subequations}
-% This can be solved analytically for the angular flux along the track,
-% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Angular Flux Solution}
-%     \begin{equation}\label{eq:MOC:LSA:Angular Flux Solution}
-%         \aflux = \afluxin + \left(\frac{\tsrcF}{\xst} - \afluxin\right)F_1(\opt) + \frac{\tsrcL}{2(\xst)^2}F_2(\opt),
-%     \end{equation}
-%     where
-%     \begin{equation}\label{eq:MOC:LSA:F1}
-%         F_1(\opt) \defined 1 - \exp(-\opt),
-%     \end{equation}
-%     and
-%     \begin{equation}\label{eq:MOC:LSA:F2}
-%         F_2(\opt) \defined 2[\opt-F_1(\opt)] - \segopt F_1(\opt).
-%     \end{equation}
-% \end{subequations}
-
-% As discussed in \cref{ssec:MOC:FSA:Derivation}, there are two \emph{equivalent} methods with which one could determine the track-averaged angular flux values.
-% However, it is the author's opinion that defining these moments implicitly, by taking the moments of the characteristic equation (\cref{eq:MOC:LSA:Characteristic Form}), results in a form that is simpler.
-% The original basis of this work \cite{Ferrer2016}, evaluated the linear moment explicitly; for brevity, the derivation will only be shown here with the implicitly defined moment.
-% Previous work \cite{Fitzgerald2019} has also shown that by using the form given by the implicit definition, there are significant benefits in multi-physics applications.
-% The implicitly defined moments, given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$ and $\MOCTrackIntegral{\nlen(\vdot)}$, are given by
-% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Track-Averaged Moments}
-%     \begin{equation}\label{eq:MOC:LSA:Track-Averaged Angular Flux}
-%         \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF}{\xst} + \frac{\dflux}{\segopt},
-%     \end{equation}
-%     and
-%     \begin{equation}\label{eq:MOC:LSA:Track-Averaged Linear Angular Flux}
-%         \MOCTrackIntegral{\nlen\aflux[][g][]} = \frac{\MOCTrackIntegral{\aflux[][g][]} - \afluxout}{\xst} + \frac{\nsegl}{2}\left[\frac{\tsrcF}{\xst} + \frac{\tsrcL}{\xst}\frac{\nsegl}{6}\right].
-%     \end{equation}
-% \end{subequations}
-% Due to the presence of the $\dflux/\segopt$ term in \cref{eq:MOC:LSA:Track-Averaged Linear Angular Flux}, it is beneficial to stability and performance \cite{Fitzgerald2018,Fitzgerald2019} to compute this quantity directly, rather than computing $\dflux$ (as is done for \ac{FSMOC}).
-% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Delta Flux over Optical Thickness}
-%     This can be found explicitly by subtracting \cref{eq:MOC:LSA:Angular Flux Solution} evaluated at the exiting location from $\afluxin$ and dividing by $\segopt$, to get
-%     \begin{equation}\label{eq:MOC:LSA:Delta Flux over Optical Thickness}
-%         \frac{\dflux}{\segopt} = \left(\afluxin-\frac{\tsrcF}{\xst}\right)E_1(\segopt) - \frac{\nsegl}{2}\frac{\tsrcL}{\xst}T_2(\segopt),
-%     \end{equation}
-%     where
-%     \begin{equation}\label{eq:MOC:LSA:E1}
-%         E_1(\segopt) \defined \frac{F_1(\segopt)}{\segopt},
-%     \end{equation}
-%     \begin{equation}\label{eq:MOC:LSA:T2}
-%         T_2(\segopt) \defined 2E_2(\segopt) - E_1(\segopt),
-%     \end{equation}
-%     and
-%     \begin{equation}\label{eq:MOC:LSA:E2}
-%         E_2(\segopt) \defined \frac{1-E_1(\segopt)}{\segopt}.
-%     \end{equation}
-% \end{subequations}
-% }
-% \subsection{Particle Conservation}{\label{ssec:MOC:LSA:Particle Conservation}
-% In consideration to particle balance, use of the \ac{LSA} results in additional constraints on the calculations.
-% Similarly to \cref{ssec:MOC:FSA:Particle Conservation}, the track-based integration of the source must exactly integrate to the spatial and angular moments of the source.
-% The conservation of spatial moments is the basis of this \ac{LSA} \cite{Ferrer2018}, so this constraint is satisfied without additional constraints on the method.
-% The angular moment constraint is expressed as
-% \begin{equation}\label{eq:MOC:LSA:Angular Moment Constaint}
-%     \rfourpi\MOCIntegral{\SH\source[mi][g][\loc]} = \srcF[i,\ell][g,n].
-% \end{equation}
-% In addition to the constraints introduced in \cref{ssec:MOC:FSA:Particle Conservation}, namely direction-dependent renormalization, and directional quadrature restrictions, this places constraints on the definition of the local coordinate system:
-% \begin{equation}\label{eq:MOC:LSA:Anisotropic Coordinate Constraint}
-%     \MOCSingleAngleIntegral{\loc} = 0.
-% \end{equation}
-% This is equivalent to stating that the local coordinate system must be defined with respect to direction-dependent global centroids, as is given by \cref{eq:MOC:LSA:Direction-Dependent Centroids}.
-
-% If these constraints are satisfied, \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions} can be simplified,
-% \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Region-Averaged Flux Moments}
-%     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Scalar Flux}
-%         \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
-%     \end{equation}
-%     \begin{equation}\label{eq:MOC:LSA:Region-Averaged Angular Moments of Flux}
-%         \fluxF = \frac{\tsrcF[i,\ell][g,n]}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\SH[\ell][n][\dirm]\suml[k]\tA[mki]\dflux,
-%     \end{equation}
-%     and
-%     \begin{aequation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}
-%         \MOCIntegral{\loc\SH\aflux[][g][]}
-%             &= \suml[m]\wt\SH[\ell][n][\dirm]\M[][mi]\frac{\srcL[][mi]}{\xst}\\
-%             &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]
-%                 \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout + \frac{\tsrcF}{\xst}\right)\right]
-%     \end{aequation}
-%     where
-%     \begin{equation}\label{eq:MOC:LSA:Delta Flux}
-%         \dflux \defined \afluxin - \afluxout,
-%     \end{equation}
-%     and
-%     \begin{equation}\label{eq:MOC:LSA:Direction Dependent M}
-%       \M[][mi] \defined \MOCSingleAngleIntegral{\loc^T\loc}.
-%     \end{equation}
-% \end{subequations}
-% }
-% \subsection{Spatial and Isotropic Simplifications}{\label{ssec:MOC:LSA:Isotropic Simplifications}
-% The work introducing the original formulation of the moment-based \ac{LSA} suggests that it is beneficial to allow only the isotropic moments of the source and flux to be spatially linear, while higher order moments are spatially flat.
-% The reformulation introduced as part of this work \cite{Fitzgerald2019} was extended to make this simplification in the so called \acf{LIFA} source [CITATION].
-% The linear moment equations can then be simplified to
-% \begin{aequation}\label{eq:MOC:LSA:LIFA Region-Averaged Spatial Moments of Flux}
-%     \MOCIntegral{\loc\aflux[][g][]}
-%         &= \M\frac{\srcL}{\xst}
-%         + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]
-%             \tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt} - \afluxout + \frac{\tsrcF}{\xst}\right)\right].
-% \end{aequation}
-
-% In the case of an isotropic source, the constraints for particle balance are relaxed.
-% Track-length renormalization as well as numerical centroid definitions can be direction-independent while still preserving particle conservation \cite{Ferrer2018}, as given by \cref{eq:MOC:Region Renormalization}, and \cref{eq:MOC:LSA:Direction-Independent Centroids} respectively.
-% The calculation of angular flux spatial moments, given in \cref{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux}, can also be simplified into the form
-% \begin{equation}\label{eq:MOC:LSA:Region-Averaged Spatial Moments of Flux Isotropic}
-%     \MOCIntegral{\loc\aflux[][g][]}
-%             = \M\frac{\srcL}{\xst}
-%             + \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA
-%                 \left(\dirm\segl\left[\frac{\dflux}{\segopt} - \afluxout\right]+ \locIn\dflux\right).
-% \end{equation}
-% }
