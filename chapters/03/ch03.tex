@@ -407,7 +407,7 @@
                     \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
                 \end{equation}
                 In order to determine the spatial expansion coefficients of the flux moments, \cref{eq:MOC:LSA:Flux Expansion} is operated on by $\MOCIntegral{\SH\loc(\vdot)}$.
-                Recognizing that this should be directly proportional to angular flux operated on by $\MOCIntegral{\SH\loc\aflux[][g][]\loc}$, a system of equations is found
+                Recognizing that this should be directly proportional to angular flux operated on by $\MOCIntegral{\SH\loc\aflux[][g][]}$, a system of equations is found
                 \begin{equation}\label{eq:MOC:LSA:Moment to Expansion Coefficient}
                     \M\fluxL = \MOCIntegral{\SH\loc\aflux[][g][]},
                 \end{equation}
@@ -453,11 +453,11 @@
             \end{subequations}
 
             As discussed in \cref{ssec:MOC:FSA:Derivation}, there are two \emph{equivalent} methods with which one could determine the track-averaged angular flux values.
-            The original derivation of the \ac{LSA} method by \citet{Ferrer2016} used the \emph{implicit} definition for the track-average angular flux, but the \emph{explicit} definition for the track-average slope of the angular flux.
-            In \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}, the implicit definition is taken for the slope as well, which allows for additional improvements for the method in multi-physics and 2D/1D applications.
+            The original derivation of the \ac{LSA} method by \citet{Ferrer2016} used the \emph{implicit} definition for the track-average angular flux, but the \emph{explicit} definition for the first spatial moment of the angular flux.
+            In \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}, the implicit definition is taken for the first spatial moment of the angular flux as well, which allows for additional improvements for the method in multi-physics and 2D/1D applications.
             For the remainder of this section, the formulation as it was originally derived by \citet{Ferrer2016} is shown, using the explicit form of $\MOCTrackIntegral{\nlen\aflux[][g][]}$.
 
-            The implicitly defined track-average flux is given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$, and the explicitly defined track-average flux slope is given by operating on \cref{eq:MOC:LSA:Angular Flux Solution} by $\MOCTrackIntegral{\nlen(\vdot)}$.
+            The implicitly defined track-average flux is given by operating on \cref{eq:MOC:LSA:Characteristic Form} by $\MOCTrackIntegral{(\vdot)}$, and the explicitly defined first spatial moment of the angular flux is given by operating on \cref{eq:MOC:LSA:Angular Flux Solution} by $\MOCTrackIntegral{\nlen(\vdot)}$.
             These are shown in \cref{eqs:MOC:LSA:Track-Averaged Moments}.
             \begin{subequations}\label[subeqs]{eqs:MOC:LSA:Track-Averaged Moments}
                 \begin{equation}\label{eq:MOC:LSA:Track-Averaged Angular Flux}

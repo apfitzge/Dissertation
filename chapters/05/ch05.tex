@@ -39,7 +39,11 @@
     Although the functions $F_1(\opt)$, and $F_2(\opt)$ are functions of variable $\opt$, in the implementation of this method in code they are only ever evaluated over the full optical thickness, $\segopt$.
     The functions, $G_1(\segopt)$, $G_2(\segopt)$, and $H(\segopt)$ all require special treatment around $\segopt = 0$, in this work this is handled via Taylor interpolation about $\segopt=0$.
 
-    [FIGURE][ADD PLOT OF THE FUNCTIONS]
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.90\linewidth]{exponentials/exponential-functions}
+        \caption{The exponential functions, \cref{eqs:LSMOC:ET:Exponential Functions}, from 0 to 10.\label{fig:Exponential Functions}}
+    \end{figure}
 
     These functions all involve an exponential, $e^{-\segopt}$; although this does not present a problem mathematically, the exponential function is a transcendental function that tends to be slow when evaluated computationally.
     For efficient transport codes, this presents a challenge.
@@ -267,9 +271,175 @@
   % Improved Linear Source Formulation for Multi-physics and 2D/1D Applications
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}{\label{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}
-    \blindtext
+    As stated in \cref{sec:MOC:LSA}, the original derivation of the moment-based \acf{LSA} from \citet{Ferrer2016} faced inefficiencies in problems with non-constant cross sections.
+    The inefficiencies arose from the use of pre-computed coefficients, \cref{eq:MOC:LSA:C Matrix}, which must be re-computed if cross sections change.
+    In multiphysics calculations, such as with \ac{TH} feedback, cross sections typically change each iteration, leading to significant overhead from re-computing these terms.
+    This section presents and equivalent formulation, which eliminates the need to re-compute these terms if cross sections change, without additional operations.
+
     \subsection{Derivation}{\label{ssec:LSMOC:Derivation}
-      \blindtext[5]
+      The derivation of this improved formulation begins with the same initial steps as the derivation detailed in \cref{ssec:MOC:LSA:Derivation}.
+      Several of these equations are repeated in this section for clarity.
+      The source is assumed to have a spatially linear shape
+      \begin{equation}\label{eq:LSMOC:Source Shape}
+        \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL[][mi],
+      \end{equation}
+      and the angular flux moments can be expanded similarly
+      \begin{equation}\label{eq:LSMOC:Flux Expansion}
+        \fluxA(\loc) = \fluxF + \loc\vdot\fluxL.
+      \end{equation}
+      The source can be computed from the flux moments using \cref{eq:MOC:LSA:Linear Source Computation}.
+
+      Computing the source requires the flux to be evaluated during transport sweeping.
+      The angular flux moments are given by \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, but are repeated here for clarity.
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Flux Moments Definitions}
+        The spatially flat angular flux moments are defined by integrating the flux multiplied by a spherical harmonics moment function over space and directions,
+        \begin{equation}\label{eq:LSMOC:Region-Averaged Flux Moment Definition}
+            \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
+        \end{equation}
+        To determine the spatial expansion coefficients of the flux moments, \cref{eq:LSMOC:Flux Expansion} is operated on by $\MOCIntegral{\SH\loc(\vdot)}$.
+        As before, this should be directly proportional to the angular flux operated on by $\MOCIntegral{\SH\loc\aflux[][g][]}$, a system of equations is found
+        \begin{equation}\label{eq:LSMOC:Moment to Expansion Coefficient}
+            \M\fluxL = \MOCIntegral{\SH\loc\aflux[][g][]},
+        \end{equation}
+        where
+        \begin{equation}\label{eq:LSMOC:Geometric Moments}
+            \M \defined \MOCIntegral{\loc^T\loc}.
+        \end{equation}
+        The spatial angular flux moments, $\MOCIntegral{\SH\loc\aflux[][g][]}$, are then defined as
+        \begin{equation}\label{eq:LSMOC:Region-Averaged Spatial Angular Flux Moments Definition}
+            \MOCIntegral{\SH\loc\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\left(\locIn\MOCTrackIntegral{\aflux[][g][]} + \dirm\MOCTrackIntegral{\nlen\aflux[][g][]} / \renorm[mi]\right).
+        \end{equation}
+      \end{subequations}
+
+      With the assumed source shape, \cref{eq:LSMOC:Source Shape}, the characteristic transport equation becomes
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Characteristic Form}
+        The characteristic transport equation becomes
+        \begin{equation}\label{eq:LSMOC:Characteristic Form}
+          \left[\deriv{}{\nlen} + \xst\right]\aflux = \tsrcF + \tsrcL\left(\nlen - \frac{\nsegl}{2}\right),
+        \end{equation}
+        where
+        \begin{equation}\label{eq:LSMOC:Track Average Source}
+          \tsrcF \defined \rfourpi\left[\srcF[mi] + \locCent \vdot \srcL[][mi]\right],
+        \end{equation}
+        \begin{equation}\label{eq:LSMOC:Track Linear Source}
+          \tsrcL \defined \rfourpi\left[\frac{\dirm\vdot\srcL[][mi]}{\renorm[mi]}\right],
+        \end{equation}
+        and $\locCent$ is the local-coordinate centroid of the track-segment.
+      \end{subequations}
+      Substituting this assumed source shape (linear) into the generic \ac{MOC} solution, given by \cref{eq:MOC:MOC Generic Solution}, the angular flux along a track-segment is found to be
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Angular Flux Solution}
+          \begin{equation}\label{eq:LSMOC:Angular Flux Solution}
+              \aflux = \afluxin + \left(\frac{\tsrcF}{\xst} - \afluxin\right)F_1(\opt) + \frac{\tsrcL}{2(\xst)^2}F_2(\opt),
+          \end{equation}
+          where
+          \begin{equation}\label{eq:LSMOC:F1}
+              F_1(\opt) \defined 1 - \exp(-\opt),
+          \end{equation}
+          and
+          \begin{equation}\label{eq:LSMOC:F2}
+              F_2(\opt) \defined 2[\opt-F_1(\opt)] - \segopt F_1(\opt).
+          \end{equation}
+      \end{subequations}
+
+      To evaluate the moments defined in \cref{eqs:LSMOC:Region-Averaged Flux Moments Definitions}, the track-average flux and first spatial moment of the angular flux must be determined.
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Flux Track Moments}
+        The track-average flux is determined as it was before, by operating on \cref{eq:LSMOC:Characteristic Form} by $\nsegl\MOCTrackIntegral{(\vdot)}$, yielding
+        \begin{equation}\label{eq:LSMOC:0th Track Moment of the Flux}
+          \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF}{\xst} + \frac{\dflux}{\segopt}.
+        \end{equation}
+        At this point the two derivations diverge from one another.
+        In the previous formulation, the integral in $\MOCTrackIntegral{\nlen\aflux[][g][]}$ is \emph{explicitly} evaluated by substituting in the solution of the angular flux along the track (\cref{eqs:MOC:LSA:Angular Flux Solution}).
+        Here, the moment will be found implicitly by operating on \cref{eq:LSMOC:Characteristic Form} by $\nsegl\MOCTrackIntegral{\nlen(\vdot)}$, just as was done for the 0th moment.
+        This results in
+        \begin{equation}\label{eq:LSMOC:1st Track Moment of the Flux}
+          \MOCTrackIntegral{\nlen\aflux[][g][]} =
+            \frac{\MOCTrackIntegral{\aflux[][g][]} - \afluxout}{\xst}
+              + \frac{\nsegl}{2}\left[\frac{\tsrcF}{\xst}
+              + \frac{\tsrcL}{\xst}\frac{\nsegl}{6}\right].
+        \end{equation}
+        Unlike \cref{eq:MOC:LSA:Track-Averaged Linear Angular Flux}, there a not any new exponential functions introduced in this form.
+      \end{subequations}
+
+      Previously, the average track flux, $\MOCTrackIntegral{\aflux[][g][]}$, was expanded to find a simpler final form.
+      This is the case here as well; however, the out-going flux, $\afluxout$, will not be expanded, as this must necessarily be computed during transmission.
+      \Cref{eqs:LSMOC:Region-Averaged Flux Moments Definitions} can be simplified into
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Flux Moments}
+        \begin{equation}\label{eq:LSMOC:Region-Averaged Flat Flux Moments}
+          \fluxF = \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left(\nsegl\tsrcF + \dflux\right),
+        \end{equation}
+        and
+        \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments}
+          \MOCIntegral{\SH\loc\aflux[][g][]}
+            = &\frac{1}{V_i}\suml[m]\wt\SH\suml[k]\tA\nsegl\left[\locCent\srcF + \left(\locCent(\locCent)^T + \frac{\segl^2}{12}\dirm\dirm^T\right)\srcL\right]\\
+            + &\frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right]
+        \end{aequation}
+      \end{subequations}
+
+      \Cref{eq:LSMOC:Region-Averaged Linear Flux Moments} contains $\dflux/\segopt$ terms, rather than only $\dflux$ terms.
+      For numerical stability, it is beneficial to compute this quantity directly, rather than $\dflux$ and performing division.
+      This can be found by evaluating the transmission equation, \cref{eq:LSMOC:Angular Flux Solution}, giving
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Average Slope}
+        \begin{equation}\label{eq:LSMOC:Average Slope}
+          \frac{\dflux}{\segopt} = \left(\afluxin-\frac{\tsrcF}{\xst}\right)E_1(\segopt) - \frac{\nsegl}{2}\frac{\tsrcL}{\xst}T_2(\segopt),
+            \end{equation}
+            where
+            \begin{equation}\label{eq:LSMOC:E1}
+                E_1(\segopt) \defined \frac{F_1(\segopt)}{\segopt},
+            \end{equation}
+            \begin{equation}\label{eq:LSMOC:T2}
+                T_2(\segopt) \defined 2E_2(\segopt) - E_1(\segopt),
+            \end{equation}
+            and
+            \begin{equation}\label{eq:LSMOC:E2}
+                E_2(\segopt) \defined \frac{1-E_1(\segopt)}{\segopt}.
+            \end{equation}
+      \end{subequations}
+      Here, $E_2(\segopt)$ is defined as an intermediate function which has smaller derivative terms, meaning higher accuracy with fewer interpolation intervals (see \cref{sec:LSMOC:Exponential Tabulation}).
+      Following the conclusions of \cref{sec:LSMOC:Exponential Tabulation}, only the $E_2(\segopt)$ function needs to be tabulated, and then is used to compute the other two exponential functions, $E_1(\segopt)$, and $T_2(\segopt)$.
+      The outgoing flux can then be evaluated as
+      \begin{equation}\label{eq:LSMOC:Outgoing Flux}
+        \afluxout = \afluxin - \segopt\frac{\dflux}{\segopt}.
+      \end{equation}
+    }
+    \subsection{Particle Conservation}{\label{ssec:LSMOC:Particle Conservation}
+      As described in \cref{ssec:MOC:LSA:Particle Conservation}, particle conservation puts the constraint of using direction-dependent renormalization and centroids, in addition to directional quadrature constraints.
+      If these constraints are satisfied, \cref{eqs:LSMOC:Region-Averaged Flux Moments} can be simplified into
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Flux Moments}
+        \begin{equation}\label{eq:LSMOC:Region-Averaged Flat Flux Moments}
+          \fluxF = \suml[m]\wt\SH\frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\dflux,
+        \end{equation}
+        and
+        \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments}
+          \MOCIntegral{\SH\loc\aflux[][g][]} =
+            &\suml[m]\wt\SH\M[][mi]\frac{\srcL}{\xst}\\
+            +& \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right],
+        \end{aequation}
+        where
+        \begin{equation}\label{eq:LSMOC:Direction-Dependent M}
+          \M[][mi] \defined \frac{1}{V_i}\suml[k]\tA\left[\locCent(\locCent)^T+\frac{\segl^2}{12}\dirm\dirm^T\right].
+        \end{equation}
+      \end{subequations}
+
+      Although the above form seems to more computationally efficient, it would be negligent for this chapter to not include a more mathematically elegant form of \cref{eq:LSMOC:Region-Averaged Linear Flux Moments}.
+      The terms in the second summation may be rewritten as
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Linear Flux Moments Elegant}
+        \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments Elegant}
+          \MOCIntegral{\SH\loc\aflux[][g][]} =&
+            \suml[m]\wt\SH\M[][mi]\frac{\srcL}{\xst} \\
+            &+ \frac{\fourpi}{V_i}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\left(\afluxin-\tfluxF\right)-\locOut\left(\afluxout-\tfluxF\right)\right],
+        \end{aequation}
+        where $\tfluxF$ is the average track flux,
+        \begin{equation}\label{eq:Average Track Flux}
+          \tfluxF \defined \nsegl\MOCTrackIntegral{\aflux[][g][]}.
+        \end{equation}
+      \end{subequations}
+      In this form, the interior summation over track-segments becomes a spatially weighted summation of the incident and outlet flux differences from the average flux.
+    }
+    \subsection{Isotropic Simplifications}{\label{ssec:LSMOC:Isotropic Simplifications}
+      If the so called \acf{LIFA} scheme is used, the spatially flat moment equations do not change; however, \cref{eq:LSMOC:Region-Averaged Linear Flux Moments} can be simplified to
+      \begin{aequation}\label{eq:LSMOC:LIFA:Region-Averaged Linear Flux Moments}
+        \MOCIntegral{\SH\loc\aflux[][g][]} &= \M\frac{\srcL}{\xst}\\ &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA\left[\locIn\dflux+\dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right]
+      \end{aequation}
     }
     \subsection{Results}{\label{ssec:LSMOC:Results}
       \blindtext[5]
