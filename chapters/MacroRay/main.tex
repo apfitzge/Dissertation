@@ -1,0 +1,46 @@
+\chapter{MacroRay Three-Dimensional Ray-tracing Technique}{\label{ch:MacroRay Three-Dimensional Ray-tracing Technique}
+  \input{macros/multigroup.tex}
+  \input{macros/DiscreteOrdinates.tex}
+  \input{macros/MOC.tex}
+  \def\figpath{chapters/MacroRay/figures/}
+  \graphicspath{ {\figpath} }
+
+  \section{Macroray}{\label{sec:RT:Macroray}
+    The \emph{macroray} method is a three-dimensional extension of the two-dimensional macroband method, and is a central contribution of this work.
+    This method has been implemented as part of this work, and, to the best of the author's knowledge, has never been studied.
+    The macroray is a extension of the macroband into three-dimensions, in which along each radial ray the macroband method is used to generate axial rays on the characteristic plane.
+    This follows the general procedure used for three-dimensional ray-tracing, but a limitation of this approach is explained in more detail in \cref{sec:RT:Interface Flux Approximations}.
+    In three-dimensions, rays can more generally be separated into ``parallel pipes'', to simplify notation these are referred to as macrorays.
+
+    The motivation for investigating this method is for three primary reasons.
+    The first, is that 2-D results \cite{Yamamoto2005,Fevotte2007,Yamamoto2008} have indicated that the macroband method allows for coarser ray-spacing (thus fewer rays) while maintaining accuracy.
+    This is expected to increase computational efficiency, and lead to faster \ac{MOC} calculations.
+    However, an extension to three-dimensions, if coarser ray-spacing can be used in both the axial and radial directions, the increase in computational efficiency is expected to be greater.
+
+    Second, \ac{MRT} methods require adjustments to the directional quadrature, which is expected to decrease accuracy of numerical integrals over directions \cite{Kochunas2013}.
+    The macroband and macroray methods require no such adjustment.
+    Typically, it is the polar angle that has a more advanced quadrature (Gauss-Legendre, or Tabuchi-Yamamoto \cite{TabuchiYamamotoQuad}), and is thus more sensitive to perturbations than the azimuthal angles.
+    Without the perturbation of the polar (and azimuthal) quadratures, it may be possible to maintain accuracy while using fewer directions than is possible with 3-D \ac{MRT} methods.
+
+    Finally, \ac{MRT} methods require that the same ray-spacing parameters are used throughout the entire problem domain.
+    Problems which have strong absorbers typically require a very fine mesh \cite{Fitzgerald2019}, which then requires that finer ray-spacing be used.
+    This finer ray-spacing, which may only be required for a small percentage of the problem domain, is then used for the entire domain, leading to a significant increase in the number tracks.
+    The macroband and macroray methods allow for use of different ray-spacing parameters in each subsystem; additionally, because macrobands are based on the computational mesh, an effectively finer ray-spacing will automatically be generated due to the fine spatial mesh.
+    This allows for densely spaced tracks where they are necessary, but more coarsely spaced tracks where they are not; this is expected to lead to significant reduction in the number of tracks in such problems.
+
+    Another consideration in three-dimensional locally axial extruded geometries is the chord-classification method.
+    In the macroray method, rays are separated into the macrorays, which are guaranteed to be of the same class in the chord-classification method;
+    this macroray classification is depicted in \cref{fig:RT:Chord-Classification Macroray}
+
+    \begin{figure}[h]
+      \centering
+      \def\svgwidth{0.45\linewidth}
+      \input{\figpath/ChordClassificationMacroBand.pdf_tex}
+      \caption{3-D example of chord-classification with Macroray ray-tracing. Colored (red and blue) characteristic tracks represent groups of ``V-chords'', rays between two vertical surfaces.}
+      \label{fig:RT:Chord-Classification Macroray}
+    \end{figure}
+  }
+
+  % References
+  \printbibliography
+}

@@ -1,6 +1,6 @@
 \chapter{Neutron Transport Theory}{\label{ch:Neutron Transport Theory}
     \input{macros/continuous.tex}   % Continuous space, direction, and energy quantities
-    \def\figpath{chapters/02/figures/}
+    \def\figpath{chapters/TransportTheory/figures/}
     \graphicspath{ {\figpath} }
 
     In this chapter, the basic theory behind the neutron transport equation, and the numerical methods used to solve it are introduced.
@@ -325,27 +325,6 @@
                     \caption{(a) Level-Symmetric and (b) product quadrature direction set examples shown for a single octant of the unit-sphere.}
                     \label{fig:NTT:Quadrature Examples}
                 \end{figure}
-            }
-            \subsubsection{The Method of Characteristics}{\label{sssec:NTT:MOC}
-                The \acf{MOC} is a technique used in mathematics to solve \acp{PDE}, by transforming a \ac{PDE} into a system of \acp{ODE}.
-                The method was first applied to the neutron transport problem by \citeauthor{Askew1972} in 1972 \cite{Askew1972}, but only began to see real use in the 1980's \cite{Halsall1980}.
-                The \ac{MOC} transforms the transport equation into the characteristic form, by examining the equation along straight neutron paths through the spatial domain.
-
-                By examining the equation along one of these characteristic ``tracks'' or ``rays'', the average angular flux along the track within a cell can be calculated.
-                The scalar flux can then be found by collecting the average angular flux along all tracks passing through this region, in a numerical integration over space and angle.
-
-                Like the \ac{CP} method, \ac{MOC} is able to handle completely arbitrary geometry; however, unlike the \ac{CP} method, it is also able to account for anisotropic scattering in a straightforward manner.
-                Additionally, the \ac{MOC} does not produce the large matrices in realistic applications as the \ac{CP} method does.
-                For problems that contain more than a few hundred cells, the \ac{MOC} is generally preferred over \ac{CP} methods \cite{Hebert2010}.
-
-                The \ac{CDP} is a method similar to both \ac{CP} method and the \ac{MOC} \cite{Hong1999,Liu2014}.
-                The \ac{CDP} uses ray-tracing to evaluate transmission probabilities between cells.
-                However, it only considers transmission probabilities between cells which are traversed by a shared characteristic ray, rather than considering the transmission probability between all cells as in the \ac{CP} methods.
-                This significantly cuts down on the computational resources required by traditional \ac{CP} methods.
-                This method has also shown improvements over \ac{MOC} in cases with few unique geometries and constant material properties throughout the simulation; however these conditions are not applicable in problems of interest to industry.
-
-                The \ac{MOC} is the primary subject of this thesis work.
-                As such, \cref{ch:The Method of Characteristics} has been devoted to the details of the method, and \cref{ch:Ray-Tracing} expands upon the details of ray-tracing that is central to the \ac{MOC}.
             }
         }
     }
