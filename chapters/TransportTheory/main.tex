@@ -84,7 +84,7 @@
             \afluxmom \defined \intl[\fourpi]\SH\aflux\ddir,
         \end{equation}
         where $\SH$ are the real spherical harmonics functions defined by
-        \begin{subequations}\label{eqs:NTT:Spherical Harmonics Definitions}
+        \begin{subequations}\label[subeqs]{eqs:NTT:Spherical Harmonics Definitions}
             \begin{equation}\label{eq:NTT:Real SH Functions}
                 \SH \defined \sqrt{(2-\delta_{n,0})\frac{(\ell-\abs{n})!}{(\ell+\abs{n})!}} P_{\ell}^{\abs{n}}(\PolarCos) \mathcal{T}(\Azimuthal),
             \end{equation}
@@ -270,61 +270,75 @@
                 Typically, the directional variable cannot be treated exactly in deterministic methods.
                 There are two common methods of approximating the solution as a function of direction $\dir$:
                 \begin{enumerate}
-                    \item{\ac{PN} Expansion}
-                    \item{\ac{SN}}
+                    \item{\acf{PN} Expansion}
+                    \item{\acf{SN}}
                 \end{enumerate}
 
-                Expansion in spherical harmonics, often referred to as \acs{PN}, is one of the oldest transport methods, where $N$ indicates the order of the expansion.
-                In this method, the angular flux is expanded as a linear combination of spherical harmonics moments.
-                The simplest expansion of order 1, reduces to the diffusion approximation.
+                \paragraph{\acf{PN} Expansion} {
+                  Expansion in spherical harmonics, often referred to as \acs{PN}, is one of the oldest transport methods, where $N$ indicates the order of the expansion.
+                  In this method, the angular flux is expanded as a linear combination of spherical harmonics moments:
+                  \begin{equation}\label{eq:PN:PN Infinite Expansion}
+                    \aflux = \suml[l=0][\infty]\suml[n=-l][l]\afluxmom\SH,
+                  \end{equation}
+                  where the spherical harmonics,$\SH$, are defined by \cref{eqs:NTT:Spherical Harmonics Definitions}.
+                  No approximation has been introduced at this point, but in practice this series is truncated at some finite number $N$:
+                  \begin{equation}\label{eq:PN:PN Expansion}
+                    \aflux \approx \suml[l=0][N]\suml[n=-l][l]\afluxmom\SH.
+                  \end{equation}
 
-                The \acf{SN} method is a discretization of the directional variable $\dir$ by a quadrature.
-                \begin{subequations}\label[subeqs]{eqs:NTT:Directional Quadrature}
-                    Let the $\angquad$ be the set of discrete directions, and weights,
-                    \begin{equation}\label{eq:NTT:Directional Quadrature Definition}
-                        \angquad \defined \left\{\dirm \in \{\dir_1,\dir_2,\ldots,\dir_N\}, \wt \in \{\wt[1], \wt[2], \ldots,\wt[N]\}\right\},
-                    \end{equation}
-                    such that a directional integration can be approximated as
-                    \begin{equation}\label{eq:NTT:Directional Quadrature Integration}
-                        \intl[\fourpi]f(\dir)\ddir \approx \fourpi\suml[m\in\angquad]\wt f(\dirm),
-                    \end{equation}
-                    where
-                    \begin{equation}\label{eq:NTT:Directional Quadrature Weight Sum}
-                        \suml[m\in\angquad]\wt = 1.
-                    \end{equation}
-                \end{subequations}
+                  The \ac{PN} equations can be found by multiply the multi-group transport equation (\cref{eq:NTT:MGEV Transport Problem}) by $\SH$ for each valid $(l,n)$ pair under the specified order, and integrating over $\fourpi$.
+                  This yields a system of $(N+1)^2$ equations for each energy group; the number of equations increases quadratically with increasing orders, making \ac{PN} methods less feasible for large calculations.
+                }
 
-                There are two common forms of quadrature sets that are commonly used in transport calculations: level-symmetric and product quadratures.
-                The level-symmetric quadratures include directions that are evenly distributed over the unit-sphere; this is optimal in situations where each direction has similar variation.
-                However, typical reactor designs have significantly less variation in the axial ($z$) direction which fuel rods are oriented along.
-                In this situation, neutrons with directions close to the $z$-axis are modeled poorly because there are few azimuthal angles at these polar levels, as is demonstrated in \cref{fig:NTT:S8 Quadrature}.
-                These steep polar angles are important in reactor analysis due to self-shielding effects, which are strongly dependent on polar angle. % [CITATION].
+                \paragraph{\acf{SN}}{
+                  The \acf{SN} method is a discretization of the directional variable $\dir$ by a quadrature.
+                  \begin{subequations}\label[subeqs]{eqs:NTT:Directional Quadrature}
+                      Let the $\angquad$ be the set of discrete directions, and weights,
+                      \begin{equation}\label{eq:NTT:Directional Quadrature Definition}
+                          \angquad \defined \left\{\dirm \in \{\dir_1,\dir_2,\ldots,\dir_N\}, \wt \in \{\wt[1], \wt[2], \ldots,\wt[N]\}\right\},
+                      \end{equation}
+                      such that a directional integration can be approximated as
+                      \begin{equation}\label{eq:NTT:Directional Quadrature Integration}
+                          \intl[\fourpi]f(\dir)\ddir \approx \fourpi\suml[m\in\angquad]\wt f(\dirm),
+                      \end{equation}
+                      where
+                      \begin{equation}\label{eq:NTT:Directional Quadrature Weight Sum}
+                          \suml[m\in\angquad]\wt = 1.
+                      \end{equation}
+                  \end{subequations}
 
-                Product quadratures are generated by a multiplicative combination of separate quadrature sets in the azimuthal and polar directions.
-                The azimuthal quadrature set is generated over the domain $[0,2\pi]$, while the polar quadrature set is generated for the polar cosine, $\mu$, over the domain $[-1,1]$.
-                This quadrature generation technique does not suffer from the same issue for steep polar directions, as each polar level has the same number of azimuthal directions.
-                A common choice for the azimuthal quadrature generation is the Chebyshev quadrature, which gives evenly spaced azimuthal angles with equal weights.
-                The polar cosine quadrature set typically uses a Gauss-Legendre quadrature, or an optimized quadrature such as the Tabuchi-Yamamoto quadrature \cite{TabuchiYamamotoQuad}.
-                \Cref{fig:NTT:ChebyshevGauss Quadrature} shows an example of a product quadrature's set of directions using a Chebyshev azimuthal quadrature and Gauss-Legendre polar quadrature.
+                  There are two common forms of quadrature sets that are commonly used in transport calculations: level-symmetric and product quadratures.
+                  The level-symmetric quadratures include directions that are evenly distributed over the unit-sphere; this is optimal in situations where each direction has similar variation.
+                  However, typical reactor designs have significantly less variation in the axial ($z$) direction which fuel rods are oriented along.
+                  In this situation, neutrons with directions close to the $z$-axis are modeled poorly because there are few azimuthal angles at these polar levels, as is demonstrated in \cref{fig:NTT:S8 Quadrature}.
+                  These steep polar angles are important in reactor analysis due to self-shielding effects, which are strongly dependent on polar angle. % [CITATION].
 
-                \begin{figure}[h]
-                    \centering
-                    \begin{subfigure}[t]{0.45\linewidth}
-                        \centering
-                        \includegraphics[width=\linewidth]{S8-Quadrature}
-                        \caption{Level-Symmetric Quadrature ($S_8$)}
-                        \label{fig:NTT:S8 Quadrature}
-                    \end{subfigure}%
-                    \hfill
-                    \begin{subfigure}[t]{0.45\linewidth}
-                        \centering
-                        \includegraphics[width=\linewidth]{ChebyshevGauss}
-                        \caption{Chebyshev-Gauss Product Quadrature with 4 azimuthal and 3 polar angles}
-                        \label{fig:NTT:ChebyshevGauss Quadrature}
-                    \end{subfigure}
-                    \caption{(a) Level-Symmetric and (b) product quadrature direction set examples shown for a single octant of the unit-sphere.}
-                    \label{fig:NTT:Quadrature Examples}
-                \end{figure}
+                  Product quadratures are generated by a multiplicative combination of separate quadrature sets in the azimuthal and polar directions.
+                  The azimuthal quadrature set is generated over the domain $[0,2\pi]$, while the polar quadrature set is generated for the polar cosine, $\mu$, over the domain $[-1,1]$.
+                  This quadrature generation technique does not suffer from the same issue for steep polar directions, as each polar level has the same number of azimuthal directions.
+                  A common choice for the azimuthal quadrature generation is the Chebyshev quadrature, which gives evenly spaced azimuthal angles with equal weights.
+                  The polar cosine quadrature set typically uses a Gauss-Legendre quadrature, or an optimized quadrature such as the Tabuchi-Yamamoto quadrature \cite{TabuchiYamamotoQuad}.
+                  \Cref{fig:NTT:ChebyshevGauss Quadrature} shows an example of a product quadrature's set of directions using a Chebyshev azimuthal quadrature and Gauss-Legendre polar quadrature.
+
+                  \begin{figure}[h]
+                      \centering
+                      \begin{subfigure}[t]{0.45\linewidth}
+                          \centering
+                          \includegraphics[width=\linewidth]{S8-Quadrature}
+                          \caption{Level-Symmetric Quadrature ($S_8$)}
+                          \label{fig:NTT:S8 Quadrature}
+                      \end{subfigure}%
+                      \hfill
+                      \begin{subfigure}[t]{0.45\linewidth}
+                          \centering
+                          \includegraphics[width=\linewidth]{ChebyshevGauss}
+                          \caption{Chebyshev-Gauss Product Quadrature with 4 azimuthal and 3 polar angles}
+                          \label{fig:NTT:ChebyshevGauss Quadrature}
+                      \end{subfigure}
+                      \caption{(a) Level-Symmetric and (b) product quadrature direction set examples shown for a single octant of the unit-sphere.}
+                      \label{fig:NTT:Quadrature Examples}
+                  \end{figure}
+                }
             }
         }
     }

@@ -12,8 +12,75 @@
   There are many different transport methods which are currently being researched; this chapter seeks to give an overview of several state-of-the-art 3-D transport methods.
 
   \section{S\texorpdfstring{$P_N$}{PN}}{\label{sec:3T:SPN}
+    \DeclareDocumentCommand{\xstr}{ m }{\CrossSection_{tr,#1}}
+    \DeclareDocumentCommand{\xsa}{}{\CrossSection_{a}}
+    \DeclareDocumentCommand{\xst}{}{\CrossSection_{t}}
+    \DeclareDocumentCommand{\xss}{ m }{\CrossSection_{s,#1}}
+    \DeclareDocumentCommand{\fluxm}{ m }{ \phi_{#1} }
+    \DeclareDocumentCommand{\Q}{}{Q}
+    \DeclareDocumentCommand{\D}{}{}
 
+
+    The \acf{SPN} method was introduced by \citet{SPN} in 1961, and was seen as a middle ground between diffusion and transport \cite{Mcclarren2010}.
+    The \ac{SPN} equations were first derived by examining the form of the 1-D \ac{PN} equations; in fact, the 1-D \ac{SPN} and \ac{PN} equations are equivalent.
+    While the original derivation \citet{SPN} lacked theoretical justification, the \ac{SPN} method has since been shown to be an asymptotic correction to standard diffusion theory \cite{Larsen2010}.
+
+    The mono-energetic planar geometry \ac{PN} equations can be written as
+    \begin{subequations}\label[subeqs]{eqs:eqs}
+      \begin{equation}\label{eq:SPN:Planar PN}
+        \deriv{}{z}\left[\frac{l}{2l+1}\fluxm{l-1} + \frac{l+1}{2l+1}\fluxm{l+1}\right] + \xst\fluxm{l} = \xss{l}\fluxm{l} + \Q\delta_{l,0}, \quad\text{for}\quad 0\leq l\leq N,
+      \end{equation}
+      where $\xss{l}$ is the lth order scattering moment and $\Q$ is either an external source or fission source.
+    \end{subequations}
+    The expansion is generally truncated by assuming that $\fluxm{N+1}=0$.
+
+    The 1-D $P_1$ equation can be written as
+    \begin{equation}\label{eq:SPN:P1}
+      -\deriv{}{z}\D\deriv{}{z}\fluxm{0} + \xst\fluxm{0} = \xss{0}\fluxm{0} + \Q,
+    \end{equation}
+    where
+    \begin{equation}\label{eq:SPN:Diffusion Coefficient}
+      \D \defined \frac{1}{3(\xst-\xss{1})}.
+    \end{equation}
+    The 3-D $P_1$ equations simply replace the derivative term operator of \cref{eq:SPN:P1} with the 3-D diffusion operator,
+    \[
+      \deriv{}{z}\D\deriv{}{z} \to \grad\vdot\D\grad,
+    \]
+    yielding the 3-D $P_1$ (diffusion) equation:
+    \begin{equation}\label{eq:SPN:3D Diffusion}
+      -\grad\vdot\D\grad\fluxm{0} + \xst\fluxm{0} = \xss{0}\flyxm{0} + \Q.
+    \end{equation}
+
+    This simple relation between 1-D and 3-D equations only holds for the special $P_1$ case.
+    The \ac{SPN} method uses a similar modification for higher-order $P_N$ equations.
+    This results in some lost accuracy compared to \ac{PN}, but the \ac{SPN} equations are significantly simpler to solve \cite{SPN,Mcclarren2010}.
+    Unlike \ac{PN}, \ac{SPN} equations do not converge to the transport solution as $N\to\infty$, but do generally have higher accuracy than diffusion (for orders of $N > 1$).
+    Generally, S$P_3$ or S$P_5$ are considered to have sufficient accuracy, and are generally less computationally intensive than transport methods.
+
+    The mono-energetic \ac{SPN} equations can be written as
+    \begin{subequations}\label[subeqs]{eqs:SPN:SPN}
+      \begin{equation}\label{eq:SPN:SPN 0}
+        -\grad\vdot\frac{1}{3\xstr{1}}\grad\fluxm{0} -\grad\vdot\frac{2}{3\xstr{1}}\grad\fluxm{2} + \xstr{0}\fluxm{0} = \Q,
+      \end{equation}
+      \begin{aequation}\label{eq:SPN:SPN N}
+        &-\grad\vdot\left(\frac{n(n-1)}{(2n+1)(2n-1)\xstr{n-1}}\right)\grad\fluxm{n-2}\\
+        &-\grad\vdot\left(\frac{(n+1)(n+2)}{(2n+1)(2n+3)\xstr{n+1}}\right)\grad\fluxm{n+2}\\
+        &-\grad\vdot\left(\frac{n^2}{(2n+1)(2n-1)\xstr{n-1}} + \frac{(n+1)^2}{(2n+1)(2n+3)\xstr{n+1}}\right)\grad\fluxm{n}\\
+        &+\xstr{n}\fluxm{n} = 0, \quad{\text{for}\quad n=2,4,...,N-1},
+      \end{aequation}
+      where
+      \begin{equation}\label{eq:SPN:xstr}
+        \xstr{n} \defined \CrossSection_t - \CrossSection_{s,n}.
+      \end{equation}
+    \end{subequations}
+
+    [CURRENT RESEARCH]
   }
+
+  % Here just to make sure previous macros didn't screw anything up
+  \input{macros/multigroup.tex}
+  \input{macros/DiscreteOrdinates.tex}
+  \input{macros/MOC.tex}
 
   \section{2D/1D Methods}{\label{sec:3T:2D/1D Methods}
     isotropic \& anisotropic
