@@ -8,7 +8,7 @@
     The \acf{MOC} \cite{Askew1972} is based on solving the transport equation along many characteristic tracks or rays.
     These rays are followed through the reactor geometry in a process generally referred to as ``ray-tracing''.
     The placement and storage of these tracks is significant with respect to both calculation accuracy as well as computational performance.
-    This section servers to give an overview of the ray-tracing methods that have been developed, as well as motivate the use of the proposed 3-D ``MacroRay'' ray-tracing method.
+    This chapter servers to give an overview of the ray-tracing methods that have been developed, as well as motivate the use of the proposed 3-D ``MacroRay'' ray-tracing method.
 
     \section{Modular Ray-Tracing}{\label{sec:RT:Modular Ray-Tracing}
         The most straight-forward approach to perform a \ac{MOC} calculation is to create rays which span the domain of the transport problem being solved.
@@ -98,6 +98,10 @@
             \label{fig:RT:Equidisant vs Macroband}
         \end{figure}
 
+        The \ac{MRT} ray-tracing technique does not consider the internal geometry when laying down tracks.
+        For a specified ray-spacing and module size, the tracks are the same regardless of the internal mesh.
+        The macroband takes an entirely different approach, and the internal mesh is the primary guide for laying down the tracks.
+
         Macrobands are determined by the computational mesh; for large heterogeneous assemblies, this results in very thin macrobands, which would result in significantly increased computation time.
         In the related \ac{CDP} \citet{Hong1999} proposed that macroband ray-tracing data only be generated on unique subsystems.
         Similarly, \citet{Yamamoto2005} proposed the \ac{MRMB} in which macroband ray-tracing data is only generated for unit-cells.
@@ -137,6 +141,67 @@
         \citet{Yamamoto2005} found that the macroband method (using a Gauss-Legendre quadrature for ray placement), was more accurate than conventional ray-tracing methods with equidistant ray-spacing.
         \citet{Fevotte2007} proposed a new tracking technique similar to the macroband method, in which rays (placed equidistantly) are divided into sub-bands, which are effectively \emph{locally} projected macrobands, and the average flux of the sub-bands is propagated along each ray.
         Studies of ray-spacing with macroband, and \citetp{Fevotte2007} method, have indicated that coarser ray-spacing can be used while maintaining accuracy \cite{Yamamoto2005,Fevotte2007,Yamamoto2008}.
+
+        \subsection{Interface Flux Approximations}{\label{ssec:RT:Interface Flux Approximations}
+          The macroband ray-tracing method is fundamentally incompatible with \acf{DNPL}.
+          Although ray-tracing can be performed on small unique subsystems, similarly to the \ac{MRT} method, the rays on module interfaces are no longer guaranteed to align.
+          This makes it necessary for an approximation of the spatial dependence of the angular flux on these interfaces.
+          However, there are multiple different options for performing this approximation.
+
+          \citet{Yamamoto2005} proposed performing a linear of the flux on these interfaces.
+          However, without adjustment, linear interpolation will not preserve the total flux passing through the surface; which is an important aspect when considering acceleration techniques such as \ac{CMFD}.
+          For 3-D \ac{CDP} with uniformly spaced rays, \citet{Liu2014} proposed a sub-boundary averaging method.
+          This method partitioned each interface into sub-boundaries, with the size depending on the interface and the direction; each sub-boundary represented a single angular flux value for each energy group, that was the average of the angular flux of all rays with centroids that intersected the sub-boundary.
+          However, because only the centroids of each ray are considered using ray-spacing that is coarse compared to the sub-boundary size it not feasible.
+
+          An earlier work \cite{Hong1999} used a similar 2-D sub-boundary averaging (though not directionally dependent); but rather than only considering the ray centroids, it considered the ``projection'' of rays.
+          The ``projection'' being the area on the surface which would be intersected by the ray if it were infinite in length.
+          Then, partial intersections of the projection and sub-boundaries are considered.
+          This allows for coarse ray-spacing to be used without as much accuracy on the interfaces as the previously mentioned method.
+
+          \Cref{fig:RT:2D SubBoundarySurfaceFlux} visually depicts the surface projections of 2-D rays on a single surface.
+          This figure will be used as an example for the equations of this sub-boundary averaging method.
+          $\psi_s^1$ should be a linear combination of the ray fluxes $\psi_r^1$ and $\psi_r^2$, based on their fractional areas, $A_1^1$ and $A_2^1$, respectively.
+          Let us denote a sub-boundary as $S_i$ where $i$ is some index, and a ray projection as $R_j$ where $j$ is some index.
+          We expect the surface flux to be a linear combination of the ray fluxes which intersect it; this can be expressed mathematically as
+          \begin{equation}\label{eq:RT:SubBoundary Flux}
+            \psi_s^i = \suml[j] \frac{A(S_i\cap R_j)}{A(S_i)}\psi_r^j,
+          \end{equation}
+          where $A$ denotes a function returning the area of the argument, and $\cap$ indicates the intersection of two objects.
+          To show that this preserves the total neutron flux through the surface, consider the total flux through the surface
+          \begin{aequation}\label{eq:RT:SubBoundary Flux Total}
+            \psi_t &= \suml[i] A(S_i)\psi_s^i\\
+                   &= \suml[i]A(S_i)\suml[j]\frac{A(S_i\cap R_j)}{A(S_i)}\psi_r^j\\
+                   &= \suml[i]\suml[j]A(S_i\cap R_j)\psi_r^j\\
+                   &= \suml[j]A(R_j)\psi_r^j,
+          \end{aequation}
+          where this last line is simply the summation of all ray fluxes.
+          The reverse problem, computing the ray fluxes from the sub-boundary fluxes, is found to be
+          \begin{equation}\label{eq:RT:Ray Flux}
+            \psi_r^j = \suml[i] \frac{A(S_i\cap R_j)}{A(R_j)}\psi_s^i.
+          \end{equation}
+          \Cref{fig:RT:2D SubBoundarySurfaceFlux} also highlights a problem with only considering the centroids of each ray.
+          Ray 2 is split nearly evenly between sub-boundaries 1 and 2.
+          If only the centroids was considered, all ray 2's flux would be put into sub-boundary 2 and in the reverse direction all it's flux would come from sub-boundary 2.
+          If the flux is relatively uniform along the surface direction, this is fine; however, if there are discontinuities in the flux then this can lead to considerable inaccuracies.
+
+          \citet{Liu2014} did introduce a very useful concept to sub-boundary averaging, with the direction-dependence in the number of sub-boundaries on each surface.
+          Rather than using a fixed number of sub-boundaries on each surface, it is expected that directions which are closer to being perpendicular to the surface will have larger variation, and thus need more sub-boundaries.
+          The number of sub-boundaries on each surface can be computed using the dimensions of the surface, and the direction.
+          Similarly to \ac{MRT}, the number of sub-boundaries on a surface is constrained to be an integer.
+          The \ac{MRT} equations, \cref{eqs:MRT:Nx/y}, can be used to determine the number of sub-boundaries on the $x$ and $y$ surfaces.
+
+          \begin{figure}
+              \centering
+              \def\svgwidth{0.75\linewidth}
+              \input{\figpath/SubBoundarySurfaceFlux.pdf_tex}
+              \caption{
+                Example of sub-boundary surface flux for a single surface.
+                Ray flux denoted with the $r$ subscript, and surface flux denoted with $s$ subscript.
+                Ray projection areas are split by sub-boundaries in the line to the right of the impacted surface.
+                \label{fig:RT:2D SubBoundarySurfaceFlux}}
+          \end{figure}
+        }
     }
     \section{Three-Dimensional Ray-Tracing Techniques}{\label{sec:RT:Three-Dimensional Ray-Tracing Techniques}
         The \ac{MOC} is naturally extended to three-dimensional calculations along characteristic tracks spanning three-dimensions.
@@ -188,45 +253,14 @@
             Additionally, this means that the exponential functions ($F_1(\segopt)$ for \ac{FSMOC}), only need to be calculated once as well.
             This adds irregularity to the data accessing, which is generally not optimal for computation, and thus is only expected to improve calculation speeds if a large number of chords can be classified \cite{Sciannandrone2016}.
             Indeed, it was observed that most rays (96\%) could be categorized as ``V-chords'' which intersect two vertical surfaces, which led to a 40\% reduction in transport sweep time \cite{Sciannandrone2016}.
+            Additionally, chord-classification allows for reduced track-storage, reducing memory by up to 93\%.
         }
         \subsection{On-the-Fly Ray-Tracing}{\label{ssec:RT:On-the-Fly Ray-Tracing}
-            The on-the-fly ray-tracing technique \cite{Gunow2016} uses some of the ideas of the chord-classification method \cite{Sciannandrone2016}, and only stores two-dimensional track information.
+            The on-the-fly ray-tracing technique \cite{Gunow2016} uses some of the ideas of the chord-classification method \cite{Sciannandrone2016}, but only stores two-dimensional track information.
             All three-dimensional tracks are generated and temporarily stored during the transport sweep (on-the-fly), leading to significant memory savings (94\% reduction), with minimal computational overhead \cite{Gunow2016}.
-        }
-        \subsection{Macroray}{\label{ssec:RT:Macroray}
-            The \emph{macroray} method is a three-dimensional extension of the two-dimensional macroband method, and is a central contribution of this work.
-            This method has been implemented as part of this work, and, to the best of the author's knowledge, has never been studied.
-            The macroray is a extension of the macroband into three-dimensions, in which along each radial ray the macroband method is used to generate axial rays on the characteristic plane.
-            This follows the general procedure used for three-dimensional ray-tracing, but a limitation of this approach is explained in more detail in \cref{sec:RT:Interface Flux Approximations}.
-            In three-dimensions, rays can more generally be separated into ``parallel pipes'', to simplify notation these are referred to as macrorays.
-
-            The motivation for investigating this method is for three primary reasons.
-            The first, is that 2-D results \cite{Yamamoto2005,Fevotte2007,Yamamoto2008} have indicated that the macroband method allows for coarser ray-spacing (thus fewer rays) while maintaining accuracy.
-            This is expected to increase computational efficiency, and lead to faster \ac{MOC} calculations.
-            However, an extension to three-dimensions, if coarser ray-spacing can be used in both the axial and radial directions, the increase in computational efficiency is expected to be greater.
-
-            Second, \ac{MRT} methods require adjustments to the directional quadrature, which is expected to decrease accuracy of numerical integrals over directions \cite{Kochunas2013}.
-            The macroband and macroray methods require no such adjustment.
-            Typically, it is the polar angle that has a more advanced quadrature (Gauss-Legendre, or Tabuchi-Yamamoto \cite{TabuchiYamamotoQuad}), and is thus more sensitive to perturbations than the azimuthal angles.
-            Without the perturbation of the polar (and azimuthal) quadratures, it may be possible to maintain accuracy while using fewer directions than is possible with 3-D \ac{MRT} methods.
-
-            Finally, \ac{MRT} methods require that the same ray-spacing parameters are used throughout the entire problem domain.
-            Problems which have strong absorbers typically require a very fine mesh \cite{Fitzgerald2019}, which then requires that finer ray-spacing be used.
-            This finer ray-spacing, which may only be required for a small percentage of the problem domain, is then used for the entire domain, leading to a significant increase in the number tracks.
-            The macroband and macroray methods allow for use of different ray-spacing parameters in each subsystem; additionally, because macrobands are based on the computational mesh, an effectively finer ray-spacing will automatically be generated due to the fine spatial mesh.
-            This allows for densely spaced tracks where they are necessary, but more coarsely spaced tracks where they are not; this is expected to lead to significant reduction in the number of tracks in such problems.
-
-            Another consideration in three-dimensional locally axial extruded geometries is the chord-classification method.
-            In the macroray method, rays are separated into the macrorays, which are guaranteed to be of the same class in the chord-classification method;
-            this macroray classification is depicted in \cref{fig:RT:Chord-Classification Macroray}
-
-            \begin{figure}[h]
-                \centering
-                \def\svgwidth{0.45\linewidth}
-                \input{\figpath/ChordClassificationMacroBand.pdf_tex}
-                \caption{3-D example of chord-classification with Macroray ray-tracing. Colored (red and blue) characteristic tracks represent groups of ``V-chords'', rays between two vertical surfaces.}
-                \label{fig:RT:Chord-Classification Macroray}
-            \end{figure}
+            While leading to significant (compared to the storage of all rays) memory reduction, this approach does not see the 40\% run-time improvement that the chord-classification method has.
+            It would also be a fairer comparison to compare the memory storage compared to the chord-classification method, which also showed significant improvement over traditional storage techniques.
+            The chord-classification technique already boasted a 93\% reduction in track-storage memory \cite{Sciannandrone2016}; while on-the-fly ray-tracing allows for additional reduction, it is not a significant improvement over chord-classification.
         }
         \subsection{Other Approaches}{\label{ssec:RT:Other Approaches}
             \citet{Giho2008} proposed the axially simplified \ac{MOC} in three-dimensional calculations, which examines characteristic planes (two-dimensional tracks).
@@ -244,15 +278,15 @@
         In global ray-tracking procedures, calculations are most often carried out by examining a ray from end to end.
         The angular flux at the ends can be found from the boundary conditions.
         Along each segment, a transmission calculation can be carried out (\cref{eqs:MOC:FSA:Angular Flux Solution,eqs:MOC:LSA:Angular Flux Solution}), and flux moments can be accumulated.
-        This procedure is shared by the \ac{MRT} which constructs global rays (long rays) by linking modular rays.
+        This procedure is shared by the \ac{MRT} which constructs global rays (long rays) by linking modular rays, as shown in \cref{fig:MRT:Modular Ray Tracing}.
         This allows for each ray calculation to be carried out in parallel, since each ray calculation is effectively independent \cite{Kochunas2013}; though special considerations must be taken to avoid race-conditions in the accumulation of moments.
 
         However, in the macroband and macroray methods, transport sweeping is carried out in a different manner.
         It is not possible to generate a continuous characteristic track spanning the global domain when using \ac{MRMB} techniques.
         Thus, transport calculations are carried out in a pin-by-pin (assuming pins are the subsystems on which track data is generated) basis.
-        For each pin calculation, boundary or interface angular flux is loaded, and transmission/accumulation calculations are carried out by sweeping over the tracks.
-        This can be done by considering each track separately, or by considering each macroray which are guaranteed to pass through the same regions.
-        The angular flux on the exiting interface must be approximated, this can be done by interpolation \cite{Yamamoto2005}, or sub-boundary averaging \cite{Liu2014}.
+        For each pin calculation, boundary or interface angular flux can be computed as described in \cref{ssec:RT:Interface Flux Approximations}, and transmission/accumulation calculations are carried out by sweeping over the tracks.
+        This can be done by considering each track separately, or by considering each macroband which are guaranteed to pass through the same regions.
+        The angular flux on the exiting interface must be approximated, this can be done as described in \cref{ssec:RT:Interface Flux Approximations}.
 
         Pin-by-pin transport calculations must be carried out in a specific order, by considering the dependencies of angular flux.
         \Cref{fig:RT:Macroband Sweep Order} displays the sweeping order for a $2\times2$ array of pins in 2-D; this order is significantly different than the ray-by-ray order used in traditional \ac{MRT}-based \ac{MOC} calculations.
@@ -260,41 +294,11 @@
 
         \begin{figure}[h]
             \centering
-            \def\svgwidth{0.65\linewidth}
+            \def\svgwidth{0.45\linewidth}
             \input{\figpath/MacroBandSweepOrder.pdf_tex}
             \caption{Pin-by-pin sweeping order for a $2\times2$ domain with colors representing the order starting from the bottom left pin.}
             \label{fig:RT:Macroband Sweep Order}
         \end{figure}
-    }
-    \section{Interface Flux Approximations}{\label{sec:RT:Interface Flux Approximations}
-      The macroband and macroray ray-tracing methods are fundamentally incompatible with \acf{DNPL}.
-      Although ray-tracing can be performed on smaller unique subsystems, similarly to the \ac{MRT} method, the rays on module interfaces are no longer guaranteed to be aligned.
-      Approximations to the angular flux at these interfaces are thus necessary.
-      \citet{Yamamoto2005} proposed performing linear interpolation of flux on these interfaces in the macroband method.
-      However, linear interpolation, without adjustment, does not guarantee that the net current is conserved; which is an important aspect when considering \ac{CMFD} acceleration techniques.
-
-      \citet{Liu2014} proposed a sub-boundary averaging method for use with 3-D \ac{CDP}.
-      Although this technique was used in the context of a modular ray-tracing approach, it can be adapted to conserve net current on surfaces.
-      The proposed sub-boundary averaging method partitioned surfaces into sub-boundaries.
-      Each sub-boundary was assigned a single angular flux value, which was the average of the angular flux of all rays with centroids that intersected the sub-boundary.
-
-      Only the centroid of the ray was considered, and not the actual shape of the intersection between the ray and surface.
-      By not considering the shape of the ray, only a very fine ray-spacing can be used.
-      If one considers the shape of the ray, and stores partial contributions to each surface, a coarser ray-spacing can be used, although this is a more expensive operation.
-      This approach was the one taken for this work, and the details of this averaging scheme are examined in the following subsections.
-
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % 2-D Sub-Boundary Averaging
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \subsection{2-D Sub-Boundary Averaging}{\label{ssec:RT:2-D Sub-Boundary Averaging}
-        \blindtext[4]
-      }
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      % 3-D Sub-Boundary Averaging
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \subsection{3-D Sub-Boundary Averaging}{\label{ssec:3-D Sub-Boundary Averaging}
-        \blindtext[8]
-      }
     }
 
     % References
