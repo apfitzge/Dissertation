@@ -45,7 +45,7 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Spatial Decomposition in MPACT}{\label{sec:Spatial Decomposition:Spatial Decomposition in MPACT}
     The MPACT code uses the \ac{MOC} for neutronics calculations, and was originally developed for direct whole-core simulation of \acp{LWR}.
-    As mentioned in \cref{sec:RT:Modular Ray-Tracing}, MPACT uses the modular ray-tracing \cite{Saji2000} to significantly reduce track memory usage.
+    As mentioned in \cref{ssec:RT:Modular Ray-Tracing}, MPACT uses the modular ray-tracing \cite{Saji2000} to significantly reduce track memory usage.
     The ray-tracing modules are small geometries that are often repeated in the reactor; these ray-tracing modules are used as the smallest unit for spatial decomposition in MPACT \cite{StimpsonPartitioning2017}.
     These ray-tracing modules are typically an axial slice of a quarter of a full fuel assembly, as shown in \cref{fig:Spatial Decomposition:5a-2d abstraction}
     The core consists of a structured grid of these modules in which each module has the same dimensions but may have different numbers of computational cells.
