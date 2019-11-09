@@ -1,453 +1,458 @@
 \chapter{Neutron Transport Theory}{\label{ch:Neutron Transport Theory}
-    \input{macros/continuous.tex}   % Continuous space, direction, and energy quantities
-    \def\figpath{chapters/TransportTheory/figures/}
-    \graphicspath{ {\figpath} }
+  \input{macros/continuous.tex}   % Continuous space, direction, and energy quantities
+  \def\figpath{chapters/TransportTheory/figures/}
+  \graphicspath{ {\figpath} }
 
-    In this chapter, the basic theory behind the neutron transport equation, and the numerical methods used to solve it are introduced.
+  In this chapter, the basic theory behind the neutron transport equation, and the numerical methods used to solve it are introduced.
 
-    \section{Neutron Transport Equation}{\label{sec:NTT:Neutron Transport Equation}
-        The mean behavior of neutrons in a (steady-state) system are described by the Boltzmann transport equation:
-        \begin{aequation}\label{eq:NTT:Boltzmann Transport}
-                &\Big[\dir\vdot\grad + \xst[\loc][E]\Big]\aflux[\loc][\dir][E]
-                    = \\&\qquad\qquad
-                    \rfourpi\Bigg[
-                        \source[\loc][\dir][E]\\&\qquad\qquad
-                        + \intl[0][\infty]\intl[\fourpi]\xss[][\loc][\dirprime\vdot\dir][\Eprime\to E]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\&\qquad\qquad
-                        + \spect\intl[0][\infty]\nufis[\loc][\Eprime]\intl[\fourpi]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}
-                    \Bigg],
-        \end{aequation}
-        \begin{equation*}
-            \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),\quad \forall t\geq 0,
-        \end{equation*}
-        where $\loc$ is the position vector, $\dir$ is the direction vector, $E$ is the neutron energy, $\CrossSection$ quantities are the macroscopic cross sections, $\AngularFlux$ is the angular flux, $\nu$ is the average number of neutrons produced per fission, and $\Spectrum$ is the fission neutron energy spectrum.
+  \section{Neutron Transport Equation}{\label{sec:NTT:Neutron Transport Equation}
+    The mean behavior of neutrons in a (steady-state) system are described by the Boltzmann transport equation:
+    \begin{aequation}\label{eq:NTT:Boltzmann Transport}
+      &\Big[\dir\vdot\grad + \xst[\loc][E]\Big]\aflux[\loc][\dir][E]
+        = \\&\qquad\qquad
+        \rfourpi\Bigg[
+          \source[\loc][\dir][E]\\&\qquad\qquad
+          + \intl[0][\infty]\intl[\fourpi]\xss[][\loc][\dirprime\vdot\dir][\Eprime\to E]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\&\qquad\qquad
+          + \spect\intl[0][\infty]\nufis[\loc][\Eprime]\intl[\fourpi]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}
+      \Bigg],
+    \end{aequation}
+    \begin{equation*}
+      \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),\quad \forall t\geq 0,
+    \end{equation*}
+    where $\loc$ is the position vector, $\dir$ is the direction vector, $E$ is the neutron energy, $\CrossSection$ quantities are the macroscopic cross sections, $\AngularFlux$ is the angular flux, $\nu$ is the average number of neutrons produced per fission, and $\Spectrum$ is the fission neutron energy spectrum.
 
-        The position vector, $\loc$, is a column vector of the spatial coordinates:
-        \begin{equation}\label{eq:NTT:Location Vector}
-            \loc \defined \begin{bmatrix}x\\y\\z\end{bmatrix}.
-        \end{equation}
-        The direction vector, $\dir$, is a column unit-vector which gives the direction of flight for neutrons, and is defined by
-        \begin{subequations}\label[subeqs]{eqs:NTT:Direction Definitions}
-            \begin{equation}\label{eq:NTT:Direction Vector}
-                \dir \defined
-                    \begin{bmatrix}
-                        \Direction_x\\\Direction_y\\\Direction_z
-                    \end{bmatrix}
-                    =
-                    \begin{bmatrix}
-                        \sqrt{1-\PolarCos^2}\cos(\Azimuthal)\\
-                        \sqrt{1-\PolarCos^2}\sin(\Azimuthal)\\
-                        \PolarCos
-                    \end{bmatrix},
-            \end{equation}
-            where $\Azimuthal$ is the azimuthal angle, and $\PolarCos$ is the cosine of the polar angle $\Polar$,
-            \begin{equation}\label{eq:NTT:Polar Cosine}
-                \PolarCos \defined \cos(\Polar).
-            \end{equation}
-        \end{subequations}
-        This spatial and angular coordinates system is depicted visually in \cref{fig:NTT:Transport Coordinate System}.
+    The position vector, $\loc$, is a column vector of the spatial coordinates:
+    \begin{equation}\label{eq:NTT:Location Vector}
+      \loc \defined \begin{bmatrix}x\\y\\z\end{bmatrix}.
+    \end{equation}
+    The direction vector, $\dir$, is a column unit-vector which gives the direction of flight for neutrons, and is defined by
+    \begin{subequations}\label[subeqs]{eqs:NTT:Direction Definitions}
+      \begin{equation}\label{eq:NTT:Direction Vector}
+        \dir \defined
+          \begin{bmatrix}
+            \Direction_x\\\Direction_y\\\Direction_z
+          \end{bmatrix}
+          =
+          \begin{bmatrix}
+            \sqrt{1-\PolarCos^2}\cos(\Azimuthal)\\
+            \sqrt{1-\PolarCos^2}\sin(\Azimuthal)\\
+            \PolarCos
+          \end{bmatrix},
+      \end{equation}
+      where $\Azimuthal$ is the azimuthal angle, and $\PolarCos$ is the cosine of the polar angle $\Polar$,
+      \begin{equation}\label{eq:NTT:Polar Cosine}
+        \PolarCos \defined \cos(\Polar).
+      \end{equation}
+    \end{subequations}
+    This spatial and angular coordinates system is depicted visually in \cref{fig:NTT:Transport Coordinate System}.
+
+    \begin{figure}[h]
+      \centering
+      \def\svgwidth{0.4\linewidth}
+      \input{\figpath/TransportCoordinateSystem.pdf_tex}
+      \caption{Depiction of the spatial and directional coordinate system used in the neutron transport equation.}
+      \label{fig:NTT:Transport Coordinate System}
+    \end{figure}
+
+    The transport equation, given by \cref{eq:NTT:Boltzmann Transport}, is an equation that represents the balance of neutrons.
+    The streaming term, $\dir\vdot\grad\aflux$, gives the rate at which neutrons are moving in or out of the of a point in phase-space due to motion.
+    The collision term, $\xst[\loc][E]\aflux$, gives the rate at which neutrons have interactions (collisions) with a nucleus of the surrounding material.
+    The source terms make up the right-hand side of the equation, and are separated into three components: an external source, the scattering source, and the fission source.
+    The scattering source, $\intl[0][\infty]\intl[\fourpi]\xss[][\loc][\dirprime\vdot\dir][\Eprime\to E]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}$, gives the rate at which neutrons are scattered into the given direction and energy at a set point in space.
+    The fission source, $\spect\intl[0][\infty]\nufis[\loc][\Eprime]\intl[\fourpi]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}$, gives the production rate of neutrons due to fission events.
+    The vast majority of fission events are prompt, though a small fraction of fission events emit \emph{delayed} neutrons.
+    Generally, in steady-state calculations the difference between prompt and delayed fission neutrons is ignored.
+    However, for transient calculations, capturing this difference is essential.
+    The external source, $\source[\loc][\dir][E]$, is a generic term that accounts for neutrons produced by all other processes that are not dependent on the angular flux.
+
+    Generally, reactor physicists are interested in reaction rates, that are useful for determining power production, rather than the angular flux.
+    A reaction rate at a specific point, direction, and energy can be computed as the product of the reaction cross section and the angular flux.
+    Integration over a volume, energy range, and direction gives a total reaction rate.
+    These quantities are the primary figures of merit for engineering applications.
+    For convenience, it is useful to define derived quantities that are used in these calculations.
+    The \emph{scalar flux}
+    \begin{equation}\label{eq:NTT:Scalar Flux Definition}
+      \sflux \defined \intl[\fourpi]\aflux\ddir,
+    \end{equation}
+    is the zeroth order angular moment.
+    The neutron \emph{current} is a vector quantity, and is the first order angular moment of the angular flux
+    \begin{equation}\label{eq:NTT:Current Definition}
+      \current \defined \intl[\fourpi]\dir\aflux\ddir.
+    \end{equation}
+    Generally, the angular moments of the angular flux are defined as
+    \begin{equation}\label{eq:NTT:Angular Flux Moments}
+      \afluxmom \defined \intl[\fourpi]\SH\aflux\ddir,
+    \end{equation}
+    where $\SH$ are the real spherical harmonics functions defined by
+    \begin{subequations}\label[subeqs]{eqs:NTT:Spherical Harmonics Definitions}
+      \begin{equation}\label{eq:NTT:Real SH Functions}
+        \SH \defined \sqrt{(2-\delta_{n,0})\frac{(\ell-\abs{n})!}{(\ell+\abs{n})!}} P_{\ell}^{\abs{n}}(\PolarCos) \mathcal{T}(\Azimuthal),
+      \end{equation}
+      where $P_{\ell}^{\abs{n}}(\PolarCos)$ is the Ferrer definition \cite{Trlifaj1958} of the associated Legendre Polynomial defined as
+      \begin{equation}\label{eq:NTT:Associated Legendre Polynomial}
+        P_{\ell}^{\abs{n}}(\PolarCos) \defined \left(1-\PolarCos^2\right)^{n/2} \frac{\dif^{n}}{\dif{\PolarCos}^n}P_{\ell}(\PolarCos), \quad n\geq0,
+      \end{equation}
+      and
+      \begin{equation}\label{eq:NTT:SH Azimuthal Dependence}
+        \mathcal{T}(\Azimuthal) \defined
+          \begin{cases}
+            \cos(n\Azimuthal), \quad \text{if}~n\geq0,\\
+            \sin(\abs{n}\Azimuthal), \quad \text{otherwise}.
+          \end{cases}
+      \end{equation}
+    \end{subequations}
+  }
+
+  \section{\texorpdfstring{$k$}{k}-Eigenvalue Problems}{\label{sec:NTT:k-Eigenvalue Problems}
+    One of the most common calculations in reactor analysis is the simulation of reactor systems at operating conditions.
+    A reactor operating at normal conditions is effectively unchanging in time.
+    The common technique for solving this class of problems is to transform \cref{eq:NTT:Boltzmann Transport} into an eigenvalue problem, such that the fission source is scaled to preserve neutron balance:
+    \begin{aequation}\label{eq:NTT:Eigenvalue Transport Problem}
+      \Big[\dir\vdot\grad &+ \xst\Big]\aflux
+        =
+        \rfourpi\Bigg[
+          \source\\
+          &+ \intl[0][\infty]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\\qquad\qquad
+          &+ \frac{\spect}{\keff}\intl[0][\infty]\nufis\sflux[\loc][\Eprime]\dif{\Eprime}
+        \Bigg],
+    \end{aequation}
+    \begin{equation*}
+      \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),
+    \end{equation*}
+    where $\keff$ is the inverse of the largest eigenvalue of the system $\Eigenvalue_1$.
+    The multiplication factor, $\keff$, indicates the criticality of the system.
+    If $\keff$ is one, then the system is \emph{critical} and will remain at the current conditions unless otherwise changed.
+    A $\keff$ less than one means that the system is \emph{subcritical} and indicates the reactor system is unable to sustain the chain reaction of nuclear fission reactions to produce power.
+    Finally, a $\keff$ greater than one indicates that a system is \emph{supercritical} and, if not changed, the neutron population will increase.
+
+    Generally, this class of problems are solved iteratively.
+    This will be discussed in more detail in \cref{sec:NTT:Source Iteration}, which lists algorithms for this iteration process.
+    Still, \cref{eq:NTT:Eigenvalue Transport Problem} has a six-dimensional phase space and cannot, in general systems, be solved exactly.
+    Numerical techniques must be used to obtain approximate solutions to this equation in calculations for realistic reactor systems.
+    In the \cref{sec:NTT:Computational Methods}, an overview of several methods for solving this equation, or approximate forms of this equation, is provided.
+  }
+
+  \section{Computational Methods}{\label{sec:NTT:Computational Methods}
+    Generally, transport methods are divided into two broad categories: stochastic and deterministic.
+    Stochastic methods, also called ``Monte Carlo'' methods, rely on random sampling to emulate the ``life'' of individual neutrons.
+    Deterministic methods rely on discretization of the transport equation.
+    The process of discretization introduces approximations.
+    An overview of these different approaches is given in the following subsections.
+
+    \subsection{Monte Carlo}{\label{ssec:NTT:Monte Carlo}
+      Stochastic, or ``Monte Carlo'' methods are methods that simulate individual neutrons in the system.
+      The simulation of each neutron relies on the random sampling of probability distributions for all aspects such as, where the \emph{free} neutron is born, which direction it is traveling in, the energy of the neutron, the distance to the next collision, and the type of collision event.
+      This process is repeated until the neutron leaks out of the system or is absorbed, possibly inducing a fission event with other neutrons to simulate, for many different neutrons.
+
+      Monte Carlo methods give a probabilistic estimate of the true solution as well as an associated uncertainty in that result.
+      This class of methods is generally considered to be the most accurate because they are capable of representing the phase-space continuously.
+      As more particles are simulated the uncertainty in the estimated solution is reduced.
+
+      For whole-core reactor analysis, the quantities of interest would typically require an extremely large number of individual neutron histories to be simulated, typically trillions.
+      Variance reduction techniques are an area of active research that allow for quantities of interest to be estimated accurately with fewer histories. % [CITATION].
+      However, generally Monte Carlo methods remain too expensive for whole-core calculations, and have challenges with multiphysics and time-dependent problems.
+    }
+
+    \subsection{Deterministic Methods}{\label{ssec:NTT:Deterministic Methods}
+      In deterministic methods, it is generally not possible to represent the phase-space continuously.
+      Thus these methods rely on discretization of the transport equation.
+      In particular, spatial, directional, and energy discretization are common in these methods.
+      \input{macros/multigroup.tex}
+      \subsubsection{The Multigroup Approximation}{\label{sssec:NTT:The Multigroup Approximation}
+        The multigroup approximation is an approximation that is common in nearly every deterministic neutron transport method.
+        This approximation discretizes the energy variable into discrete energy groups.
+        Generally, cross sections have strong dependence on the energy of incident neutrons; this dependence is typically not smooth due to the presence of resonances.
+        Around resonance energies, the cross sections are increased significantly, as observed in \cref{fig:NTT:Cross Section plot}.
 
         \begin{figure}[h]
-            \centering
-            \def\svgwidth{0.4\linewidth}
-            \input{\figpath/TransportCoordinateSystem.pdf_tex}
-            \caption{Depiction of the spatial and directional coordinate system used in the neutron transport equation.}
-            \label{fig:NTT:Transport Coordinate System}
+          \centering
+          \includegraphics[width=0.85\linewidth]{\figpath/U235-8-XST}
+          \caption{Uranium 235 and 238 total microscopic cross sections as a function of energy. Data provided through the ENDF-8.0 nuclear reaction data library \cite{ENDF8}.}
+          \label{fig:NTT:Cross Section plot}
         \end{figure}
 
-        The transport equation, given by \cref{eq:NTT:Boltzmann Transport}, is an equation that represents the balance of neutrons.
-        The streaming term, $\dir\vdot\grad\aflux$, gives the rate at which neutrons are moving in or out of the of a point in phase-space due to motion.
-        The collision term, $\xst[\loc][E]\aflux$, gives the rate at which neutrons have interactions (collisions) with a nucleus of the surrounding material.
-        The source terms make up the right-hand side of the equation, and are separated into three components: an external source, the scattering source, and the fission source.
-        The scattering source, $\intl[0][\infty]\intl[\fourpi]\xss[][\loc][\dirprime\vdot\dir][\Eprime\to E]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}$, gives the rate at which neutrons are scattered into the given direction and energy at a set point in space.
-        The fission source, $\spect\intl[0][\infty]\nufis[\loc][\Eprime]\intl[\fourpi]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}$, gives the production rate of neutrons due to fission events.
-        The vast majority of fission events are prompt, though a small fraction of fission events emit \emph{delayed} neutrons.
-        Generally, in steady-state calculations the difference between prompt and delayed fission neutrons is ignored.
-        However, for transient calculations, capturing this difference is essential.
-        The external source, $\source[\loc][\dir][E]$, is a generic term that accounts for neutrons produced by all other processes that are not dependent on the angular flux.
-
-        Generally, reactor physicists are interested in reaction rates, that are useful for determining power production, rather than the angular flux.
-        A reaction rate at a specific point, direction, and energy can be computed as the product of the reaction cross section and the angular flux.
-        Integration over a volume, energy range, and direction gives a total reaction rate.
-        These quantities are the primary figures of merit for engineering applications.
-        For convenience, it is useful to define derived quantities that are used in these calculations.
-        The \emph{scalar flux}
-        \begin{equation}\label{eq:NTT:Scalar Flux Definition}
-            \sflux \defined \intl[\fourpi]\aflux\ddir,
-        \end{equation}
-        is the zeroth order angular moment.
-        The neutron \emph{current} is a vector quantity, and is the first order angular moment of the angular flux
-        \begin{equation}\label{eq:NTT:Current Definition}
-            \current \defined \intl[\fourpi]\dir\aflux\ddir.
-        \end{equation}
-        Generally, the angular moments of the angular flux are defined as
-        \begin{equation}\label{eq:NTT:Angular Flux Moments}
-            \afluxmom \defined \intl[\fourpi]\SH\aflux\ddir,
-        \end{equation}
-        where $\SH$ are the real spherical harmonics functions defined by
-        \begin{subequations}\label[subeqs]{eqs:NTT:Spherical Harmonics Definitions}
-            \begin{equation}\label{eq:NTT:Real SH Functions}
-                \SH \defined \sqrt{(2-\delta_{n,0})\frac{(\ell-\abs{n})!}{(\ell+\abs{n})!}} P_{\ell}^{\abs{n}}(\PolarCos) \mathcal{T}(\Azimuthal),
-            \end{equation}
-            where $P_{\ell}^{\abs{n}}(\PolarCos)$ is the Ferrer definition \cite{Trlifaj1958} of the associated Legendre Polynomial defined as
-            \begin{equation}\label{eq:NTT:Associated Legendre Polynomial}
-                P_{\ell}^{\abs{n}}(\PolarCos) \defined \left(1-\PolarCos^2\right)^{n/2} \frac{\dif^{n}}{\dif{\PolarCos}^n}P_{\ell}(\PolarCos), \quad n\geq0,
-            \end{equation}
-            and
-            \begin{equation}\label{eq:NTT:SH Azimuthal Dependence}
-                \mathcal{T}(\Azimuthal) \defined
-                    \begin{cases}
-                        \cos(n\Azimuthal), \quad \text{if}~n\geq0,\\
-                        \sin(\abs{n}\Azimuthal), \quad \text{otherwise}.
-                    \end{cases}
-            \end{equation}
-        \end{subequations}
-
-    }
-    \section{\texorpdfstring{$k$}{k}-Eigenvalue Problems}{\label{sec:NTT:k-Eigenvalue Problems}
-        One of the most common calculations in reactor analysis is the simulation of reactor systems at operating conditions.
-        A reactor operating at normal conditions is effectively unchanging in time.
-        The common technique for solving this class of problems is to transform \cref{eq:NTT:Boltzmann Transport} into an eigenvalue problem, such that the fission source is scaled to preserve neutron balance:
-        \begin{aequation}\label{eq:NTT:Eigenvalue Transport Problem}
-                \Big[\dir\vdot\grad &+ \xst\Big]\aflux
-                    =
-                    \rfourpi\Bigg[
-                        \source\\
-                        &+ \intl[0][\infty]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\\qquad\qquad
-                        &+ \frac{\spect}{\keff}\intl[0][\infty]\nufis\sflux[\loc][\Eprime]\dif{\Eprime}
-                    \Bigg],
+        The complicated dependence on energy would require hundreds of thousands of energy points to faithfully represent all the resonances of interest in thermal reactors.
+        Modeling of this many energy points in whole-core simulations would be computationally impractical.
+        The multigroup eigenvalue transport equation can be found by integrating the \cref{eq:NTT:Eigenvalue Transport Problem} over an energy energy interval $[E_{g}, E_{g-1})$, where $E_{g} > E_{g-1}$.
+        \begin{aequation}\label{eq:NTT:MGEV Transport Problem w/ Anisotropic XS}
+          \left[\dir\vdot\grad + \xst[\loc,\dir]\right]\aflux
+            = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss[][\loc][\dir,\dirprime]\aflux[\loc][\dirprime][\gprime]\ddirprime \\
+            + &\frac{\spect}{\keff}\suml[\gprime=1][G]\nufis[\loc,\dir]\sflux[\loc]\Bigg]
         \end{aequation}
         \begin{equation*}
-            \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),
+          \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
         \end{equation*}
-        where $\keff$ is the inverse of the largest eigenvalue of the system $\Eigenvalue_1$.
-        The multiplication factor, $\keff$, indicates the criticality of the system.
-        If $\keff$ is one, then the system is \emph{critical} and will remain at the current conditions unless otherwise changed.
-        A $\keff$ less than one means that the system is \emph{subcritical} and indicates the reactor system is unable to sustain the chain reaction of nuclear fission reactions to produce power.
-        Finally, a $\keff$ greater than one indicates that a system is \emph{supercritical} and, if not changed, the neutron population will increase.
+        where the multigroup quantities are defined by
+        \begin{subequations}\label[subeqs]{eqs:NTT:Multigroup Quantities Anisotropic}
+          \begin{equation}\label{eq:NTT:Multigroup Angular Flux}
+            \aflux \defined \intl[E_g][E_{g-1}]\AngularFlux(\loc,\dir,E)\dif{E},
+          \end{equation}
+          \begin{equation}\label{eq:NTT:Multigroup Spectrum}
+            \spect \defined \intl[E_g][E_{g-1}]\Spectrum(\loc,E)\dif{E},
+          \end{equation}
+          \begin{equation}\label{eq:NTT:Multigroup Total Cross Section Anisotropic}
+            \xst[\loc,\dir] \defined \frac{\intl[E_{g}][E_{g-1}]\CrossSection_{t}(\loc,E)\AngularFlux(\loc,\dir,E)\dif{E}}{\aflux},
+          \end{equation}
+          \begin{equation}\label{eq:NTT:Multigroup Fission Cross Section Anisotropic}
+            \nufis[\loc,\dir][g] \defined \frac{\intl[E_{g}][E_{g-1}]\nu\CrossSection_{f}(\loc,E)\AngularFlux(\loc,\dir,E)\dif{E}}{\aflux},
+          \end{equation}
+          \begin{equation}\label{eq:NTT:Multigroup Scattering Cross Section Anisotropic}
+            \xss[][\loc][\dir,\dirprime] \defined \frac{\intl[E_{g}][E_{g-1}]\intl[E_{\gprime}][E_{\gprime-1}]\CrossSection_{s}(\loc,\dirprime\vdot\dir,\Eprime\to E)\AngularFlux(\loc,\dirprime,\Eprime)\dif{\Eprime}\dif{E}}{\aflux[\loc][\dirprime][\gprime]}.
+          \end{equation}
+        \end{subequations}
 
-        Generally, this class of problems are solved iteratively.
-        This will be discussed in more detail in \cref{sec:NTT:Source Iteration}, which lists algorithms for this iteration process.
-        Still, \cref{eq:NTT:Eigenvalue Transport Problem} has a six-dimensional phase space and cannot, in general systems, be solved exactly.
-        Numerical techniques must be used to obtain approximate solutions to this equation in calculations for realistic reactor systems.
-        In the \cref{sec:NTT:Computational Methods}, an overview of several methods for solving this equation, or approximate forms of this equation, is provided.
-    }
-    \section{Computational Methods}{\label{sec:NTT:Computational Methods}
-        Generally, transport methods are divided into two broad categories: stochastic and deterministic.
-        Stochastic methods, also called ``Monte Carlo'' methods, rely on random sampling to emulate the ``life'' of individual neutrons.
-        Deterministic methods rely on discretization of the transport equation.
-        The process of discretization introduces approximations.
-        An overview of these different approaches is given in the following subsections.
+        By defining the cross sections in this way, no approximations have been made, and the reaction rates of each energy group are preserved.
+        However, this approach has two issues: the cross sections are dependent on the angular flux which is not known \textit{a priori}, and have dependence on the neutron direction of flight.
+        Generally, the dependence on the angular flux is addressed by solving a \emph{spatially} simplified problem to generate a continuous or fine-group neutron energy spectrum.
+        This spectrum is then used as the weighting function (in place of $\aflux$) to ``collapse'' the cross sections into coarser multigroup values \cite{Knott2010}.
+        This introduces an approximation into the transport equation.
 
-        \subsection{Monte Carlo}{\label{ssec:NTT:Monte Carlo}
-            Stochastic, or ``Monte Carlo'' methods are methods that simulate individual neutrons in the system.
-            The simulation of each neutron relies on the random sampling of probability distributions for all aspects such as, where the \emph{free} neutron is born, which direction it is traveling in, the energy of the neutron, the distance to the next collision, and the type of collision event.
-            This process is repeated until the neutron leaks out of the system or is absorbed, possibly inducing a fission event with other neutrons to simulate, for many different neutrons.
+        To eliminate the directional dependence of the multigroup cross sections, an additional approximation is made: isotropic angular flux spectrum,
+        \begin{equation}\label{eq:NTT:Multigroup Isotropic Spectrum}
+          \AngularFlux(\loc,\dir,E) \approx \rfourpi\FluxSpectrum(\loc, E).
+        \end{equation}
+        Using this approximate angular flux as the weighting function for multigroup cross sections in \cref{eq:NTT:MGEV Transport Problem w/ Anisotropic XS,eqs:NTT:Multigroup Quantities Anisotropic} can be simplified to
+        \begin{aequation}\label{eq:NTT:MGEV Transport Problem}
+          \left[\dir\vdot\grad + \xst\right]\aflux = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\gprime]\ddirprime\\
+              + \frac{\spect}{\keff}&\suml[\gprime=1][G]\nufis\intl[\fourpi]\aflux[\loc][\dirprime][\gprime]\ddirprime\Bigg],
+        \end{aequation}
+        \begin{equation*}
+          \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
+        \end{equation*}
+        where the approximated multigroup cross sections are defined as
+        \begin{subequations}\label[subeqs]{eqs:NTT:Multigroup Cross Sections}
+          \begin{equation}\label{eq:NTT:Multigroup Total Cross Section}
+            \xst \defined \frac{\intl[E_{g}][E_{g-1}]\CrossSection_{t}(\loc,E)\FluxSpectrum(\loc,E)\dif{E}}{\intl[E_{g}][E_{g-1}]\FluxSpectrum(\loc,E)\dif{E}},
+          \end{equation}
+          \begin{equation}\label{eq:NTT:Multigroup Fission Cross Section}
+            \nufis[\loc][g] \defined \frac{\intl[E_{g}][E_{g-1}]\nu\CrossSection_{f}(\loc,E)\FluxSpectrum(\loc,E)\dif{E}}{\intl[E_{g}][E_{g-1}]\FluxSpectrum(\loc,E)\dif{E}},
+          \end{equation}
+          \begin{equation}\label{eq:NTT:Multigroup Scattering Cross Section}
+            \xss \defined \frac{\intl[E_{g}][E_{g-1}]\intl[E_{\gprime}][E_{\gprime-1}]\CrossSection_{s}(\loc,\dirprime\vdot\dir,\Eprime\to E)\FluxSpectrum(\loc,\Eprime)\dif{\Eprime}\dif{E}}{\intl[E_{\gprime}][E_{\gprime-1}]\FluxSpectrum(\loc,\Eprime)\dif{\Eprime}}.
+          \end{equation}
+        \end{subequations}
 
-            Monte Carlo methods give a probabilistic estimate of the true solution as well as an associated uncertainty in that result.
-            This class of methods is generally considered to be the most accurate because they are capable of representing the phase-space continuously.
-            As more particles are simulated the uncertainty in the estimated solution is reduced.
+        For thermal reactors, the weighting spectrum, $\FluxSpectrum(\loc, E)$, is well approximated by a spatially uniform spectrum, $\FluxSpectrum(E)$.
+        This justifies the use of the spectrum of the spatially simplified system.
+        However, this is not the case for other systems, such as fast reactors.
+        In such systems, the spatial dependence of the weighting spectrum plays is important to capture accurately, and the above methods cannot be used.
+      }
 
-            For whole-core reactor analysis, the quantities of interest would typically require an extremely large number of individual neutron histories to be simulated, typically trillions.
-            Variance reduction techniques are an area of active research that allow for quantities of interest to be estimated accurately with fewer histories. % [CITATION].
-            However, generally Monte Carlo methods remain too expensive for whole-core calculations, and have challenges with multiphysics and time-dependent problems.
-        }
-        \subsection{Deterministic Methods}{\label{ssec:NTT:Deterministic Methods}
-            In deterministic methods, it is generally not possible to represent the phase-space continuously.
-            Thus these methods rely on discretization of the transport equation.
-            In particular, spatial, directional, and energy discretization are common in these methods.
-            \input{macros/multigroup.tex}
-            \subsubsection{The Multigroup Approximation}{\label{sssec:NTT:The Multigroup Approximation}
-                The multigroup approximation is an approximation that is common in nearly every deterministic neutron transport method.
-                This approximation discretizes the energy variable into discrete energy groups.
-                Generally, cross sections have strong dependence on the energy of incident neutrons; this dependence is typically not smooth due to the presence of resonances.
-                Around resonance energies, the cross sections are increased significantly, as observed in \cref{fig:NTT:Cross Section plot}.
+      \subsubsection{Spatial Discretization}{\label{sssec:NTT:Spatial Discretization}
+        Nearly all computational transport methods involve some form of spatial discretization.
+        Reactor designs include many different material regions, and nearly all simulation tools will discretize the spatial domain into these different material regions.
+        Deterministic methods will generally apply a finer meshing within these material regions, to discretize them into \emph{transport cells}.
+        For the purposes of this work, a cell $\mathcal{R}_i$ is indexed with $i$.
+        A visualization of the material and hypothetical meshing of a characteristics based transport method for a single pin-cell are shown in \cref{fig:NTT:Pin Cell}.
+        In deterministic codes, the typical assumption is that material properties (cross sections) are constant within each computational cell.
 
-                \begin{figure}[h]
-                    \centering
-                    \includegraphics[width=0.85\linewidth]{\figpath/U235-8-XST}
-                    \caption{Uranium 235 and 238 total microscopic cross sections as a function of energy. Data provided through the ENDF-8.0 nuclear reaction data library \cite{ENDF8}.}
-                    \label{fig:NTT:Cross Section plot}
-                \end{figure}
-
-                The complicated dependence on energy would require hundreds of thousands of energy points to faithfully represent all the resonances of interest in thermal reactors.
-                Modeling of this many energy points in whole-core simulations would be computationally impractical.
-                The multigroup eigenvalue transport equation can be found by integrating the \cref{eq:NTT:Eigenvalue Transport Problem} over an energy energy interval $[E_{g}, E_{g-1})$, where $E_{g} > E_{g-1}$.
-                \begin{aequation}\label{eq:NTT:MGEV Transport Problem w/ Anisotropic XS}
-                    \left[\dir\vdot\grad + \xst[\loc,\dir]\right]\aflux
-                        = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss[][\loc][\dir,\dirprime]\aflux[\loc][\dirprime][\gprime]\ddirprime \\
-                        + &\frac{\spect}{\keff}\suml[\gprime=1][G]\nufis[\loc,\dir]\sflux[\loc]\Bigg]
-                \end{aequation}
-                \begin{equation*}
-                    \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
-                \end{equation*}
-                where the multigroup quantities are defined by
-                \begin{subequations}\label[subeqs]{eqs:NTT:Multigroup Quantities Anisotropic}
-                    \begin{equation}\label{eq:NTT:Multigroup Angular Flux}
-                        \aflux \defined \intl[E_g][E_{g-1}]\AngularFlux(\loc,\dir,E)\dif{E},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:Multigroup Spectrum}
-                        \spect \defined \intl[E_g][E_{g-1}]\Spectrum(\loc,E)\dif{E},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:Multigroup Total Cross Section Anisotropic}
-                        \xst[\loc,\dir] \defined \frac{\intl[E_{g}][E_{g-1}]\CrossSection_{t}(\loc,E)\AngularFlux(\loc,\dir,E)\dif{E}}{\aflux},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:Multigroup Fission Cross Section Anisotropic}
-                        \nufis[\loc,\dir][g] \defined \frac{\intl[E_{g}][E_{g-1}]\nu\CrossSection_{f}(\loc,E)\AngularFlux(\loc,\dir,E)\dif{E}}{\aflux},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:Multigroup Scattering Cross Section Anisotropic}
-                        \xss[][\loc][\dir,\dirprime] \defined \frac{\intl[E_{g}][E_{g-1}]\intl[E_{\gprime}][E_{\gprime-1}]\CrossSection_{s}(\loc,\dirprime\vdot\dir,\Eprime\to E)\AngularFlux(\loc,\dirprime,\Eprime)\dif{\Eprime}\dif{E}}{\aflux[\loc][\dirprime][\gprime]}.
-                    \end{equation}
-                \end{subequations}
-
-                By defining the cross sections in this way, no approximations have been made, and the reaction rates of each energy group are preserved.
-                However, this approach has two issues: the cross sections are dependent on the angular flux which is not known \textit{a priori}, and have dependence on the neutron direction of flight.
-                Generally, the dependence on the angular flux is addressed by solving a \emph{spatially} simplified problem to generate a continuous or fine-group neutron energy spectrum.
-                This spectrum is then used as the weighting function (in place of $\aflux$) to ``collapse'' the cross sections into coarser multigroup values \cite{Knott2010}.
-                This introduces an approximation into the transport equation.
-
-                To eliminate the directional dependence of the multigroup cross sections, an additional approximation is made: isotropic angular flux spectrum,
-                \begin{equation}\label{eq:NTT:Multigroup Isotropic Spectrum}
-                    \AngularFlux(\loc,\dir,E) \approx \rfourpi\FluxSpectrum(\loc, E).
-                \end{equation}
-                Using this approximate angular flux as the weighting function for multigroup cross sections in \cref{eq:NTT:MGEV Transport Problem w/ Anisotropic XS,eqs:NTT:Multigroup Quantities Anisotropic} can be simplified to
-                \begin{aequation}\label{eq:NTT:MGEV Transport Problem}
-                    \left[\dir\vdot\grad + \xst\right]\aflux = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\gprime]\ddirprime\\
-                        + \frac{\spect}{\keff}&\suml[\gprime=1][G]\nufis\intl[\fourpi]\aflux[\loc][\dirprime][\gprime]\ddirprime\Bigg],
-                \end{aequation}
-                \begin{equation*}
-                    \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
-                \end{equation*}
-                where the approximated multigroup cross sections are defined as
-                \begin{subequations}\label[subeqs]{eqs:NTT:Multigroup Cross Sections}
-                    \begin{equation}\label{eq:NTT:Multigroup Total Cross Section}
-                        \xst \defined \frac{\intl[E_{g}][E_{g-1}]\CrossSection_{t}(\loc,E)\FluxSpectrum(\loc,E)\dif{E}}{\intl[E_{g}][E_{g-1}]\FluxSpectrum(\loc,E)\dif{E}},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:Multigroup Fission Cross Section}
-                        \nufis[\loc][g] \defined \frac{\intl[E_{g}][E_{g-1}]\nu\CrossSection_{f}(\loc,E)\FluxSpectrum(\loc,E)\dif{E}}{\intl[E_{g}][E_{g-1}]\FluxSpectrum(\loc,E)\dif{E}},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:Multigroup Scattering Cross Section}
-                        \xss \defined \frac{\intl[E_{g}][E_{g-1}]\intl[E_{\gprime}][E_{\gprime-1}]\CrossSection_{s}(\loc,\dirprime\vdot\dir,\Eprime\to E)\FluxSpectrum(\loc,\Eprime)\dif{\Eprime}\dif{E}}{\intl[E_{\gprime}][E_{\gprime-1}]\FluxSpectrum(\loc,\Eprime)\dif{\Eprime}}.
-                    \end{equation}
-                \end{subequations}
-
-                For thermal reactors, the weighting spectrum, $\FluxSpectrum(\loc, E)$, is well approximated by a spatially uniform spectrum, $\FluxSpectrum(E)$.
-                This justifies the use of the spectrum of the spatially simplified system.
-                However, this is not the case for other systems, such as fast reactors.
-                In such systems, the spatial dependence of the weighting spectrum plays is important to capture accurately, and the above methods cannot be used.
-            }
-            \subsubsection{Spatial Discretization}{\label{sssec:NTT:Spatial Discretization}
-                Nearly all computational transport methods involve some form of spatial discretization.
-                Reactor designs include many different material regions, and nearly all simulation tools will discretize the spatial domain into these different material regions.
-                Deterministic methods will generally apply a finer meshing within these material regions, to discretize them into \emph{transport cells}.
-                For the purposes of this work, a cell $\mathcal{R}_i$ is indexed with $i$.
-                A visualization of the material and hypothetical meshing of a characteristics based transport method for a single pin-cell are shown in \cref{fig:NTT:Pin Cell}.
-                In deterministic codes, the typical assumption is that material properties (cross sections) are constant within each computational cell.
-
-                \begin{figure}[h]
-                    \centering
-                    \begin{subfigure}[t]{0.45\linewidth}
-                        \centering
-                        \def\svgwidth{\linewidth}
-                        \input{\figpath/PinCell.pdf_tex}
-                        \caption{Material regions}
-                        \label{fig:NTT:Pin Cell Materials}
-                    \end{subfigure}%
-                    \hfill
-                    \begin{subfigure}[t]{0.45\linewidth}
-                        \centering
-                        \def\svgwidth{\linewidth}
-                        \input{\figpath/PinCellMesh.pdf_tex}
-                        \caption{Hypothetical computational cell mesh}
-                        \label{fig:NTT:Pin Cell Mesh}
-                    \end{subfigure}
-                    \caption{Material and mesh spatial discretization examples for a single pin cell.}
-                    \label{fig:NTT:Pin Cell}
-                \end{figure}
-            }
-            \subsubsection{Directional Discretization}{\label{sssec:NTT:Directional Discretization}
-                \input{macros/DiscreteOrdinates.tex}
-
-                Typically, the directional variable cannot be treated exactly in deterministic methods.
-                There are two common methods of approximating the solution as a function of direction $\dir$:
-                \begin{enumerate}
-                    \item{\acf{PN} Expansion}
-                    \item{\acf{SN}}
-                \end{enumerate}
-
-                \paragraph{\acf{PN} Expansion} {
-                  Expansion in spherical harmonics, often referred to as \acs{PN}, is one of the oldest transport methods, where $N$ indicates the order of the expansion.
-                  In this method, the angular flux is expanded as a linear combination of spherical harmonics moments:
-                  \begin{equation}\label{eq:PN:PN Infinite Expansion}
-                    \aflux = \suml[l=0][\infty]\suml[n=-l][l]\afluxmom\SH,
-                  \end{equation}
-                  where the spherical harmonics,$\SH$, are defined by \cref{eqs:NTT:Spherical Harmonics Definitions}.
-                  No approximation has been introduced at this point, but in practice this series is truncated at some finite number $N$:
-                  \begin{equation}\label{eq:PN:PN Expansion}
-                    \aflux \approx \suml[l=0][N]\suml[n=-l][l]\afluxmom\SH.
-                  \end{equation}
-
-                  The \ac{PN} equations can be found by multiply the multi-group transport equation (\cref{eq:NTT:MGEV Transport Problem}) by $\SH$ for each valid $(l,n)$ pair under the specified order, and integrating over $\fourpi$.
-                  This yields a system of $(N+1)^2$ equations for each energy group; the number of equations increases quadratically with increasing orders, making \ac{PN} methods less feasible for large calculations.
-                }
-
-                \paragraph{\acf{SN}}{
-                  The \acf{SN} method is a discretization of the directional variable $\dir$ by a quadrature.
-                  \begin{subequations}\label[subeqs]{eqs:NTT:Directional Quadrature}
-                      Let the $\angquad$ be the set of discrete directions, and weights,
-                      \begin{equation}\label{eq:NTT:Directional Quadrature Definition}
-                          \angquad \defined \left\{\dirm \in \{\dir_1,\dir_2,\ldots,\dir_N\}, \wt \in \{\wt[1], \wt[2], \ldots,\wt[N]\}\right\},
-                      \end{equation}
-                      such that a directional integration can be approximated as
-                      \begin{equation}\label{eq:NTT:Directional Quadrature Integration}
-                          \intl[\fourpi]f(\dir)\ddir \approx \fourpi\suml[m\in\angquad]\wt f(\dirm),
-                      \end{equation}
-                      where
-                      \begin{equation}\label{eq:NTT:Directional Quadrature Weight Sum}
-                          \suml[m\in\angquad]\wt = 1.
-                      \end{equation}
-                  \end{subequations}
-
-                  There are two common forms of quadrature sets that are commonly used in transport calculations: level-symmetric and product quadratures.
-                  The level-symmetric quadratures include directions that are evenly distributed over the unit-sphere; this is optimal in situations where each direction has similar variation.
-                  However, typical reactor designs have significantly less variation in the axial ($z$) direction which fuel rods are oriented along.
-                  In this situation, neutrons with directions close to the $z$-axis are modeled poorly because there are few azimuthal angles at these polar levels, as is demonstrated in \cref{fig:NTT:S8 Quadrature}.
-                  These steep polar angles are important in reactor analysis due to self-shielding effects, which are strongly dependent on polar angle. % [CITATION].
-
-                  Product quadratures are generated by a multiplicative combination of separate quadrature sets in the azimuthal and polar directions.
-                  The azimuthal quadrature set is generated over the domain $[0,2\pi]$, while the polar quadrature set is generated for the polar cosine, $\mu$, over the domain $[-1,1]$.
-                  This quadrature generation technique does not suffer from the same issue for steep polar directions, as each polar level has the same number of azimuthal directions.
-                  A common choice for the azimuthal quadrature generation is the Chebyshev quadrature, which gives evenly spaced azimuthal angles with equal weights.
-                  The polar cosine quadrature set typically uses a Gauss-Legendre quadrature, or an optimized quadrature such as the Tabuchi-Yamamoto quadrature \cite{TabuchiYamamotoQuad}.
-                  \Cref{fig:NTT:ChebyshevGauss Quadrature} shows an example of a product quadrature's set of directions using a Chebyshev azimuthal quadrature and Gauss-Legendre polar quadrature.
-
-                  \begin{figure}[h]
-                      \centering
-                      \begin{subfigure}[t]{0.45\linewidth}
-                          \centering
-                          \includegraphics[width=\linewidth]{S8-Quadrature}
-                          \caption{Level-Symmetric Quadrature ($S_8$)}
-                          \label{fig:NTT:S8 Quadrature}
-                      \end{subfigure}%
-                      \hfill
-                      \begin{subfigure}[t]{0.45\linewidth}
-                          \centering
-                          \includegraphics[width=\linewidth]{ChebyshevGauss}
-                          \caption{Chebyshev-Gauss Product Quadrature with 4 azimuthal and 3 polar angles}
-                          \label{fig:NTT:ChebyshevGauss Quadrature}
-                      \end{subfigure}
-                      \caption{(a) Level-Symmetric and (b) product quadrature direction set examples shown for a single octant of the unit-sphere.}
-                      \label{fig:NTT:Quadrature Examples}
-                  \end{figure}
-                }
-            }
-        }
-    }
-    \section{Source Iteration}{\label{sec:NTT:Source Iteration}
-        Generally, the $k$-eigenvalue transport problems, introduced in \cref{sec:NTT:k-Eigenvalue Problems}, are solved iteratively.
-        Given an initial guess for the $k$-eigenvalue, boundary conditions, and interior flux-moments, an estimate of the source can be computed.
-        A transport ``sweep'' can be performed, in which updated boundary conditions and flux-moments are computed.
-        Given these updated flux-moments a new estimate of the eigenvalue can be calculated.
-        This process can be repeated until the eigenvalue and flux-moments are converged within some tolerance.
-        For simplicity, this process is shown for a isotropic mono-energetic, continuous-space, one-dimensional transport problem in \cref{alg:NTT:Source Iteration}.
-
-        \begin{algorithm}[ht]
+        \begin{figure}[h]
+          \centering
+          \begin{subfigure}[t]{0.45\linewidth}
             \centering
-            \caption{Source Iteration algorithm for the $k$-eigenvalue transport problem.}
-            \label{alg:NTT:Source Iteration}
-            \begin{algorithmic}[1]
-                \State{Begin iteration $j$ with a known boundary conditions, scalar flux estimate, $\ScalarFlux^{(j)}(x)$, and a $k$-eigenvalue estimate, $\keff^{j}$.}
-                \State{Perform a transport sweep:
-                    \begin{equation}\label{eq:NTT:Source Iteration:Transport Sweep}
-                        \left[\PolarCos\pderiv{}{x} + \CrossSection_t(x)\right]\AngularFlux^{(j+1)}(x,\PolarCos) = \frac{1}{2}\left[\CrossSection_s(x) + \frac{1}{\keff^{(j)}}\nu\CrossSection_f(x)\right]\ScalarFlux^{(j)}(x),
-                    \end{equation}
-                    \begin{equation*}
-                        \forall x\in [0,X], \quad \forall\PolarCos \in [-1, 1].
-                    \end{equation*}
-                }
-                \State{Update the scalar flux, and the eigenvalue for the next iteration:
-                    \begin{subequations}\label[subeqs]{eqs:NTT:Source Iteration:Update}
-                        \begin{equation}\label{eq:NTT:Source Iteration:Scalar Flux Update}
-                            \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
-                        \end{equation}
-                        \begin{equation}\label{eq:NTT:Source Iteration:Eigenvalue Update}
-                            \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x}}.
-                        \end{equation}
-                    \end{subequations}
-                }
-                \State{Repeat steps 1. - 3. until sufficient convergence.}
-            \end{algorithmic}
-        \end{algorithm}
+            \def\svgwidth{\linewidth}
+            \input{\figpath/PinCell.pdf_tex}
+            \caption{Material regions}
+            \label{fig:NTT:Pin Cell Materials}
+          \end{subfigure}%
+          \hfill
+          \begin{subfigure}[t]{0.45\linewidth}
+            \centering
+            \def\svgwidth{\linewidth}
+            \input{\figpath/PinCellMesh.pdf_tex}
+            \caption{Hypothetical computational cell mesh}
+            \label{fig:NTT:Pin Cell Mesh}
+          \end{subfigure}
+          \caption{Material and mesh spatial discretization examples for a single pin cell.}
+          \label{fig:NTT:Pin Cell}
+        \end{figure}
+      }
 
-        \subsection{Transport Acceleration}{\label{ssec:NTT:Transport Acceleration}
-            While \cref{alg:NTT:Source Iteration} is valid, it typically converges very slowly, requiring many iterations to get reasonable results.
-            In full-core calculations, a single transport sweep is typically the most computationally expensive operation and using \cref{alg:NTT:Source Iteration} is not feasible.
-            There has been considerable effort in developing methods that accelerate transport calculations by using a lower-order calculation, typically based on the diffusion approximation.
-            These methods often reduce the number of iterations from O(1000) to O(10) for thermal reactor systems.
+      \subsubsection{Directional Discretization}{\label{sssec:NTT:Directional Discretization}
+        \input{macros/DiscreteOrdinates.tex}
 
-            While other acceleration methods exist \cite{Hebert2017}, the most common for $k$-eigenvalue problems are \ac{NDA} methods \cite{Smith2002}, typically using the \ac{CMFD} method \cite{Smith1983}.
-            \Cref{alg:NTT:NDA} lists the standard \ac{NDA} algorithm for a 1-D mono-energetic $k$-eigenvalue problem.
-            The primary difference between \ac{CMFD} and \ac{NDA} is that \ac{CMFD} introduces the concept of a second, coarser spatial grid, while \ac{NDA} uses the same mesh as the transport problem.
+        Typically, the directional variable cannot be treated exactly in deterministic methods.
+        There are two common methods of approximating the solution as a function of direction $\dir$:
+        \begin{enumerate}
+          \item{\acf{PN} Expansion}
+          \item{\acf{SN}}
+        \end{enumerate}
 
-            The \ac{CMFD} acceleration method has been shown to significantly reduce computational transport run-times \cite{Smith2002,Anistratov2011,Collins2016}.
-            There have been several improvements upon the original \ac{CMFD} formulation \cite{Smith1983}, such as p\ac{CMFD} \cite{Cho2002} and od\ac{CMFD} \cite{Zhu2016}.
-            The p\ac{CMFD} method preserves partial currents rather than net currents, and has been shown to be unconditionally stable for transport problems at fixed conditions \cite{Cho2002}.
-            The od\ac{CMFD} method generalizes the \ac{CMFD} and p\ac{CMFD} methods by adding an artificial term to the diffusion coefficient, and has faster convergence properties than p\ac{CMFD} \cite{Zhu2016}.
-            Recently, it was shown that the theoretical reason for this is the that most \ac{MOC} methods do not preserve the linear solutions of the transport equation, resulting in the need for an unphysical correction to the diffusion coefficient to account for truncation error in the transport discretization.
+        \paragraph{\acf{PN} Expansion} {
+          Expansion in spherical harmonics, often referred to as \acs{PN}, is one of the oldest transport methods, where $N$ indicates the order of the expansion.
+          In this method, the angular flux is expanded as a linear combination of spherical harmonics moments:
+          \begin{equation}\label{eq:PN:PN Infinite Expansion}
+            \aflux = \suml[l=0][\infty]\suml[n=-l][l]\afluxmom\SH,
+          \end{equation}
+          where the spherical harmonics,$\SH$, are defined by \cref{eqs:NTT:Spherical Harmonics Definitions}.
+          No approximation has been introduced at this point, but in practice this series is truncated at some finite number $N$:
+          \begin{equation}\label{eq:PN:PN Expansion}
+            \aflux \approx \suml[l=0][N]\suml[n=-l][l]\afluxmom\SH.
+          \end{equation}
 
-            Utilization of \ac{CMFD} acceleration in transport calculations with \ac{TH} feedback has not had the favorable stability and convergence properties as calculations without feedback \cite{Kochunas2017}.
-            Many transport codes have required under-relaxation of the scalar flux in the iteration schemes for stability in these calculations; there is ongoing research investigating a less ad-hoc approach \cite{Kochunas2017}.
-            This instability and convergence slow-down in problems with feedback has prevented full utilization of more advanced multi-level solvers \cite{Kochunas2017,Yee2018a}.
-
-            \begin{algorithm}
-              \caption{Non-linear Diffusion Acceleration (NDA) algorithm for the $k$-eigenvalue transport problem.}
-              \label{alg:NTT:NDA}
-              \newcommand{\ndaCurrent}[1][j]{J^{(#1)}(x)}
-              \newcommand{\ndaFlux}[1][j]{\ScalarFlux^{(#1)}(x)}
-              \newcommand{\ndaXST}{\CrossSection_{t}(x)}
-              \newcommand{\ndaXSA}{\CrossSection_{a}(x)}
-              \newcommand{\ndaNUFIS}{\nu\CrossSection_{f}(x)}
-              \newcommand{\ndaD}{\frac{1}{3\ndaXST}}
-              \newcommand{\ndaDHAT}{\widehat{D}^{(j)}(x)}
-
-              \begin{algorithmic}[1]
-                \State{Begin iteration $i$ with known boundary conditions, scalar flux estimate, $\ScalarFlux^{(j)}(x)$, a net current estimate, $\Current^{(j)}(x)$, and a $k$-eigenvalue estimate, $\keff$.}
-                \State{Compute linear and non-linear correction factors for low-order diffusion equation:
-                  \begin{equation}\label{eq:NTT:NDA:Dhat}
-                    \ndaDHAT = \frac{\deriv{}{x}\left[\ndaCurrent + \ndaD\deriv{\ndaFlux}{x}\right]}{\ndaFlux}
-                  \end{equation}
-                }
-                \State{Solve the low-order diffusion eigenvalue problem:
-                  \begin{equation}\label{eq:NTT:NDA:NDA Equation}
-                    -\deriv{}{x}\ndaD\deriv{\ndaFlux[j+1/2]}{x}
-                    +\left[\ndaXSA + \ndaDHAT\right]\ndaFlux[j+1/2] = \frac{1}{\keff}\ndaNUFIS\ndaFlux[j+1/2].
-                  \end{equation}
-                }
-                \State{Perform a transport sweep using the scalar flux, and eigenvalue estimates from the low-order diffusion calculation:
-                  \begin{equation}\label{eq:NTT:NDA:Transport Sweep}
-                    \left[\PolarCos\pderiv{}{x} + \ndaXST\right]\AngularFlux^{(j+1)}(x,\PolarCos) = \frac{1}{2}\left[\CrossSection_s(x) + \frac{1}{\keff^{(j)}}\nu\CrossSection_f(x)\right]\ScalarFlux^{(j)}(x),
-                  \end{equation}
-                  \begin{equation*}
-                      \forall x\in [0,X], \quad \forall\PolarCos \in [-1, 1].
-                  \end{equation*}
-                }
-                \State{Update the scalar flux, current, and eigenvalue estimates for next iteration:
-                  \begin{subequations}\label[subeqs]{eqs:NTT:NDA:Update}
-                    \begin{equation}\label{eq:NTT:NDA:Scalar Flux Update}
-                      \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:NDA:Current Update}
-                      \Current^{(j+1)}(x) = \intl[-1][1]\PolarCos\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
-                    \end{equation}
-                    \begin{equation}\label{eq:NTT:NDA:Eigenvalue Update}
-                      \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x}}.
-                    \end{equation}
-                  \end{subequations}
-                }
-              \end{algorithmic}
-            \end{algorithm}
+          The \ac{PN} equations can be found by multiply the multi-group transport equation (\cref{eq:NTT:MGEV Transport Problem}) by $\SH$ for each valid $(l,n)$ pair under the specified order, and integrating over $\fourpi$.
+          This yields a system of $(N+1)^2$ equations for each energy group; the number of equations increases quadratically with increasing orders, making \ac{PN} methods less feasible for large calculations.
         }
-    }
 
-    % References
-    \printbibliography
+        \paragraph{\acf{SN}}{
+          The \acf{SN} method is a discretization of the directional variable $\dir$ by a quadrature.
+          \begin{subequations}\label[subeqs]{eqs:NTT:Directional Quadrature}
+            Let the $\angquad$ be the set of discrete directions, and weights,
+            \begin{equation}\label{eq:NTT:Directional Quadrature Definition}
+              \angquad \defined \left\{\dirm \in \{\dir_1,\dir_2,\ldots,\dir_N\}, \wt \in \{\wt[1], \wt[2], \ldots,\wt[N]\}\right\},
+            \end{equation}
+            such that a directional integration can be approximated as
+            \begin{equation}\label{eq:NTT:Directional Quadrature Integration}
+              \intl[\fourpi]f(\dir)\ddir \approx \fourpi\suml[m\in\angquad]\wt f(\dirm),
+            \end{equation}
+            where
+            \begin{equation}\label{eq:NTT:Directional Quadrature Weight Sum}
+              \suml[m\in\angquad]\wt = 1.
+            \end{equation}
+          \end{subequations}
+
+          There are two common forms of quadrature sets that are commonly used in transport calculations: level-symmetric and product quadratures.
+          The level-symmetric quadratures include directions that are evenly distributed over the unit-sphere; this is optimal in situations where each direction has similar variation.
+          However, typical reactor designs have significantly less variation in the axial ($z$) direction which fuel rods are oriented along.
+          In this situation, neutrons with directions close to the $z$-axis are modeled poorly because there are few azimuthal angles at these polar levels, as is demonstrated in \cref{fig:NTT:S8 Quadrature}.
+          These steep polar angles are important in reactor analysis due to self-shielding effects, which are strongly dependent on polar angle. % [CITATION].
+
+          Product quadratures are generated by a multiplicative combination of separate quadrature sets in the azimuthal and polar directions.
+          The azimuthal quadrature set is generated over the domain $[0,2\pi]$, while the polar quadrature set is generated for the polar cosine, $\mu$, over the domain $[-1,1]$.
+          This quadrature generation technique does not suffer from the same issue for steep polar directions, as each polar level has the same number of azimuthal directions.
+          A common choice for the azimuthal quadrature generation is the Chebyshev quadrature, which gives evenly spaced azimuthal angles with equal weights.
+          The polar cosine quadrature set typically uses a Gauss-Legendre quadrature, or an optimized quadrature such as the Tabuchi-Yamamoto quadrature \cite{TabuchiYamamotoQuad}.
+          \Cref{fig:NTT:ChebyshevGauss Quadrature} shows an example of a product quadrature's set of directions using a Chebyshev azimuthal quadrature and Gauss-Legendre polar quadrature.
+
+          \begin{figure}[h]
+            \centering
+            \begin{subfigure}[t]{0.45\linewidth}
+              \centering
+              \includegraphics[width=\linewidth]{S8-Quadrature}
+              \caption{Level-Symmetric Quadrature ($S_8$)}
+              \label{fig:NTT:S8 Quadrature}
+            \end{subfigure}%
+            \hfill
+            \begin{subfigure}[t]{0.45\linewidth}
+              \centering
+              \includegraphics[width=\linewidth]{ChebyshevGauss}
+              \caption{Chebyshev-Gauss Product Quadrature with 4 azimuthal and 3 polar angles}
+              \label{fig:NTT:ChebyshevGauss Quadrature}
+            \end{subfigure}
+            \caption{(a) Level-Symmetric and (b) product quadrature direction set examples shown for a single octant of the unit-sphere.}
+            \label{fig:NTT:Quadrature Examples}
+          \end{figure}
+        }
+      }
+    }
+  }
+
+  \section{Source Iteration}{\label{sec:NTT:Source Iteration}
+    Generally, the $k$-eigenvalue transport problems, introduced in \cref{sec:NTT:k-Eigenvalue Problems}, are solved iteratively.
+    Given an initial guess for the $k$-eigenvalue, boundary conditions, and interior flux-moments, an estimate of the source can be computed.
+    A transport ``sweep'' can be performed, in which updated boundary conditions and flux-moments are computed.
+    Given these updated flux-moments a new estimate of the eigenvalue can be calculated.
+    This process can be repeated until the eigenvalue and flux-moments are converged within some tolerance.
+    For simplicity, this process is shown for a isotropic mono-energetic, continuous-space, one-dimensional transport problem in \cref{alg:NTT:Source Iteration}.
+
+    \begin{algorithm}[ht]
+      \centering
+      \caption{Source Iteration algorithm for the $k$-eigenvalue transport problem.}
+      \label{alg:NTT:Source Iteration}
+      \begin{algorithmic}[1]
+        \State{Begin iteration $j$ with a known boundary conditions, scalar flux estimate, $\ScalarFlux^{(j)}(x)$, and a $k$-eigenvalue estimate, $\keff^{j}$.}
+        \State{Perform a transport sweep:
+          \begin{equation}\label{eq:NTT:Source Iteration:Transport Sweep}
+            \left[\PolarCos\pderiv{}{x} + \CrossSection_t(x)\right]\AngularFlux^{(j+1)}(x,\PolarCos) = \frac{1}{2}\left[\CrossSection_s(x) + \frac{1}{\keff^{(j)}}\nu\CrossSection_f(x)\right]\ScalarFlux^{(j)}(x),
+          \end{equation}
+          \begin{equation*}
+            \forall x\in [0,X], \quad \forall\PolarCos \in [-1, 1].
+          \end{equation*}
+        }
+        \State{Update the scalar flux, and the eigenvalue for the next iteration:
+          \begin{subequations}\label[subeqs]{eqs:NTT:Source Iteration:Update}
+            \begin{equation}\label{eq:NTT:Source Iteration:Scalar Flux Update}
+              \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
+            \end{equation}
+            \begin{equation}\label{eq:NTT:Source Iteration:Eigenvalue Update}
+              \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x}}.
+            \end{equation}
+          \end{subequations}
+        }
+        \State{Repeat steps 1. - 3. until sufficient convergence.}
+      \end{algorithmic}
+    \end{algorithm}
+
+    \subsection{Transport Acceleration}{\label{ssec:NTT:Transport Acceleration}
+      While \cref{alg:NTT:Source Iteration} is valid, it typically converges very slowly, requiring many iterations to get reasonable results.
+      In full-core calculations, a single transport sweep is typically the most computationally expensive operation and using \cref{alg:NTT:Source Iteration} is not feasible.
+      There has been considerable effort in developing methods that accelerate transport calculations by using a lower-order calculation, typically based on the diffusion approximation.
+      These methods often reduce the number of iterations from O(1000) to O(10) for thermal reactor systems.
+
+      While other acceleration methods exist \cite{Hebert2017}, the most common for $k$-eigenvalue problems are \ac{NDA} methods \cite{Smith2002}, typically using the \ac{CMFD} method \cite{Smith1983}.
+      \Cref{alg:NTT:NDA} lists the standard \ac{NDA} algorithm for a 1-D mono-energetic $k$-eigenvalue problem.
+      The primary difference between \ac{CMFD} and \ac{NDA} is that \ac{CMFD} introduces the concept of a second, coarser spatial grid, while \ac{NDA} uses the same mesh as the transport problem.
+
+      The \ac{CMFD} acceleration method has been shown to significantly reduce computational transport run-times \cite{Smith2002,Anistratov2011,Collins2016}.
+      There have been several improvements upon the original \ac{CMFD} formulation \cite{Smith1983}, such as p\ac{CMFD} \cite{Cho2002} and od\ac{CMFD} \cite{Zhu2016}.
+      The p\ac{CMFD} method preserves partial currents rather than net currents, and has been shown to be unconditionally stable for transport problems at fixed conditions \cite{Cho2002}.
+      The od\ac{CMFD} method generalizes the \ac{CMFD} and p\ac{CMFD} methods by adding an artificial term to the diffusion coefficient, and has faster convergence properties than p\ac{CMFD} \cite{Zhu2016}.
+      Recently, it was shown that the theoretical reason for this is the that most \ac{MOC} methods do not preserve the linear solutions of the transport equation, resulting in the need for an unphysical correction to the diffusion coefficient to account for truncation error in the transport discretization.
+
+      Utilization of \ac{CMFD} acceleration in transport calculations with \ac{TH} feedback has not had the favorable stability and convergence properties as calculations without feedback \cite{Kochunas2017}.
+      Many transport codes have required under-relaxation of the scalar flux in the iteration schemes for stability in these calculations; there is ongoing research investigating a less ad-hoc approach \cite{Kochunas2017}.
+      This instability and convergence slow-down in problems with feedback has prevented full utilization of more advanced multi-level solvers \cite{Kochunas2017,Yee2018a}.
+
+      \begin{algorithm}
+        \caption{Non-linear Diffusion Acceleration (NDA) algorithm for the $k$-eigenvalue transport problem.}
+        \label{alg:NTT:NDA}
+        \newcommand{\ndaCurrent}[1][j]{J^{(#1)}(x)}
+        \newcommand{\ndaFlux}[1][j]{\ScalarFlux^{(#1)}(x)}
+        \newcommand{\ndaXST}{\CrossSection_{t}(x)}
+        \newcommand{\ndaXSA}{\CrossSection_{a}(x)}
+        \newcommand{\ndaNUFIS}{\nu\CrossSection_{f}(x)}
+        \newcommand{\ndaD}{\frac{1}{3\ndaXST}}
+        \newcommand{\ndaDHAT}{\widehat{D}^{(j)}(x)}
+
+        \begin{algorithmic}[1]
+          \State{Begin iteration $i$ with known boundary conditions, scalar flux estimate, $\ScalarFlux^{(j)}(x)$, a net current estimate, $\Current^{(j)}(x)$, and a $k$-eigenvalue estimate, $\keff$.}
+          \State{Compute linear and non-linear correction factors for low-order diffusion equation:
+            \begin{equation}\label{eq:NTT:NDA:Dhat}
+              \ndaDHAT = \frac{\deriv{}{x}\left[\ndaCurrent + \ndaD\deriv{\ndaFlux}{x}\right]}{\ndaFlux}
+            \end{equation}
+          }
+          \State{Solve the low-order diffusion eigenvalue problem:
+            \begin{equation}\label{eq:NTT:NDA:NDA Equation}
+              -\deriv{}{x}\ndaD\deriv{\ndaFlux[j+1/2]}{x}
+              +\left[\ndaXSA + \ndaDHAT\right]\ndaFlux[j+1/2] = \frac{1}{\keff}\ndaNUFIS\ndaFlux[j+1/2].
+            \end{equation}
+          }
+          \State{Perform a transport sweep using the scalar flux, and eigenvalue estimates from the low-order diffusion calculation:
+            \begin{equation}\label{eq:NTT:NDA:Transport Sweep}
+              \left[\PolarCos\pderiv{}{x} + \ndaXST\right]\AngularFlux^{(j+1)}(x,\PolarCos) = \frac{1}{2}\left[\CrossSection_s(x) + \frac{1}{\keff^{(j)}}\nu\CrossSection_f(x)\right]\ScalarFlux^{(j)}(x),
+            \end{equation}
+            \begin{equation*}
+              \forall x\in [0,X], \quad \forall\PolarCos \in [-1, 1].
+            \end{equation*}
+          }
+          \State{Update the scalar flux, current, and eigenvalue estimates for next iteration:
+            \begin{subequations}\label[subeqs]{eqs:NTT:NDA:Update}
+              \begin{equation}\label{eq:NTT:NDA:Scalar Flux Update}
+                \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
+              \end{equation}
+              \begin{equation}\label{eq:NTT:NDA:Current Update}
+                \Current^{(j+1)}(x) = \intl[-1][1]\PolarCos\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
+              \end{equation}
+              \begin{equation}\label{eq:NTT:NDA:Eigenvalue Update}
+                \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x}}.
+              \end{equation}
+            \end{subequations}
+          }
+        \end{algorithmic}
+      \end{algorithm}
+    }
+  }
+
+  % References
+  \printbibliography
 }
