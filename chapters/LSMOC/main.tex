@@ -404,12 +404,12 @@
     \subsection{Particle Conservation}{\label{ssec:LSMOC:Particle Conservation}
       As described in \cref{ssec:MOC:LSA:Particle Conservation}, particle conservation puts the constraint of using direction-dependent renormalization and centroids, in addition to directional quadrature constraints.
       If these constraints are satisfied, \cref{eqs:LSMOC:Region-Averaged Flux Moments} can be simplified into
-      \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Flux Moments}
-        \begin{equation}\label{eq:LSMOC:Region-Averaged Flat Flux Moments}
+      \begin{subequations}\label[subeqs]{eqs:LSMOC:Conservation:Region-Averaged Flux Moments}
+        \begin{equation}\label{eq:LSMOC:Conservation:Region-Averaged Flat Flux Moments}
           \fluxF = \suml[m]\wt\SH\frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\dflux,
         \end{equation}
         and
-        \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments}
+        \begin{aequation}\label{eq:LSMOC:Conservation:Region-Averaged Linear Flux Moments}
           \MOCIntegral{\SH\loc\aflux[][g][]} =
             &\suml[m]\wt\SH\M[][mi]\frac{\srcL}{\xst}\\
             +& \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right],
@@ -441,70 +441,419 @@
         \MOCIntegral{\SH\loc\aflux[][g][]} &= \M\frac{\srcL}{\xst}\\ &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA\left[\locIn\dflux+\dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right]
       \end{aequation}
     }
-    \subsection{Results}{\label{ssec:LSMOC:Results}
-      \subsubsection{C5G7 Benchmark}{\label{sssec:LSMOC:C5G7 Benchmark}
-        [C5G7 2-D Benchmark problem results]
+  }
+
+  \section{Results}{\label{sec:LSMOC:Results}
+    \subsection{C5G7 Benchmark}{\label{ssec:LSMOC:C5G7 Benchmark}
+      [C5G7 2-D Benchmark problem results]
+    }
+
+    \subsection{Typical Pin Cell Depletion}{\label{ssec:LSMOC:Typical Pin Cell Depletion}
+      In order to evaluate the benefits of this new formulation, the first multiphysics case studied was a typical \ac{UO2} fuel cell, as specified by \ac{VERA} progression problem 1A \cite{VERAProblems}.
+      Isotopic depletion calculations were run up to 70 \ac{GWDMT} ($\sim$1820 \ac{EFPD}) at \ac{HFP} conditions.
+      Using the current default meshing parameters in MPACT as a starting point, various mesh parameters were coarsened to study their affect when using the \ac{LSMOC}.
+      These cases were compared against a reference case which was very finely meshed with fine ray-spacing (0.001 cm), and a Tabuchi-Yamamoto \cite{Yamamoto2005} quadrature using 128 azimuthal angles and 4 polar angles over $\fourpi$
+      All other cases were run using a Tabuchi-Yamamoto quadrature with 64 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.05 cm.
+
+      \paragraph{Default Mesh}{
+        MPACT's current default meshing parameters were used as a starting point.
+        Flat and linear source calculations were run on this mesh, to set a baseline for ``acceptable'' levels of error in the eigenvalue.
+        Compared to the reference case, the \ac{LS} calculation had a larger maximum error in eigenvalue of 89.2 \ac{pcm}, whereas the \ac{FS} calculation had a maximum error of 65.5 \ac{pcm}.
+        However, the average errors over the depletion were approximately the same: 31.6 and 33.7 \ac{pcm}, for the \ac{FS} and \ac{LS} calculations, respectively.
+        The eigenvalue differences over the depletion calculation are shown in \cref{fig:LSMOC:1a:DefaultMesh:Eigenvalue}.
+        The goal in this mesh refinement study is to determine acceptable meshing parameters without worse maximum or average eigenvalue errors.
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{1a/DefaultMesh-Eigenvalues}
+            \caption{Reference eigenvalues and differences for the default mesh pin cell case with isotopic depletion. \label{fig:LSMOC:1a:DefaultMesh:Eigenvalue}}
+        \end{figure}
       }
-      \subsubsection{Typical Pin Cell Depletion}{\label{sssec:LSMOC:Typical Pin Cell Depletion}
-        In order to evaluate the benefits of this new formulation, the first multiphysics case studied was a typical \ac{UO2} fuel cell, as specified by \ac{VERA} progression problem 1a \cite{VERAProblems}.
-        Isotopic depletion calculations were run up to 70 \ac{GWDMT} ($\sim$1820 \ac{EFPD}) as \ac{HFP} conditions.
-        Using the current default meshing parameters in MPACT as a starting point, various mesh parameters were coarsened to study their affect when using the \ac{LSMOC}.
-        These cases were compared against a reference case which was very finely meshed with fine ray-spacing (0.001 cm), and a Tabuchi-Yamamoto \cite{Yamamoto2005} quadrature using 128 azimuthal angles and 4 polar angles over $\fourpi$
-        All other cases were run using a Tabuchi-Yamamoto quadrature with 64 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.05 cm.
+      \paragraph{Fuel Radius}{
+        During isotopic depletion, it is important to accurately capture the radial distribution of Plutonium, due to self-shielding effects.
+        Plutonium is primarily produced in the outer rim of the pin, this is well known as the rim-effect.
+        The default mesh uses three equal volume rings in the fuel region; however, we expect that two rings will be sufficient, when using the \ac{LSA}, if the extra ring is placed in such a way that it captures this rim-effect.
+        Experimental studies of the rim-effect \cite{Lassmann1994} have found that there is a sharp rise in Plutonium at around between 80-90\% of the outer radius of the fuel.
 
-        \paragraph{Default Mesh}{
-          MPACT's current default meshing parameters were used as a starting point.
-          Flat and linear source calculations were run on this mesh, to set a baseline for ``acceptable'' levels of error in the eigenvalue.
-          Compared to the reference case, the \ac{LS} calculation had a larger maximum error in eigenvalue of 89.2 \ac{pcm}, whereas the \ac{FS} calculation had a maximum error of 65.5 \ac{pcm}.
-          However, the average errors over the depletion were approximately the same: 31.6 and 33.7 \ac{pcm}, for the \ac{FS} and \ac{LS} calculations, respectively.
-          The eigenvalue differences over the depletion calculation are shown in \cref{fig:LSMOC:1a:DefaultMesh:Eigenvalue}.
-          The goal in this mesh refinement study is to determine acceptable meshing parameters without worse maximum or average eigenvalue errors.
+        A series of calculations were run using two fuel rings with varying inner radius.
+        The eigenvalue and Plutonium comparisons are shown in \cref{fig:LSMOC:1a:FuelRadius:Eigenvalue,fig:LSMOC:1a:FuelRadius:Pu239}.
+        Comparing eigenvalues, a fractional radius between 0.825 and 0.875 seem to have little effect on the mean or worst-case eigenvalue difference.
+        By comparing the concentration of Pu-239, these radii are again shown to be the most accurate; a fractional radius of 0.875 was chosen to be sufficient, and used in the remainder of the studies.
+
+        \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{1a/FuelRadius-Eigenvalues}
+            \caption{Eigenvalue comparisons for problem 1A using various inner fuel radii. \label{fig:LSMOC:1a:FuelRadius:Eigenvalue}}
+        \end{figure}
+        \begin{figure}
+          \centering
+          \includegraphics[width=\linewidth]{1a/FuelRadius-Pu239}
+          \caption{Pu-239 concentration comparisons for problem 1A using various inner fuel radii. \label{fig:LSMOC:1a:FuelRadius:Pu239}}
+        \end{figure}
+      }
+      \paragraph{Moderator Ring and Azimuthal Divisions} {
+        The remaining mesh parameters are the azimuthal divisions in the fuel, clad, gap, and moderator regions, and the presence of an additional surrounding ring of moderator.
+        While it may be sufficient to use a single azimuthal division in some regions in larger cases, due to symmetry of this single pin case, using a single azimuthal region would cause the linear components of the source to be zero (i.e. it is equivalent to the \ac{FSA}).
+        It was found that the coarsening of these parameters have an insignificant affect on the resulting eigenvalue when using the \ac{LSA}, with less than 1 \ac{pcm} difference over the entire depletion.
+        Thus, four azimuthal divisions in each material region, and no additional surrounding moderator ring was found to be sufficiently accurate in this case.
+      }
+      The coarse default and coarse meshes are displayed in \cref{figs:LSMOC:1A:Mesh}.
+
+      \begin{figure}[h]
+          \centering
+          \begin{subfigure}[t]{0.45\textwidth}
+              \centering
+              \includegraphics[width=0.9\textwidth]{1a/1a-default-trimmed}
+              \caption{default mesh\label{fig:LSMOC:1a:Default Mesh}}
+          \end{subfigure}%
+          ~
+          \begin{subfigure}[t]{0.45\textwidth}
+              \centering
+              \includegraphics[width=0.9\textwidth]{1a/1a-coarse-trimmed}
+              \caption{coarse mesh\label{fig:LSMOC:1a:Coarse Mesh}}
+          \end{subfigure}
+          \caption{VERA problem 1A (a) default and (b) coarse meshes.\label{figs:LSMOC:1A:Mesh}}
+      \end{figure}
+    }
+
+    \subsection{VERA Problem 2A and 2P Depletion}{\label{ssec:LSMOC:VERA Problem 2A and 2P Depletion}
+      A mesh study similar to that done in \cref{ssec:LSMOC:Typical Pin Cell Depletion} was performed on modified \ac{VERA} problems 2A and 2P \cite{VERAProblems} with isotopic depletion up to 70 \ac{GWDMT}.
+      This was done to verify that the meshing parameters previously found were valid for larger problems, and determine if even coarser parameters were sufficient.
+      First, problem 2A was studied; the meshing parameters of the fuel cell and guide-tube cells were studied independently.
+      \subsubsection{Problem 2A}{\label{sssec:LSMOC:Problem 2A}
+        \paragraph{2A - Default Mesh}{
+          For this problem, a reference calculation was carried out on the lattice with a very fine mesh.
+          This reference calclation also used a finer directional quadrature of 128 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.001 cm.
+          Again, the MPACT's current default mesh was used a starting point for the mesh study; the results of the \ac{FS} and \ac{LS} calculations on this default mesh are used as a baseline.
+          Eigenvalue and pin-power comparisons are provided in \cref{fig:LSMOC:2A:Default Mesh:Eigenvalues,fig:LSMOC:2A:Default Mesh:PinPowers}.
+
+          The trend in eigenvalue is similar to that found for problem 1A with the default mesh;
+            the \ac{LS} calculation has a higher absolute eigenvalue difference of 51 \ac{pcm} compared to the \ac{FS} calculation with 43 \ac{pcm}.
+          However, the average eigenvalue differences are similar at 24 and 21 \ac{pcm} for the \ac{FS} and \ac{LS} calculations, respectively.
+          Additionally, \cref{fig:LSMOC:2A:Default Mesh:PinPowers} shows that maximum pin power differences are consistently lower for the linear source calculation.
+          This indicates that local effects are predicted better by the linear source, and there is some cancellation of errors occurring in the eigenvalue.
 
           \begin{figure}
-              \centering
-              \includegraphics[width=\linewidth]{1a/DefaultMesh-Eigenvalues}
-              \caption{Reference eigenvalues and differences for the default mesh pin cell case with isotopic depletion. \label{fig:LSMOC:1a:DefaultMesh:Eigenvalue}}
-          \end{figure}
-        }
-        \paragraph{Fuel Radius}{
-          During isotopic depletion, it is important to accurately capture the radial distribution of Plutonium, due to self-shielding effects.
-          Plutonium is primarily produced in the outer rim of the pin, this is well known as the rim-effect.
-          The default mesh uses three equal volume rings in the fuel region; however, we expect that two rings will be sufficient, when using the \ac{LSA}, if the extra ring is placed in such a way that it captures this rim-effect.
-          Experimental studies of the rim-effect \cite{Lassmann1994} have found that there is a sharp rise in Plutonium at around between 80-90\% of the outer radius of the fuel.
-
-          A series of calculations were run using two fuel rings with varying inner radius.
-          The eigenvalue and Plutonium comparisons are shown in \cref{fig:LSMOC:1a:FuelRadius:Eigenvalue,fig:LSMOC:1a:FuelRadius:Pu239}.
-          Comparing eigenvalues, a fractional radius between .825 and 0.875 seem to have little effect on the mean or worst-case eigenvalue difference.
-          By comparing the concentration of Pu-239, these radii are again shown to be the most accurate; a fractional radius of 0.875 was chosen to be sufficient, and used in the remainder of the studies.
-
-          \begin{figure}
-              \centering
-              \includegraphics[width=\linewidth]{1a/FuelRadius-Eigenvalues}
-              \caption{Eigenvalue comparisons for problem 1a using various inner fuel radii. \label{fig:LSMOC:1a:FuelRadius:Eigenvalue}}
+            \centering
+            \includegraphics[width=\linewidth]{2a/DefaultMesh-Eigenvalues}
+            \caption{VERA Problem 2A default mesh eigenvalue comparison. \label{fig:LSMOC:2A:Default Mesh:Eigenvalues}}
           \end{figure}
           \begin{figure}
             \centering
-            \includegraphics[width=\linewidth]{1a/FuelRadius-Pu239}
-            \caption{Pu-239 concentration comparisons for problem 1a using various inner fuel radii. \label{fig:LSMOC:1a:FuelRadius:Pu239}}
+            \includegraphics[width=\linewidth]{2a/DefaultMesh-PinPowers}
+            \caption{VERA Problem 2A default mesh pin power comparison. \label{fig:LSMOC:2A:Default Mesh:PinPowers}}
           \end{figure}
         }
-        \paragraph{Moderator Ring and Azimuthal Divisions} {
-          The remaining mesh parameters are the azimuthal divisions in the fuel, clad, gap, and moderator regions, and the presence of an additional surrounding ring of moderator.
-          While it may be sufficient to use a single azimuthal division in some regions in larger cases, due to symmetry of this single pin case, using a single azimuthal region would cause the linear components of the source to be zero (i.e. it is equivalent to the \ac{FSA}).
-          It was found that the coarsening of these parameters have an insignificant affect on the resulting eigenvalue when using the \ac{LSA}, with less than 1 \ac{pcm} difference over the entire depletion.
-          Thus, four azimuthal divisions in each material region, and no additional surrounding moderator ring was found to be sufficiently accurate in this case.
+        \paragraph{2A - Fuel Radius and Azimuthal Divisions}{
+          For this problem, only the fractional radius found in \cref{ssec:LSMOC:Typical Pin Cell Depletion} is tested against the current default mesh.
+          There was no significant affect in eigenvalue or pin powers by using the 2-ring model with an inner radius fraction of 0.875.
+          Next, the varied azimuthal divisions in the fuel were tested; this time testing a single azimuthal division.
+          \Cref{fig:LSMOC:2A:Fuel Azimuthals:Eigenvalues} shows that there is noticeable affect moving to a single azimuthal division;
+            however, the mean difference is changed by less than 1 \ac{pcm}, and the max difference is actually improved by 3 \ac{pcm}.
+          We acknowledge that this improvement is likely due to cancellation of errors. Regardless, the net effect of this change is small.
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/FuelAzimuthals-Eigenvalue}
+            \caption{VERA Problem 2A eigenvalue comparison for varied fuel azimuthal divisions. \label{fig:LSMOC:2A:Fuel Azimuthals:Eigenvalues}}
+          \end{figure}
+        }
+        \paragraph{2A - Moderator Azimuthal Divisions}{
+          The azimuthal divisions of the surrounding moderator seems to have a more significant effect on the accuracy of the calculation.
+          As shown by \cref{fig:LSMOC:2A:Moderator Azimuthal:Eigenvalues}, using 4 azimuthal divisions seems to be sufficient; but moving to a single division is not feasible.
+          A single division ore than doubles the mean eigenvalue difference, and shows a consistent positive bias.
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/ModrAzimuthals-Eigenvalue}
+            \caption{VERA Problem 2A eigenvalue comparison for varied number of surrounding moderator azimuthal divisions in the fuel cells. \label{fig:LSMOC:2A:Moderator Azimuthal:Eigenvalues}}
+          \end{figure}
+        }
+        \paragraph{2A - Cladding and Gap Azimuthal Divisions}{
+          The azimuthal divisions of the cladding and gap regions do not seem to play a significant role.
+          The difference is not even visually apparent in a graph of the eigenvalue, as seen in \cref{fig:LSMOC:2A:Clad Azimuthal:Eigenvalues}.
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/CladAzimuthals-Eigenvalue}
+            \caption{VERA Problem 2A eigenvalue comparison for varied number of the cladding/gap azimuthal divisions in the fuel cells. \label{fig:LSMOC:2A:Clad Azimuthal:Eigenvalues}}
+          \end{figure}
+        }
+        \paragraph{2A - Guide-Tube Azimuthal Divisions}{
+          In the 2A lattice, guide-tube pins are present; each guide-tube consists of three regions: inner moderator, cladding, and outer moderator.
+          The effect of different azimuthal divisions in each of these regions was tested; the resulting eigenvalues are shown in \cref{fig:LSMOC:2A:Gtube:Inner Moderator Azimuthals:Eigenvalues,fig:LSMOC:2A:Gtube:Cladding Azimuthals:Eigenvalues,fig:LSMOC:2A:Gtube:Outer Moderator Azimuthals:Eigenvalues}.
+          A single azimuthal division in each of these regions seems to be sufficient, without any significant affect on eigenvalue accuracy.
+          However, 4 azimuthal divisions in the surrounding moderator was selected for moving forward due to compatibility issues with \ac{CTF}.
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/Gtube-InnerModeratorAzm-Eigenvalue}
+            \caption{VERA Problem 2A eigenvalue comparison for varied number of inner moderator azimuthal divisions in the guide-tube cells. \label{fig:LSMOC:2A:Gtube:Inner Moderator Azimuthals:Eigenvalues}}
+          \end{figure}
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/Gtube-CladAzm-Eigenvalue}
+            \caption{VERA Problem 2A eigenvalue comparison for varied number of cladding azimuthal divisions in the guide-tube cells. \label{fig:LSMOC:2A:Gtube:Cladding Azimuthals:Eigenvalues}}
+          \end{figure}
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/Gtube-OuterAzm-Eigenvalue}
+            \caption{VERA Problem 2A eigenvalue comparison for varied number of outer moderator azimuthal divisions in the guide-tube cells. \label{fig:LSMOC:2A:Gtube:Outer Moderator Azimuthals:Eigenvalues}}
+          \end{figure}
+        }
+        \paragraph{2A - Coarse Mesh Summary}{
+          Coarse mesh parameters were found using this isotopic depletion calculation on \ac{VERA} problem 2A.
+          The fuel cell
+          \begin{itemize}
+            \item{has 2 fuel rings, with the inner radius being 0.875 fraction of the outer,}
+            \item{no additional moderator ring in the surrounding moderator,}
+            \item{a single azimuthal division in the fuel, clad, and gap regions,}
+            \item{and four azimuthal divisions in the surrounding moderator.}
+          \end{itemize}
+          The guide-tube cell
+          \begin{itemize}
+            \item{has no additional moderator ring in the surrounding moderator,}
+            \item{has a single azimuthal division for the inner moderator, and cladding,}
+            \item{and four azimuthal divisions for the surrounding moderator.}
+          \end{itemize}
+          The lattice meshes are shown in \cref{figs:LSMOC:2a:Meshes}.
+
+          \begin{figure}[h]
+              \centering
+              \begin{subfigure}[t]{0.45\textwidth}
+                  \centering
+                  \includegraphics[width=0.9\textwidth]{2a/2a-default-trimmed}
+                  \caption{default mesh\label{fig:LSMOC:2a:Default Mesh}}
+              \end{subfigure}%
+              ~
+              \begin{subfigure}[t]{0.45\textwidth}
+                  \centering
+                  \includegraphics[width=0.9\textwidth]{2a/2a-coarse-trimmed}
+                  \caption{coarse mesh\label{fig:LSMOC:2a:Coarse Mesh}}
+              \end{subfigure}
+              \caption{VERA problem 2A (a) default and (b) coarse meshes.\label{figs:LSMOC:2a:Meshes}}
+          \end{figure}
+
+          Eigenvalue comparisons are shown in \cref{fig:LSMOC:2A:Coarse Mesh:Eigenvalues}, and pin power comparisons are made in \cref{fig:LSMOC:2A:Coarse Mesh:PinPowers}.
+          While it is visually apparent that the accuracy is made slightly worse than the default mesh \ac{LS} calculation, the entire goal of the this mesh study was to maintain error with the \ac{FS} calculation.
+          This goal has been met, while reducing the number of cells from 3946 to 579.
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/Final-Eigenvalues}
+            \caption{VERA Problem 2A coarse mesh eigenvalue comparison. \label{fig:LSMOC:2A:Coarse Mesh:Eigenvalues}}
+          \end{figure}
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2a/Final-PinPowers}
+            \caption{VERA Problem 2A coarse mesh pin power comparison. \label{fig:LSMOC:2A:Coarse Mesh:PinPowers}}
+          \end{figure}
         }
       }
-      \subsubsection{2-D Lattices}{\label{sssec:LSMOC:2-D Lattices}
-        [Lattice Cases]
+
+      \subsubsection{Problem 2P}{\label{sssec:LSMOC:Problem 2P}
+        \paragraph{2P - Applying Coarse Mesh Parameters}{
+          \ac{VERA} problem 2P contains several gadolinia enriched fuel rods; as the lattice is depleted, these fuel rods ``burn'' the gadolinia.
+          The gadolinia is primarily burned away started at the outer radius and moving inwards as time progresses.
+          This inward burning makes the pins difficult to model, and requires many radial divisions for accurate calculations; it is effectively a ``moving rim effect''.
+          Additionally, because the presence of these small radial regions, a finer ray-spacing (0.01 cm) is necessary.
+
+          To evaluate if the previously determined coarse mesh parameters are sufficient in this problem, they are applied to the regular fuel and guide-tube cells, while the gadolinia rods use the default meshing parameters.
+          \Cref{fig:LSMOC:2P:Default Mesh:Eigenvalues,fig:LSMOC:2P:Default Mesh:PinPowers} show that applying the coarse mesh parameters to the fuel and guide-tube cells does not significantly worsen the eigenvalue or pin power results.
+          It is worth observing that errors in this cases are significantly higher than in the problem 2A; this is likely due to the complicated radial dependence of the gadolinia rods during depletion.
+
+          \begin{figure}
+              \centering
+              \includegraphics[width=\linewidth]{2p/Initial-Eigenvalues}
+              \caption{Eigenvalue comparisons for VERA problem 2P with default mesh parameters and coarse mesh parameters for the fuel and guide-tube cells.\label{fig:LSMOC:2P:Default Mesh:Eigenvalues}}
+          \end{figure}
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2p/Initial-PinPowers}
+            \caption{Pin power comparisons for VERA problem 2P with default mesh parameters and coarse mesh parameters for the fuel and guide-tube cells.\label{fig:LSMOC:2P:Default Mesh:PinPowers}}
+          \end{figure}
+        }
+        \paragraph{2P - Azimuthal Divisions}{
+          It is not expected that the radial divisions in the gadolinia rods can be significantly coarsened.
+          However, this is not true for the azimuthal divisions.
+          We apply the same azimuthal divisions as we did for the fuel: 1 in the fuel, clad, and gap, and 4 in the surrounding moderator.
+          \Cref{fig:LSMOC:2P:Gad Azm:Eigenvalues} shows the eigenvalue results are similar at all but the initial state to the previous coarse mesh parameters.
+          Even at the initial state, the error is between the flat and linear source calculations on the default mesh.
+          Thus, it is ``acceptable'' to coarsen the azimuthal divisions in the gadolinia pins.
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2p/GadAzm-Eigenvalues}
+            \caption{Eigenvalue comparisons for VERA problem 2P for the default mesh, previous coarse mesh, and gadolinia rods with fewer azimuthal divisions.\label{fig:LSMOC:2P:Gad Azm:Eigenvalues}}
+          \end{figure}
+        }
+        \paragraph{2P - Radial Divisions}{
+          While it is unexpected that significant radial coarsening can occur in these pins, it is best to test this assumption.
+          \Cref{fig:LSMOC:2P:Gad Rad:Eigenvalues} shows the eigenvalue errors for several different numbers of equal volume radii in the gadolinia fuel rods.
+          It is clear that the number of radii can significantly affect the accuracy.
+          For 8 radial divisions, the error is higher near the reactivity peak, it is still between the flat and linear source calculation errors on the default mesh.
+          The goal of these mesh reduction studies was not to preserve the accuracy of the linear source on the default mesh, but to nearly match the accuracy of the flat source calculation on the default mesh.
+          For this goal, 8 radial divisions seems to be sufficient.
+
+          \begin{figure}
+              \centering
+              \includegraphics[width=\linewidth]{2p/GadRad-Eigenvalues}
+              \caption{Eigenvalue comparisons for VERA problem 2P for varied number of radii in gadolinia rods.\label{fig:LSMOC:2P:Gad Rad:Eigenvalues}}
+          \end{figure}
+        }
+        \paragraph{2P - Coarse Mesh Summary}{
+          The coarse mesh parameters for the fuel and guide-tube cells previously found were also found to be sufficient for \ac{VERA} problem 2P.
+          For the gadolinia rods, it was found to be sufficient to
+          \begin{itemize}
+            \item{have no additional moderator ring,}
+            \item{use 8 equal volume fuel radial fuel divisions,}
+            \item{a single azimuthal division in the fuel, clad, and gap regions,}
+            \item{and four azimuthal divisions in the surrounding moderator.}
+          \end{itemize}
+
+          Eigenvalue comparisons are shown in \cref{fig:LSMOC:2P:Coarse Mesh:Eigenvalues}, and pin power comparisons are made in \cref{fig:LSMOC:2P:Coarse Mesh:PinPowers}.
+          Using these coarse mesh parameters reduces the number of cells from 4282 to 621.
+          The lattice meshes are visualized in \cref{figs:LSMOC:2p:Meshes}.
+
+          \begin{figure}[h]
+            \centering
+            \begin{subfigure}[t]{0.45\textwidth}
+                \centering
+                \includegraphics[width=0.9\textwidth]{2p/2p-default-trimmed}
+                \caption{default mesh\label{fig:LSMOC:2p:Default Mesh}}
+            \end{subfigure}%
+            ~
+            \begin{subfigure}[t]{0.45\textwidth}
+                \centering
+                \includegraphics[width=0.9\textwidth]{2p/2p-coarse-trimmed}
+                \caption{coarse mesh\label{fig:LSMOC:2p:Coarse Mesh}}
+            \end{subfigure}
+            \caption{VERA problem 2P (a) default and (b) coarse meshes.\label{figs:LSMOC:2p:Meshes}}
+          \end{figure}
+
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2p/Final-Eigenvalues}
+            \caption{VERA Problem 2P coarse mesh eigenvalue comparison. \label{fig:LSMOC:2P:Coarse Mesh:Eigenvalues}}
+          \end{figure}
+          \begin{figure}
+            \centering
+            \includegraphics[width=\linewidth]{2p/Final-PinPowers}
+            \caption{VERA Problem 2P coarse mesh pin power comparison. \label{fig:LSMOC:2P:Coarse Mesh:PinPowers}}
+          \end{figure}
+        }
       }
-      \subsubsection{Assembly with Feedback}{\label{sssec:LSMOC:Assembly with Feedback}
-        [Problem 6]
-      }
-      \subsubsection{Core Depletion with Feedback}{\label{sssec:LSMOC:Core Depletion with Feedback}
-        [Problem 9]
+
+      \subsubsection{Performance}{\label{sssec:Performance}
+        [TIME/MEMORY RESULTS HERE]
       }
     }
+
+    \subsection{2-D Lattices}{\label{ssec:LSMOC:2-D Lattices}
+      In order to evaluate these coarse mesh parameters, they were applied to the \ac{VERA} problem 2 lattice series.
+      This series contains 17 common lattice configurations, and it is expected that if the meshing parameters are sufficient for these cases, they will be sufficient in most applications.
+      The eigenvalue and pin-power results compared to a very finely meshed reference case are shown in \cref{tab:LSMOC:Lattice Results}.
+      On average, the \ac{LS} on the coarse mesh, using the parameters found in the previous sections, had accuracy comparable to the \ac{FS} on the default mesh.
+      Additionally, the worst case errors were lower for the \ac{LS} on the coarse mesh.
+      These results also show that the \ac{FS} on the coarse mesh is not sufficient, with significantly worse eigenvalue and pin-power comparisons.
+
+      \begin{table}
+        \centering
+        \caption{Results for VERA Problem 2 lattices for different mesh and source approximations.}
+        \footnotesize
+        \begin{tabular}{rrrrr@{\hskip 1cm}rrrr} \toprule
+          Case  & \multicolumn{4}{c}{$\Delta \keff$ (pcm)} & \multicolumn{4}{c}{Max Pin Power Difference (\%)}\\\midrule
+                & FS Default & LS Default & FS Coarse & LS Coarse & FS Default & LS Default & FS Coarse & LS Coarse\\\midrule
+                A    & -17  &   -51   &  44     & -36             & 0.07 & 0.05 & 0.24 & 0.08\\
+                B    & -15  &   -49   &  46     & -34             & 0.07 & 0.05 & 0.24 & 0.08\\
+                C    & -17  &   -51   &  44     & -36             & 0.07 & 0.05 & 0.24 & 0.08\\
+                D    & -25  &   -59   &  39     & -41             & 0.07 & 0.05 & 0.24 & 0.08\\
+                E    & -49  &   -40   &  -52    & -27             & 0.12 & 0.05 & 0.37 & 0.08\\
+                F    & -74  &   -32   &  -120   & -26             & 0.15 & 0.05 & 0.51 & 0.08\\
+                G    & -98  &   -45   &  -210   & -43             & 0.19 & 0.09 & 0.59 & 0.10\\
+                H    & -78  &   17    &  -206   & 18              & 0.25 & 0.15 & 0.58 & 0.15\\
+                I    & 2    &   -43   &  82     & -24             & 0.09 & 0.05 & 0.29 & 0.08\\
+                J    & -74  &   -32   &  -119   & -26             & 0.10 & 0.05 & 0.34 & 0.08\\
+                K    & -61  &   -26   &  -97    & -19             & 0.17 & 0.06 & 0.55 & 0.08\\
+                L    & 60   &   37    &  105    & 52              & 0.13 & 0.07 & 0.35 & 0.12\\
+                M    & 74   &   54    &  124    & 71              & 0.11 & 0.06 & 0.26 & 0.11\\
+                N    & -1   &   31    &  -45    & 43              & 0.18 & 0.05 & 0.51 & 0.11\\
+                O    & -21  &   9     &  -109   & 7               & 0.15 & 0.06 & 0.43 & 0.08\\
+                P    & -115 &   -42   &  -311   & -64             & 0.17 & 0.08 & 0.69 & 0.14\\
+                Q    & -12  &   -48   &  54     & -30             & 0.08 & 0.05 & 0.28 & 0.08\\\midrule
+                AVG  & 47   &   39    &  106    & 35              & 0.13 & 0.06 & 0.39 & 0.09\\
+                MAX  & 115  &   59    &  311    & 71              & 0.25 & 0.15 & 0.69 & 0.15\\\bottomrule
+        \end{tabular}
+        \label{tab:LSMOC:Lattice Results}
+      \end{table}
+
+      [ADD TABLE OF TIME (per iter?) / MEMORY][MAKE NOTE OF ITERATION NUMBERS]
+
+      \subsubsection{Coarse Rays}{\label{sssec:LSMOC:Coarse Rays}
+        In each of the these lattice calculations, the \ac{MOC} calculation takes up the majority of the runtime.
+        The \ac{MOC} runtime is directly proportional to the number of track-segments that are generated during the ray-tracing.
+        This number is reduced as the mesh becomes coarser; however, due to material and geometric limitations, the mesh can only be coarsened so much.
+        Another parameter that affects the number of track-segments is the ray-spacing, or how far apart each ray is.
+        The rays can be spaced more coarsely, but this may cause some regions to not be integrated as accurately, thus degrading overall accuracy.
+
+        In this section, the use of coarser ray-spacing is investigated for the \ac{VERA} problem 2 series.
+        Results were generated using a ray-spacing of 0.1 cm and 0.2 cm for the default mesh with the \ac{FS} solver, and for the coarse mesh with \ac{LS} solver.
+        Eigenvalue and pin power comparisons are shown in [].
+
+        [SHOW DIFFERENCE FROM PREVIOUS!? - i.e. show affect of ray-spacing]
+
+        \begin{table}
+          \centering
+          \caption{Results for VERA Problem 2 lattices for different mesh and source approximations and coarse ray-spacings.}
+          \footnotesize
+          \begin{tabular}{rrrrr@{\hskip 1cm}rrrr} \toprule
+            Case  & \multicolumn{4}{c}{$\Delta \keff$ (pcm)} & \multicolumn{4}{c}{Max Pin Power Difference (\%)}\\\midrule
+                  & FS (0.1 cm) & FS (0.2 cm) & LS (0.1 cm) & LS (0.2cm) & FS (0.1 cm) & FS (0.2 cm) & LS (0.1 cm) & LS (0.2cm)\\\midrule
+            A     & 42   &   34    &  21   &   18   & 0.15 & 0.45 & 0.10 & 0.33\\
+            B     & 41   &   33    &  19   &   16   & 0.15 & 0.45 & 0.10 & 0.33\\
+            C     & 42   &   34    &  21   &   18   & 0.15 & 0.45 & 0.10 & 0.33\\
+            D     & 45   &   38    &  23   &   20   & 0.15 & 0.45 & 0.10 & 0.33\\
+            E     & 4    &   -59   &  25   &   -29  & 0.22 & 0.28 & 0.09 & 0.28\\
+            F     & -22  &   -32   &  26   &   28   & 0.19 & 0.31 & 0.09 & 0.42\\
+            G     & 27   &   73    &  98   &   162  & 0.31 & 0.49 & 0.24 & 0.44\\
+            H     & -37  &   71    &  59   &   180  & 0.35 & 0.52 & 0.24 & 0.51\\
+            I     & 54   &   45    &  25   &   22   & 0.16 & 0.47 & 0.10 & 0.32\\
+            J     & -22  &   -31   &  26   &   28   & 0.19 & 0.31 & 0.08 & 0.42\\
+            K     & -5   &   -15   &  37   &   38   & 0.20 & 0.33 & 0.10 & 0.43\\
+            L     & -30  &   -171  &  70   &   -40  & 0.79 & 0.90 & 0.80 & 1.30\\
+            M     & -140 &   -220  &  -43  &   -15  & 1.08 & 0.94 & 1.11 & 1.20\\
+            N     & -95  &   -227  &  23   &   -103 & 0.91 & 0.85 & 0.98 & 0.98\\
+            O     & 4    &   -36   &  27   &   -21  & 0.25 & 0.62 & 0.14 & 0.43\\
+            P     & -7   &   -35   &  39   &   -7   & 0.30 & 0.61 & 0.20 & 0.40\\
+            Q     & 43   &   35    &  22   &   19   & 0.15 & 0.46 & 0.11 & 0.32\\\midrule
+            AVG   & 39   &   70    &  36   &   45   & 0.34 & 0.52 & 0.28 & 0.52\\
+            MAX   & 140  &   227   &  98   &   180  & 1.08 & 0.94 & 1.11 & 1.30\\\bottomrule
+          \end{tabular}
+          \label{tab:LSMOC:Lattice Results:Coarse Rays}
+        \end{table}
+      }
+    }
+
+    \subsection{Assembly with Feedback}{\label{ssec:LSMOC:Assembly with Feedback}
+      % [Rough outline:
+      %   1. Parameters applied to P6
+      %   2. At time of this work, no radial coupling possible
+      %   3. Mesh is valid or no?
+      %   4. Coarse rays
+      % ]
+    }
+
+    \subsection{Core Depletion with Feedback}{\label{ssec:LSMOC:Core Depletion with Feedback}
+      [Rough outline:
+        1. P9 depletion and TH Feedback
+        2. Radial coupling affect?
+        3. Mesh is valid or no? w/o radial coupling? w/ radial coupling?
+        4. Mention coarse rays = NO because control rods
+      ]
+    }
+  }
+  \section{Conclusions}{\label{sec:Conclusions}
+    [INSERT CONCLUSIONS HERE]
   }
 
   % References
