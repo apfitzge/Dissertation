@@ -668,6 +668,17 @@
         While ray widths are still linked, the ray-traces are not; though, this does not seem to introduce significant discretization errors \cite{Yamamoto2008}.
       }
 
+      \subsection{Random Rays}{\label{ssec:RT:Random Rays}
+        The random ray method was developed in the ARRC code by \citet{Tramm2018}, and is a hybrid method between Monte Carlo and \ac{MOC} methods.
+        This ray-tracing method uses stochastic discretizations of the directions and space (characteristic rays).
+        The method uses a unique directional quadrature and ray-trace each iteration; this significantly decreases the memory usage, as tracking storage is completely eliminated.
+        The use of random rays on boundaries also allows for the storage of boundary/interface flux to be eliminated entirely; this is due to the consideration of cyclic-tracks, and cancellation of errors due to stochastic ray placement \cite{Tramm2018}.
+
+        This also significantly increases the amount of work that needs to be done for each track, as intersection data needs to be recomputed for each track each iteration.
+        There are claims that the cache benefits of not storing the rays out-weighs the increased computational work \cite{Tramm2018}.
+        Initial results for this method have been promising, but no \ac{CMFD} acceleration has been utilized at this time.
+      }
+
       \subsection{Macroband}{\label{ssec:RT:Macroband}
         The \emph{macroband} method  was originally proposed by \citet{Villarino1992} for \ac{CP} calculations in HELIOS.
         In this method, characteristic rays placed within ``macrobands'' which are separated by tangential and intersection points in the mesh.
