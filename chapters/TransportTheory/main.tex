@@ -438,40 +438,131 @@
 
       Following the relative success of these methods, other research groups have followed in their paths.
       nTRACER \cite{Jung2009}, and MPACT \cite{MPACT2016} used the isotropic 2D/1D method.
-      The PANX [CITATION], STREAM \cite{Zheng2017}, and APOLLO3 \cite{Faure2018} have also implemented 2D/1D methods.
+      The STREAM \cite{Zheng2017}, and APOLLO3 \cite{Faure2018} have also implemented 2D/1D methods.
 
       \citet{Stimpson2015} implemented an anisotropic 2D/1D method in MPACT using a Fourier expansion of the azimuthal angles for the axial and radial transverse leakages.
       \citet{Jarrett2018} further improved upon \citetp{Stimpson2015} work by introducing a 2D/1D method using $P_3$ in the axial direction.
+      2D/1D methods are fundamentally based on the idea that heterogeneity in the axial direction is very low;
+      thus, in cases where this is not true these methods have been observed to break down, or yield incorrect solutions.
 
-      [FAILINGS]
-      [DERIVATION]
+      \DeclareDocumentCommand{\aflux}{}{\psi}
+      \DeclareDocumentCommand{\xst}{ O{t} }{\Sigma_{#1}}
+      \DeclareDocumentCommand{\mxst}{ O{t} }{\widetilde{\Sigma}_{#1}}
+      \DeclareDocumentCommand{\dir}{}{\vec{\Omega}}
+      \DeclareDocumentCommand{\rloc}{}{\loc_{xy}}
+      \DeclareDocumentCommand{\TL}{}{\widetilde{J}}
+      \DeclareDocumentCommand{\L}{}{\widetilde{L}}
 
+      \subsubsection{Derivation}{\label{sssec:3T:Derivation}
+        The details of the 2D/1D equations have implications on results in \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}.
+        In this section, the 2D/1D equations are derived.
+        Begin with the mono-energetic transport equation
+        \begin{equation}\label{eq:2D/1D:Transport}
+          \dir\vdot\grad\aflux(\loc,\dir) + \xst(\loc)\aflux(\loc,\dir) = \frac{Q(\loc)}{\fourpi},
+        \end{equation}
+        where $Q(\loc)$ is the source.
 
+        The 2D/1D methods divide the transport equation into radial (2-D) and axial (1-D) equations.
+        The streaming term, $\dir\vdot\grad\aflux$ can be divided into the radial and axial components:
+        \begin{equation}\label{eq:2D/1D:Streaming Split}
+          \dir\vdot\grad\aflux = (\dir\vdot\grad)_{xy}\aflux + \PolarCos\pderiv{\aflux}{z}.
+        \end{equation}
+        The radial equation can be found by first separating the axial derivative from the streaming term:
+        \begin{equation}\label{eq:2D/1D:Radial Eqn. 1}
+          \left[(\dir\vdot\grad)_{xy} + \xst\right]\aflux(\loc,\dir) = \frac{Q(\loc)}{\fourpi} - \PolarCos\pderiv{\aflux}{z}.
+        \end{equation}
+        \Cref{eq:2D/1D:Radial Eqn. 1} is then integrated over an axial plane $k$, over the interval $[z_{k-1/2}, z_{k+1/2}]$, yielding
+        \begin{subequations}\label[subeqs]{eqs:2D/1D:Radial Eqn.}
+          \begin{equation}\label{eq:2D/1D:Radial Eqn.}
+            \left[(\dir\vdot\grad)_{xy} + \xst[t,k](\rloc)\right]\aflux_k(\rloc,\dir) = \frac{Q_k(\rloc)}{\fourpi} - \TL_{z,k}(\rloc,\dir),
+          \end{equation}
+          where
+          \begin{equation}\label{eq:2D/1D:Radial Flux}
+            \aflux_k(\rloc,\dir) \defined \frac{1}{h_k}\intl[z_{k-1/2}][z_{k+1/2}]\aflux(\loc,\dir)\dif{z},
+          \end{equation}
+          \begin{equation}\label{eq:2D/1D:Radial Source}
+            Q_k(\rloc) \defined \frac{1}{h_k}\intl[z_{k-1/2}][z_{k+1/2}]Q(\loc,\dir)\dif{z},
+          \end{equation}
+          \begin{equation}\label{eq:2D/1D:Axial TL}
+            \TL_{z,k}(\rloc,\dir) = \frac{\PolarCos}{h_k}\left[\aflux(\rloc,z_{k+1/2},\dir) - \aflux(\rloc,z_{k-1/2})\right],
+          \end{equation}
+          and $h_k = z_{k+1/2}-z_{k-1/2}$.
+        \end{subequations}
+        Generally, the difference between isotropic and anisotropic 2D/1D methods is in the treatment of the transverse leakages, $\TL_{z,k}$.
+        In MPACT, the axial transverse leakage is typically discretized over the coarse radial mesh (typically a pin cell), and is assumed to be isotropic.
 
+        The axial equations are found by moving the radial streaming term to the right hand side of \cref{eq:2D/1D:Transport},
+        \begin{equation}\label{eq:2D/1D:Axial Eqn. 1}
+          \left[\PolarCos\pderiv{}{z} + \xst\right]\aflux(\loc,\dir) = \frac{Q(\loc)}{\fourpi} - (\dir\vdot\grad)_{xy}\aflux(\loc,\dir),
+        \end{equation}
+        and integrating over a radial area.
+        This radial area can be a fine cell (transport cell), but is typically a coarser discretization such as a pin cell \cite{Jarrett2018}.
+        Operate on \cref{eq:2D/1D:Axial Eqn. 1} by
+        \[
+          \frac{1}{A_{ij}}\intl[x_{i-1/2}][x_{i+1/2}]\intl[y_{j-1/2}][y_{j+1/2}](\vdot)\dif{x}\dif{y}
+          =
+          \frac{1}{A_{ij}}\iint_{ij}(\vdot)\dif{x}\dif{y},
+        \]
+        \begin{subequations}\label[subeqs]{eqs:2D/1D:Axial}
+          \begin{equation}\label{eq:2D/1D:Axial}
+            \left[\PolarCos\pderiv{}{z}+\xst[t,k,ij](z,\dir)\right]\aflux_{ij}(z,\dir)
+              = \frac{Q_{ij}(z)}{\fourpi} - \frac{1}{A_{ij}}\suml[s\in\{N,S,E,W\}](\dir\vdot\widehat{n}_s)\aflux_{ij,s}(z,\dir),
+          \end{equation}
+          where
+          \begin{equation}\label{eq:2D/1D:Axial XS}
+            \xst[t,k,ij](z,\dir) \defined \frac{\iint_{ij}\xst[t,k](\rloc)\aflux_k(\rloc,\dir)\dif{x}\dif{y}}{\iint_{ij}\aflux_k(\rloc,\dir)\dif{x}\dif{y}},
+          \end{equation}
+          where $s$ indicates a surface for the cardinal directions $\{N,S,E,W\}$.
+          For hexagonal pins there would instead be six directions to loop over; for simplicity this work assumes cartesian pin cells.
+        \end{subequations}
+        Typically the coarse cell cross sections are isotropic, but polar dependence has been investigated \cite{Jarrett2018}.
 
+        The radial equations, \cref{eqs:2D/1D:Radial Eqn.}, are solved by a 2-D transport method, such as \ac{MOC}, while the axial equations, \cref{eqs:2D/1D:Axial}, are solved by either a transport method or approximate method such as diffusion \cite{Collins2016,Jarrett2018}.
+        The radial equations yield surface fluxes on the pin faces, while the axial equations yield surface fluxes on the axial planar faces.
+        The radial equations are, however, integrated over an axial plane which results in an axial flat solution within each plane.
+        These methods then require many axial planes to resolve the axial behavior in a system, particularly if there is significant axial variation in the solution.
+      }
 
-      % 2D/1D methods originally developed in Korea - KAIST and KAERI in the early 2000's.
-      % Implemented in CRX, DeCART, nTracer.
-      % Implemented MPACT [Shane's thesis] - anisotropic TL?
-      % PANX, STREAM, APOLLO3
-      % Isotropic vs Anisotropic - performance vs accuracy
-      % Failings of the 2D/1D method
+      \subsubsection{Transverse Leakage Splitting}{\label{sssec:3T:Transverse Leakage Splitting}
+        \Cref{eqs:2D/1D:Radial Eqn.} gives no guarantee that the right-hand-side will be a positive source.
+        Negative sources present considerable challenges to iteration stability when using non-linear acceleration methods such as \ac{CMFD} \cite{Jarrett2018}.
+        The transverse leakage splitting method \cite{Stimpson2015,Kelley2015} was developed to ``split'' the transverse leakage term such that the total source ($Q+\TL$) is non-negative.
+        A split term, $\L_{z}$, is defined
+        \begin{equation}\label{eq:2D/1D:Split Term}
+          \L_z \defined -\left[\frac{Q_k(\rloc)}{\fourpi} - \TL_{z,k}(\rloc,\dir)\right],
+        \end{equation}
+        and is added to both sides of \cref{eq:2D/1D:Radial Eqn.}.
+        The left hand side (the 2-D transport operator) cannot have a free-source term, so it is necessary to merge this split term into the cross section term.
+        The angular flux is not known a priori, so a approximation is used, typically isotropic flux:
+        \begin{equation}\label{eq:2D/1D:Isotropic Flux}
+          \aflux_k(\rloc,\dir) \approx \frac{\phi_k(\rloc)}{\fourpi}.
+        \end{equation}
+        This approximation is introduced only to combine the left-hand-side leakage term into the cross section term as
+        \begin{equation}\label{eq:2D/1D:Split XS}
+          \mxst[t,k](\rloc) \defined \xst[t,k](\rloc) + \fourpi\frac{\L_z}{\phi_k(\rloc)}.
+        \end{equation}
+        The radial equation then becomes
+        \begin{equation}\label{eq:2D/1D:Split Radial Eqn.}
+          \left[(\dir\vdot\grad)_{xy} + \mxst[t,k](\rloc)\right]\aflux_k(\rloc,\dir) = 0.
+        \end{equation}
 
-      % Derivation:
-      %   - Radial transport (MoC)
-      %   - Coupled by transverse leakages
-      %   - Planar integration -> flat in each plane
-      %   - homogenization
-      %   - stability / relaxation
-      %   - transverse leakage splitting
+        Because splitting introduces an approximation, it generally decreases the accuracy of the solution.
+        Thus, the transverse splitting method is typically use only in cells that have a negative source.
+        More recently, alternative methods have been investigated \cite{Zhao2018}, but will not be covered in this work.
+      }
     }
 
+    % Here just to make sure previous macros didn't screw anything up
+    \input{macros/multigroup.tex}
+    \input{macros/DiscreteOrdinates.tex}
+    \input{macros/MOC.tex}
+
     \subsection{Extruded 3-D Methods}{\label{ssec:3T:Extruded 3-D Methods}
-      Proteus - FEM
-      STREAM - Linear orthogonal polynomials
-      APOLLO - ?
-      Nick H. - Legendre Expansion
-      SooYoung - Diamond-Difference
+      % Proteus - FEM
+      % STREAM - Linear orthogonal polynomials
+      % APOLLO - ?
+      % Nick H. - Legendre Expansion
+      % SooYoung - Diamond-Difference
     }
 
     \subsection{Method of Characteristics}{\label{ssec:3T:Method of Characteristics}
