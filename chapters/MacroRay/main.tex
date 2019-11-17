@@ -5,40 +5,257 @@
   \def\figpath{chapters/MacroRay/figures/}
   \graphicspath{ {\figpath} }
 
-  \section{Macroray}{\label{sec:RT:Macroray}
-    The \emph{macroray} method is a three-dimensional extension of the two-dimensional macroband method, and is a central contribution of this work.
-    This method has been implemented as part of this work, and, to the best of the author's knowledge, has never been studied.
-    The macroray is a extension of the macroband into three-dimensions, in which along each radial ray the macroband method is used to generate axial rays on the characteristic plane.
-    This follows the general procedure used for three-dimensional ray-tracing, but a limitation of this approach is explained in more detail in \cref{sssec:RT:Interface Flux Approximations}.
-    In three-dimensions, rays can more generally be separated into ``parallel pipes'', to simplify notation these are referred to as macrorays.
+  The primary motivation of the three-dimensional macroray ray-tracing technique is to reduce the number of tracks generated for 3-D \ac{MOC} applications.
+  The number of track-segments is very strongly correlated with the run-time of a \ac{MOC} calculation \footnote{if the \ac{MOC} calculation performs an entirely separate calculation (i.e does not use the chord-classification method) for each track-segment, this is expected to be directly proportional (ignoring overhead)}.
+  The 2-D macroband ray-tracing method had been shown to allow for coarser ray-spacing compared to traditional methods, but has never been extended for use in 3-D \ac{MOC} calculations.
+  This work seeks to fill that gap, and perform an investigation into the extension from 2-D to 3-D macroband-like ray-tracing.
+  The ray-tracing technique is referred to as the \emph{macroray}, because the 3-D ``macro''paths are no longer bands, but instead parallel-pipes.
 
-    The motivation for investigating this method is for three primary reasons.
-    The first, is that 2-D results \cite{Yamamoto2005,Fevotte2007,Yamamoto2008} have indicated that the macroband method allows for coarser ray-spacing (thus fewer rays) while maintaining accuracy.
-    This is expected to increase computational efficiency, and lead to faster \ac{MOC} calculations.
-    However, an extension to three-dimensions, if coarser ray-spacing can be used in both the axial and radial directions, the increase in computational efficiency is expected to be greater.
+  \section{MacroRay Technique}{\label{sec:MR:MacroRay Technique}
+    There have been different approaches to 3-D ray-tracing for \ac{MOC}; the most common approach is to first generate 2-D tracking data, forming characteristic planes.
+    Then 2-D tracking data is generated for each of the characteristic planes.
+    This process was described in detail in \cref{ssec:RT:Three-Dimensional Ray-Tracing Techniques}, and will be referred to as the 2D/2D ray-tracing approach.
+    This was the approach taken for this thesis work, but other approaches may have significant advantages; these will be discussed in [REF].
 
-    Second, \ac{MRT} methods require adjustments to the directional quadrature, which is expected to decrease accuracy of numerical integrals over directions \cite{Kochunas2013}.
-    The macroband and macroray methods require no such adjustment.
-    Typically, it is the polar angle that has a more advanced quadrature (Gauss-Legendre, or Tabuchi-Yamamoto \cite{TabuchiYamamotoQuad}), and is thus more sensitive to perturbations than the azimuthal angles.
-    Without the perturbation of the polar (and azimuthal) quadratures, it may be possible to maintain accuracy while using fewer directions than is possible with 3-D \ac{MRT} methods.
+    Although previous works have investigated the 2-D macroband ray-tracing method \cite{Yamamoto2005,Fevotte2007,Yamamoto2008}, there has not been any studies on the use of this macroray ray-tracing technique (in 3-D).
+    Here, the macroray ray-tracing technique uses the macroband method for both the 2-D track generation, and track generation within each characteristic plane.
+    [Redescribe the process, with figures, using macroband]
 
-    Finally, \ac{MRT} methods require that the same ray-spacing parameters are used throughout the entire problem domain.
-    Problems which have strong absorbers typically require a very fine mesh \cite{Fitzgerald2019}, which then requires that finer ray-spacing be used.
-    This finer ray-spacing, which may only be required for a small percentage of the problem domain, is then used for the entire domain, leading to a significant increase in the number tracks.
-    The macroband and macroray methods allow for use of different ray-spacing parameters in each subsystem; additionally, because macrobands are based on the computational mesh, an effectively finer ray-spacing will automatically be generated due to the fine spatial mesh.
-    This allows for densely spaced tracks where they are necessary, but more coarsely spaced tracks where they are not; this is expected to lead to significant reduction in the number of tracks in such problems.
+    Similarly to the macroband method, the macroray method is fundamentally incompatible with the \ac{DNPL} ray-tracing technique.
+    The \ac{MRMB} technique can be used to store tracking data for unique geometric subsystems (typically a pin cell), greatly reducing
+    Although tracking data can be generated for unique geometry subsystems (\ac{MRMB} \cite{Yamamoto2005}), some approximation of the angular flux is necessary on interfaces.
+    Generally, the macroray and macroband methods, which provide more accurate integration, exchange regional numerical dispersion for interface numerical dispersion \cite{Sanchez2012}.
+    It is the point of view of the author, that this is generally considered a favorable trade-off, as the engineering quantities of interest are primarily determined through regional integration.
 
-    Another consideration in three-dimensional locally axial extruded geometries is the chord-classification method.
-    In the macroray method, rays are separated into the macrorays, which are guaranteed to be of the same class in the chord-classification method;
-    this macroray classification is depicted in \cref{fig:RT:Chord-Classification Macroray}
+    \subsection{Chord-Classification}{\label{ssec:MR:Chord-Classification}
+      The chord-classification ray-tracing method \cite{Sciannandrone2016} was described in detail in \cref{sssec:RT:Chord-Classification}.
+      One of the key criticisms of this method, by \citet{Gunow2018}, was that full 3-D tracking data needed to be generated prior to the classification of rays.
+      However, with the addition of the macroray ray-tracing method, classification can be done automatically.
 
-    \begin{figure}[h]
-      \centering
-      \def\svgwidth{0.45\linewidth}
-      \input{\figpath/ChordClassificationMacroBand.pdf_tex}
-      \caption{3-D example of chord-classification with Macroray ray-tracing. Colored (red and blue) characteristic tracks represent groups of ``V-chords'', rays between two vertical surfaces.}
-      \label{fig:RT:Chord-Classification Macroray}
-    \end{figure}
+      During the axial ray-tracing along a characteristic plane, the computational mesh is used to determine the axial macrobands.
+      Each ray within the macroray is guaranteed to pass through the same regions and surfaces; this means that each ray within an axial macroband is guaranteed to be of the same chord classification.
+      This is demonstrated visually in \cref{fig:RT:Chord-Classification Macroray}.
+      The chord-classification drastically cuts down on the amount of memory used to store 3-D tracking data, and also may reduce the amount of computational work.
+      The work is reduced because the exponential functions (see \cref{sec:LSMOC:Exponential Tabulation}) are determined by the material and segment length.
+      For vertical-to-vertical or horizontal-to-horizontal macroray segments, the segment lengths of all rays are the same, thus only a single exponential calculation is necessary.
+
+      The chord-classification approach was taken in this work, rather than on-the-fly ray-tracing \cite{Gunow2018}.
+      This was done due to the ease of implementation (because of automatic classification), and because of the criticisms of on-the-fly ray-tracing described in \cref{ssec:RT:On-the-Fly Ray-Tracing}.
+
+      \begin{figure}[h]
+        \centering
+        \def\svgwidth{0.45\linewidth}
+        \input{\figpath/ChordClassificationMacroBand.pdf_tex}
+        \caption{3-D example of chord-classification with Macroray ray-tracing. Colored (red and blue) characteristic tracks represent groups of ``V-chords'', rays between two vertical surfaces.}
+        \label{fig:RT:Chord-Classification Macroray}
+      \end{figure}
+    }
+
+    \subsection{Interface Angular Flux Approximation}{\label{ssec:MR:Interface Angular Flux Approximation}
+      In \cref{sssec:RT:Interface Flux Approximations} different approaches to approximating the angular flux on the boundaries was outlined for a 2-D macroband-based \ac{MOC} calculation.
+      A ``fraction contribution'' sub-boundary averaging technique was described and chosen as the approach for this work.
+      In this approach, each surface of the subsystems (pin cells) is divided into sub-boundaries based on the direction of flight.
+      Each ray's width is considered, and partial intersections with each surface are computed and used to determine the ray's fractional contribution to each sub-boundary.
+      And in the reverse direction (going from sub-boundary to ray), each sub-boundaries fractional contribution to each ray is determined.
+      It was shown that this method conserved the total area-integrated angular flux on each surface.
+
+      However, in 3-D this approach becomes considerably more complicated due to the nature of 3-D geometries and the 2D/2D ray-tracing approach.
+      This cause of the issues stems from the fact that each ray, as viewed in the direction of flight, is rectangular.
+      Each ray is rectangular because in the radial ray-tracing step, the ray is considered within the bounds of the width in the radially transverse direction, and in the axial ray-tracing on the characteristic plane the ray is again constrained in a height in the axially transverse direction.
+      The rectangular ray projection is demonstrated for a single ray in \cref{figs:MR:MacroRayProjections}.
+
+      For 3-D extruded cartesian pin cells, it is impossible (in arbitrary directions) to ``span''\footnote{in this context, ``span'' will be used to describe the idea that each ray's entire area projects onto some surface, and the entire surface is filled with ray projections.} the surfaces of our system.
+      Because each ray is rectangular, parts of the pin cell's surfaces will not be ``hit'' by the projection of any ray, and parts of some rays will live entirely outside the problem domain.
+      This issue is visualized in \cref{fig:MR:MacroRayProjectionProblem}; it should also be noted that the area outside the domain, and the surface area without any covering rays are not equal in area unless the ray is in the center of the radial width.
+
+      \begin{figure}[htbp]
+          \centering
+          \begin{subfigure}[t]{0.45\textwidth}
+              \centering
+              \def\svgwidth{0.70\linewidth}
+              \input{\figpath/MacroRayProjections.pdf_tex}
+              \caption{2-D ray viewed from above\label{fig:MR:MacroRayProjections}}
+          \end{subfigure}%
+          \begin{subfigure}[t]{0.45\textwidth}
+              \centering
+              \def\svgwidth{0.70\linewidth}
+              \input{\figpath/MacroRayProjectionsDOF.pdf_tex}
+              \caption{3-D ray viewed in direction of flight\label{fig:MR:MacroRayProjectionsDOF}}
+          \end{subfigure}
+          \caption{Example of the projected rectangular area formed in the 2D/2D ray-tracing approach.}
+          \label{figs:MR:MacroRayProjections}
+      \end{figure}
+
+      \begin{figure}[htbp]
+        \centering
+        \def\svgwidth{0.25\linewidth}
+        \input{\figpath/MacroRayProjectionsDOFProblem.pdf_tex}
+        \caption{
+            An example of a ray that causes issues with the fractional contribution interface flux approximation when using 2D/2D ray-tracing.
+            The highlighted red area is the area of the ray outside the domain (which projects to no surface), and the blue highlighted area is an area on the surface that will not be hit by any ray.}
+        \label{fig:MR:MacroRayProjectionProblem}
+      \end{figure}
+
+      The rays not ``spanning'' our system causes issues with the conservation of surface flux as described in \cref{sssec:RT:Interface Flux Approximations}.
+      Previously, the average angular flux in a sub-boundary was determined by
+      \begin{equation}\label{eq:MR:Old SubBoundary Flux}
+        \psi_s^i = \suml[j] \frac{A(S_i\cap R_j)}{A(S_i)}\psi_r^j.
+      \end{equation}
+      It was shown that by summing over all sub-boundaries, the total flux passing through the surface was conserved.
+      However, because the rays are no longer guaranteed to span the system's surfaces, the summation of intersected ray areas is no longer equal to the sub-boundary areas:
+      \begin{equation}\label{eq:MR:Area Imbalance}
+        \suml[j] A(S_i\cap R_j) \leq A(S_i).
+      \end{equation}
+      Generally, these areas are very close, and in the limit of infinite rays they are equivalent; but, the motivation of this work has been to reduce the number of rays, so this issue needs to be addressed.
+      \Cref{sssec:MR:MacroRay Area Correction} describes how this issue was addressed in this work, and \cref{sssec:MR:Alternative Approaches} describes possible alternative approaches.
+
+      \subsubsection{MacroRay Area Correction}{\label{sssec:MR:MacroRay Area Correction}
+        Two ideas were investigated in order to address the issue of the rays not spanning the surface areas.
+        Here, it should be emphasized that the first approach is \emph{incorrect}.
+        It will be described in this section because it seems like a reasonable choice for this correction; in fact, it was not realized for some time in this work that the first approach was incorrect.
+
+        The sub-boundary averaging method of this work has been referred to as a ``fractional contribution'' approach.
+        This comes from \cref{eq:MR:Old SubBoundary Flux} where $A(S_i \cap R_j) / A(S_i)$ is the fractional contribution of flux from ray $j$ into sub-boundary $i$.
+        In 2-D, these fractions will sum to one, because our rays span the surfaces of our system:
+        \begin{equation}\label{eq:MR:2-D Fractional Unity}
+          \suml[j] \frac{A(S_i \cap R_j)}{A(S_i)} = 1.
+        \end{equation}
+
+        The first approach taken attempted to preserve this property of fractional contributions summing to unity.
+        This is done by ignoring ray areas outside the domain and surface areas that are not covered by ray projections; the sub-boundary and ray fluxes are determined by
+        \begin{subequations}\label[subeqs]{eqs:MR:Flux A1}
+          \begin{equation}\label{eq:MR:SubBoundary Flux A1}
+            \psi_s^i = \suml[j] \frac{A(S_i \cap R_j)}{\suml[k] A(S_i \cap R_k)}\psi_r^j = \suml[j] \frac{A(S_i \cap R_j)}{A_p(S_i)}\psi_r^j,
+          \end{equation}
+          \begin{equation}\label{eq:MR:Ray Flux A1}
+            \psi_r^j = \suml[i] \frac{A(S_i \cap R_j)}{\suml[k] A(S_k \cap R_j)}\psi_s^i = \suml[i] \frac{A(S_i \cap R_j)}{A_p(R_j)}\psi_s^i,
+          \end{equation}
+        \end{subequations}
+        respectively.
+        For convenience, let us define the ``total projected area'' as the sum of intersections for that object, for example the total projected area of a ray would be defined by
+        \begin{equation}\label{eq:MR:Projected Area Ray}
+          A_p(R_j) \defined \suml[i] A(S_i \cap R_j),
+        \end{equation}
+        and similarly for $A_p(S_i)$.
+        Through these definitions the new fractional contributions sum to unity:
+        \begin{subequations}\label[subeqs]{eqs:MR:Fractions A1}
+          \begin{equation}\label{eq:MR:SubBoundary Fractions A1}
+            \suml[j] \frac{A(S_i \cap R_j)}{A_p(S_i)} = 1,
+          \end{equation}
+          and
+          \begin{equation}\label{eq:MR:Ray Fractions A1}
+            \suml[i] \frac{A(S_i \cap R_j)}{A_p(R_j)} = 1.
+          \end{equation}
+        \end{subequations}
+
+        While this may seem reasonable \footnote{at least at first to the author}, this is not actually the property we need to preserve for compatibility with \ac{CMFD} acceleration.
+        The surface-integrated angular flux needs to be preserved, but in this first approach this is not the case.
+        \begin{subequations}\label[subeqs]{eqs:MR:Flux Conservation A1}
+          \begin{equation}\label{eq:MR:SubBoundary Flux Conservation A1}
+            \psi_t^s = \suml[i] A(S_i) \psi_s^i
+                     = \suml[i] A(S_i) \suml[j] \frac{A(S_i \cap R_j)}{A_p(S_i)}\psi_r^j
+                     \neq \psi_t^r,
+          \end{equation}
+          \begin{equation}\label{eq:MR:Ray Flux Conservation A1}
+            \psi_t^r = \suml[j] A(R_j) \psi_r^j
+                     = \suml[j] A(R_j) \suml[i] \frac{A(S_i \cap R_j)}{A_p(R_j)}\psi_s^i.
+                     \neq \psi_t^s,
+          \end{equation}
+        \end{subequations}
+        Note that the true areas $A(S_i)$ and $A(R_j)$ must be used to sum the fluxes in order to integrate over the entire surface (or ray areas).
+
+        This approach actually works for many problems, and while small differences between the solutions of transport and accelerated transport calculations, they are usually small.
+        However, for larger problems, the \ac{CMFD} acceleration \emph{may} become unstable and cause the iteration scheme to diverge; though this generally only occurs if the convergence criteria is relatively low ($\leq 10^{-6}$).
+        Nevertheless, compatibility with \ac{CMFD} acceleration, or other acceleration methods, is necessary if this method is ever to be used.
+        This leads to the approach used for the remained of this work.
+
+        As this section has emphasized, the property that is important to conserve is the surface-integrated angular flux.
+        The surface-integrated angular flux can be found by integrating over sub-boundaries, or over rays; it is necessary for these to be equal:
+        \begin{equation}\label{eq:MR:Surface-Integrated Angular Flux}
+          \psi_t = \suml[i] A(S_i) \psi_s^i = \suml[j] A(R_j) \psi_r^j.
+        \end{equation}
+        The sub-boundary flux, $\psi_s^i$, should be dependent on the ray fluxes, $\psi_r^j$, and should also follow a similar form as \cref{eq:MR:Old SubBoundary Flux}.
+
+        Let us examine the sub-boundary flux in order to show how the surface-integrated angular flux may be preserved.
+        Insert a corrective multiplicative term into the summation of \cref{eq:MR:Old SubBoundary Flux},
+        \begin{equation}\label{eq:MR:SubBoundary Flux:Derivation 1}
+          \psi_s^i = \suml[j] k_s^{j} \frac{A(S_i \cap R_j)}{A(S_i)} \psi_r^j.
+        \end{equation}
+        Substituting this form into \cref{eq:MR:Surface-Integrated Angular Flux} yields,
+        \begin{equation}\label{eq:MR:Surface-Integrated Angular Flux:Derivation 2}
+          \psi_t = \suml[i] A(S_i) \suml[j] k_s^{j} \frac{A(S_i \cap R_j)}{A(S_i)} \psi_r^j = \suml[j] A(R_j) \psi_r^j.
+        \end{equation}
+        So, $k_s^{j}$ should be chosen such that
+        \begin{equation}\label{eq:MR:ks factor condition}
+          \suml[i] k_s^{j} A(S_i \cap R_j) = A(R_j),
+        \end{equation}
+        solved by
+        \begin{equation}\label{eq:MR:ks factor}
+          k_s^{j} = \frac{A(R_j)}{\suml[i] A(S_i \cap R_j)} = \frac{A(R_j)}{A_p(R_j)}.
+        \end{equation}
+        The sub-boundary flux can then be determined by
+        \begin{subequations}\label[subeqs]{eqs:MR:Flux}
+          \begin{equation}\label{eq:MR:SubBoundary Flux}
+            \psi_s^i = \suml[j] \frac{A(R_j)}{A_p(R_j)}\frac{A(S_i \cap R_j)}{A(S_i)}\psi_r^j,
+          \end{equation}
+          and similarly, the ray flux can be determined by
+          \begin{equation}\label{eq:MR:Ray Flux}
+            \psi_r^j = \suml[i] \frac{A(S_i)}{A_p(S_i)}\frac{A(S_i \cap R_j)}{A(R_j)}\psi_s^i.
+          \end{equation}
+        \end{subequations}
+        As this was derived from \cref{eq:MR:Surface-Integrated Angular Flux}, these forms guarantee that the surface-integrated angular flux is conserved.
+        It should also be noted that if the surfaces are spanned by the rays the factors, $A(R_j)/A_p(R_j)$ and $A(S_i)/A_p(S_i)$, are one, giving back the original form of the equations.
+      }
+
+      \subsubsection{Alternative Approaches}{\label{sssec:MR:Alternative Approaches}
+        The approach described in \cref{sssec:MR:MacroRay Area Correction} provided a correction to \cref{eq:MR:Old SubBoundary Flux} such that the surface-integrated angular flux is conserved.
+        This approach seems to be valid when operating in the 2D/2D (rectangular) ray-tracing procedure, but there are alternative options.
+        The reason a correction was necessary is because due to the nature of 3-D geometry and 2D/2D ray-tracing, the ray are no longer guaranteed to span the system's surfaces.
+        It is possible to have an alternative ray-tracing approach (still based on the macroray) which does span the system's surfaces.
+
+        The choice of rectangular rays was arbitrary, but this choice may be exchanged for any shape, such as triangular, or even arbitrarily shaped rays.
+        Non-rectangular rays were not investigated as part of this work, and to the best of our knowledge, have not been investigated by any works.
+        As previously mentioned, 3-D \ac{MOC} codes up to this point have used the uniform ray-spacing assumption in order to comply with constraints of \ac{MRT} and \ac{DNPL}.
+        When rays are uniformly spaced and have \ac{DNPL}, the shape of the ray is largely ignored because the procedures only care about the ray's centroid.
+        It only becomes important when you consider the integration volume of the ray, such as in the sub-boundary averaging method with fractional contributions.
+
+        If rays are constructed so that they span the system's surfaces, there is no need to correct \cref{eq:MR:Old SubBoundary Flux}.
+        It is not clear at this point whether or not this would have benefits for the accuracy of the method.
+        However, it is possible to also preserves some of the desirable features for general geometries of the macroband which were lost in the transition to 3-D (in the 2D/2D ray-tracing framework).
+        If the geometry is not locally extruded (in this work this was an assumption), then it is possible for macrorays to have some of their transverse area in a region that none of its' rays pass through.
+        Examples of how non-rectangular rays might be used are shown in \cref{figs:MR:Alternatives}.
+
+        \begin{figure}[h]
+          \centering
+          \begin{subfigure}[t]{0.32\textwidth}
+            \centering
+            \def\svgwidth{0.85\linewidth}
+            \input{\figpath/MacroRayProjectionsGeom.pdf_tex}
+            \caption{geometry\label{fig:MR:Alternatives:Geom}}
+          \end{subfigure}%
+          \begin{subfigure}[t]{0.32\textwidth}
+            \centering
+            \def\svgwidth{0.85\linewidth}
+            \input{\figpath/MacroRayProjectionsDOFAlternative.pdf_tex}
+            \caption{Axially stacked rays\label{fig:MR:Alternative 1}}
+          \end{subfigure}%
+          \begin{subfigure}[t]{0.32\textwidth}
+            \centering
+            \def\svgwidth{0.85\linewidth}
+            \input{\figpath/MacroRayProjectionsDOFAlternative2.pdf_tex}
+            \caption{General triangular rays\label{fig:MR:Alternative 2}}
+          \end{subfigure}
+          \caption{
+            Two alternative (non-rectangular) ray-tracing ideas.
+            (a) shows the geometry for clarity.
+            (b) shows an example of rays which are generated to be axially aligned in a characteristic plane, but consider the full volume they pass through.
+            (c) shows an example of triangulated rays.
+            In both (b) and (c) the rays are formed by rhombuses or triangles, but if there were a cylinder in this pin, it is possible they could have curved boundaries as well.
+          }
+          \label{figs:MR:Alternatives}
+        \end{figure}
+      }
+    }
   }
 
   % References
