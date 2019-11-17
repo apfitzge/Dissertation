@@ -840,6 +840,37 @@
           \citet{Kochunas2013} also found that modularization of the directional quadratures led to clustering of the discrete directions, which introduces significant error in the integration of spherical harmonics moments \cite{Kochunas2013}, and has implications on particle conservation in anisotropic calculations (\cref{ssec:MOC:FSA:Particle Conservation}).
           In order to avoid this issue, the axial ray-spacing can be reduced until the modularized polar angle is only perturbed within some error criteria \cite{Kochunas2013}; however, this leads to significant increases in the number of tracks (and thus increases computational costs).
         }
+
+        \subsubsection{Chord-Classification}{\label{sssec:RT:Chord-Classification}
+          While \ac{MRT} significantly reduces the storage requirements of ray-tracing data, in realistic calculations, the data cannot fully be stored in a processors cache.
+          Loading this data from main memory is slow, and in general, the movement of this ray-tracing data into different levels of cache uses significant amounts of time in these calculations.
+          This led to the development of a technique called \emph{chord-classification} for locally axially extruded geometries \cite{Sciannandrone2016}.
+          Chord-classification recognizes that reactors typically have regularities in the 3-D geometries; this allows for characteristic track-segments to be classified into sets which share the same length.
+          As shown in \cref{fig:RT:Chord-Classification}, rays on the same characteristic plane that intersect two vertical mesh boundaries will have the same lengths.
+          Similarly for rays which intersect horizontal planes (though, as axial meshes are usually tall, this is not as common).
+
+          \begin{figure}[h]
+            \centering
+            \def\svgwidth{0.45\linewidth}
+            \input{\figpath/ChordClassification.pdf_tex}
+            \caption{3-D example of chord-classification. Colored (red and blue) characteristic tracks represent groups of ``V-chords'', rays between two vertical surfaces.}
+            \label{fig:RT:Chord-Classification}
+          \end{figure}
+
+          By classifying chords of the same length, the length can be stored only once.
+          Additionally, this means that the exponential functions ($F_1(\segopt)$ for \ac{FSMOC}), only need to be calculated once as well.
+          This adds irregularity to the data accessing, which is generally not optimal for computation, and thus is only expected to improve calculation speeds if a large number of chords can be classified \cite{Sciannandrone2016}.
+          Indeed, it was observed that most rays (96\%) could be categorized as ``V-chords'' which intersect two vertical surfaces, which led to a 40\% reduction in transport sweep time \cite{Sciannandrone2016}.
+          Additionally, chord-classification allows for reduced track-storage, reducing memory by up to 93\%.
+        }
+
+        \subsubsection{On-the-Fly Ray-Tracing}{\label{ssec:RT:On-the-Fly Ray-Tracing}
+          The on-the-fly ray-tracing technique \cite{Gunow2016} uses some of the ideas of the chord-classification method \cite{Sciannandrone2016}, but only stores two-dimensional track information.
+          All three-dimensional tracks are generated and temporarily stored during the transport sweep (on-the-fly), leading to significant memory savings (94\% reduction), with minimal computational overhead \cite{Gunow2016}.
+          While leading to significant (compared to the storage of all rays) memory reduction, this approach does not see the 40\% run-time improvement that the chord-classification method has.
+          It would also be a fairer comparison to compare the memory storage compared to the chord-classification method, which also showed significant improvement over traditional storage techniques.
+          The chord-classification technique already boasted a 93\% reduction in track-storage memory \cite{Sciannandrone2016}; while on-the-fly ray-tracing allows for additional reduction, it is not a significant improvement over chord-classification.
+        }
       }
 
       \subsection{Transport Sweeping with the Method of Characteristics}{\label{ssec:RT:Transport Sweeping with the Method of Characteristics}
@@ -898,8 +929,6 @@
         As part of this thesis work, a more efficient method of spatial decomposition has been investigated and developed in MPACT \cite{Fitzgerald2019a}.
         Details on the spatial decomposition techniques used in this work are given in \cref{ch:Spatial Decomposition}.
     }
-
-
 
     % References
     \printbibliography
