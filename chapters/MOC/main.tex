@@ -145,7 +145,7 @@
                 \nsegl = \renorm[mki]\segl.
             \end{equation}
             The spatial integration schemes given by \cref{eq:MOC:Track-Averaged Definition UnRenormalized,eq:MOC:Spatial Averaging Definition UnRenormalized} become
-            \begin{subequations}\label{eq:MOC:Renormalized Spatial Integration Definition}
+            \begin{subequations}\label[subeqs]{eqs:MOC:Renormalized Spatial Integration Definition}
                 \begin{equation}\label{eq:MOC:Renormalized Track-Averaged Definition}
                     \MOCTrackIntegral{f(\loc,\dirm)} \defined \frac{1}{\nsegl}\intl[0][\nsegl]f(\len,\dirm)\dif{\nlen},
                 \end{equation}
@@ -603,14 +603,29 @@
       The placement and storage of these tracks is significant with respect to both calculation accuracy as well as computational performance.
       This section serves to give an overview of the current state-of-the-art ray-tracing methods used for \ac{MOC}-like transport calculations.
 
+      \subsection{Fundamentals}{\label{ssec:MOC:RT:Fundamentals}
+        This section will cover the fundamentals of why ray-tracing is necessary for \ac{MOC} calculations, what data is necessary, and possible constraints.
+        Unless a neutron has an interaction with surrounding media, it will travel in a straight line.
+        This idea is represented in the characteristic form of the transport equation (\cref{eq:MOC:MOC Equation Generic}), which follows a generic characteristic through the problem domain.
+        The \ac{MOC} is based on solving the \cref{eq:MOC:MOC Equation Generic} along many of these characteristic paths, performing spatial/directional integrations using \cref{eqs:MOC:Renormalized Spatial Integration Definition}.
+
+        For a \ac{MOC} iteration, it is necessary to compute the integrated quantities of the angular flux (\cref{eqs:MOC:FSA:Region-Averaged Flux Moments,eqs:MOC:LSA:Region-Averaged Flux Moments}).
+        This requires that the angular flux along a track-segment, the path-segment of a characteristic path bounded within a spatial cell, is known.
+        Determining the angular flux along a track-segment (\cref{eq:MOC:MOC Generic Solution}) can be done only if the incident angular flux is known, and the length of the track-segment is known.
+        Generally, characteristic paths will not be constructed independently for each spatial cell because then the incident flux on the surface would need to be approximated.
+        Thus, a long characteristic path (ray) is generated to pass through the domain (or sub-system of the domain), and the lengths of each segment (bounded by spatial cells) are recorded.
+        This way, given the incident flux at one end of the characteristic ray, the ray can be followed and the angular flux can be determined for each segment of the ray.
+        Because the incident flux of one segment is the outgoing flux of the previous segment, the segments must be ``swept'' in order.
+      }
+
       \subsection{Modular Ray-Tracing}{\label{ssec:RT:Modular Ray-Tracing}
         The most straight-forward approach to perform a \ac{MOC} calculation is to create rays which span the domain of the transport problem being solved.
         However, in this approach, the information of each ray-segment must be stored, or computed on-the-fly.
         In large problems the number of ray-segments can become exceedingly large, and this approach is not feasible due to memory constraints.
 
-        This led to the development of so-called ``modular'' ray-tracing methods \cite{Filippone1980,Saji2000,Wu2003,Kochunas2013}, in which the regularity of reactor designs is utilized to reduce memory usages.
+        This led to the development of so-called ``modular'' ray-tracing methods \cite{Filippone1980,Saji2000,Wu2003,Kochunas2013}, in which the regularity of reactor designs is utilized to reduce memory requirements.
         In typical reactor designs, certain geometries (like assemblies) are repeated throughout the core.
-        Rather than laying tracks down for the global geometry, the transport problem is partitioned into ``modules'' which represent a small often repeated geometries in the problem.
+        Rather than laying tracks down for the global geometry, the transport problem is partitioned into ``modules'' which represent small often repeated geometries in the problem.
         The ray-tracing data is generated for each module, in such a way there is direct linking of tracks on module interfaces; this is the \ac{DNPL} technique devised by \citet{Saji2000}.
         This significantly reduces the amount of ray-tracing data that needs to be stored in \ac{MOC} calculations, and has been widely adopted in \ac{MOC} transport codes \cite{Hong1998,Jung2009,Tang2009,DeCART,APOLLO3,MPACT2016,Hebert2017a}.
         Tracks spanning the global domain are then constructed by connecting multiple modular rays, as is depicted in \cref{fig:MRT:Modular Ray Tracing}.
@@ -636,7 +651,7 @@
                 N_y = \ceil*{\frac{P_x \cos(\Azimuthal_{a0})}{\tA[a0]}}.
             \end{equation}
         \end{subequations}
-        The $x$ and $y$ distance between rays can be determined by
+        The $x$ and $y$ distance between rays is then determined by
         \begin{subequations}\label[subeqs]{eqs:MRT:x/y ray-spacing}
             \begin{equation}\label{eq:MRT:x ray-spacing}
                 \delta_x = \frac{P_x}{N_x},
@@ -654,10 +669,11 @@
         \begin{equation}\label{eq:MRT:Corrected Radial Ray-Spacing}
             \tA[a] = \delta_x \sin(\Azimuthal_{a}).
         \end{equation}
+        Another approach that has been taken in MPACT is to use a rational fraction to approximate $\tan(\frac{\delta_y}{\delta_x})$.
 
         Due to the constraint of \ac{DNPL}, the directional quadrature is perturbed in the process of ray-tracing.
         As described in \cref{ssec:MOC:FSA:Particle Conservation}, this has implications on particle conservation in calculations.
-        To maintain accuracy, a higher-order directional quadrature may need to be used would otherwise have been necessary.
+        In order to maintain accuracy, it may become necessary to use a higher-order directional quadrature than would have been necessary if the directions were not perturbed by \ac{MRT}.
       }
 
       \subsection{Mobile Chords}{\label{ssec:RT:Mobile Chords}
@@ -666,6 +682,25 @@
         The mobile chord method offsets the ray from the center, with differing offsets in each direction.
         This has generally shown to be more accurate than the typical equidistant ray-tracing method \cite{Yamamoto2008}, but is not directly compatible with the \ac{DNPL} technique.
         While ray widths are still linked, the ray-traces are not; though, this does not seem to introduce significant discretization errors \cite{Yamamoto2008}.
+        An example illustration of mobile chords is given in \cref{figs:RT:MobileChords}.
+
+        \begin{figure}[h]
+          \centering
+          \begin{subfigure}[t]{0.45\textwidth}
+            \centering
+            \def\svgwidth{0.85\textwidth}
+            \input{\figpath/MobileChords/EquidistantRaySpacing.pdf_tex}
+            \caption{Centered Chords\label{fig:RT:MobileChords:Normal}}
+          \end{subfigure}%
+          ~
+          \begin{subfigure}[t]{0.45\textwidth}
+            \centering
+            \def\svgwidth{0.85\textwidth}
+            \input{\figpath/MobileChords/MobileChords.pdf_tex}
+            \caption{Mobile Chords\label{fig:RT:MobileChords:MobileChords}}
+          \end{subfigure}
+          \caption{Example illustration of centered chords (traditional approach) and mobile chords for a single direction.\label{figs:RT:MobileChords}}
+        \end{figure}
       }
 
       \subsection{Random Rays}{\label{ssec:RT:Random Rays}
@@ -681,8 +716,8 @@
 
       \subsection{Macroband}{\label{ssec:RT:Macroband}
         The \emph{macroband} method  was originally proposed by \citet{Villarino1992} for \ac{CP} calculations in HELIOS.
-        In this method, characteristic rays placed within ``macrobands'' which are separated by tangential and intersection points in the mesh.
-        There is no material or geometric discontinuities within each macroband segment (macrosegment), and thus the direction-of-flight averaged angular flux in each macrosegment is smooth with regards to the transverse direction.
+        In this method, characteristic rays placed within ``macrobands'' are separated by tangential and intersection points in the mesh.
+        There is no material or geometric discontinuities within each macroband segment (macrosegment), thus the direction-of-flight averaged angular flux in each macrosegment is smooth with regards to the transverse direction.
         Since integration in the \ac{MOC} is akin to a quadrature integration, this indicates that a more advanced quadrature, for ray placement and width, can be used to reduce discretization error \cite{Yamamoto2005}.
 
         \begin{figure}[h]
@@ -709,7 +744,7 @@
         The macroband takes an entirely different approach, and the internal mesh is the primary guide for laying down the tracks.
 
         Macrobands are determined by the computational mesh; for large heterogeneous assemblies, this results in very thin macrobands, which would result in significantly increased computation time.
-        In the related \ac{CDP} \citet{Hong1999} proposed that macroband ray-tracing data only be generated on unique subsystems.
+        In the related \acf{CDP} \citet{Hong1999} proposed that macroband ray-tracing data only be generated on unique subsystems.
         Similarly, \citet{Yamamoto2005} proposed the \ac{MRMB} in which macroband ray-tracing data is only generated for unit-cells.
         These techniques are similar to the modular ray-tracing technique in that ray-tracing data is only generated for unique subsystems, which significantly reduces the amount of ray-tracing data.
         The macroband ray-tracing process is displayed for a single pin-cell mesh in \cref{fig:RT:Macroband Process}.
@@ -740,16 +775,16 @@
           \label{fig:RT:Macroband Process}
         \end{figure}
 
-        However, these techniques are fundamentally incompatible with the \ac{DNPL} technique, at thus an approximation of angular flux must be made on subsystem interfaces.
+        However, these techniques are fundamentally incompatible with the \ac{DNPL} technique, thus an approximation of angular flux must be made on subsystem interfaces.
         \citet{Yamamoto2005} proposed linearly interpolating the angular flux on cell boundaries, though other techniques involving averaging the angular flux on sub-boundaries have been utilized in the \ac{CDP} \cite{Liu2014}.
-        Alternatively, these methods do not require adjustment to the angular quadrature.
+        Additionally, these methods do not require adjustment to the angular quadrature.
 
         \citet{Yamamoto2005} found that the macroband method (using a Gauss-Legendre quadrature for ray placement), was more accurate than conventional ray-tracing methods with equidistant ray-spacing.
         \citet{Fevotte2007} proposed a new tracking technique similar to the macroband method, in which rays (placed equidistantly) are divided into sub-bands, which are effectively \emph{locally} projected macrobands, and the average flux of the sub-bands is propagated along each ray.
         Studies of ray-spacing with macroband, and \citetp{Fevotte2007} method, have indicated that coarser ray-spacing can be used while maintaining accuracy \cite{Yamamoto2005,Fevotte2007,Yamamoto2008}.
 
         \subsubsection{Interface Flux Approximations}{\label{sssec:RT:Interface Flux Approximations}
-          The macroband ray-tracing method is fundamentally incompatible with \acf{DNPL}.
+          The macroband ray-tracing method is fundamentally incompatible with \acf{DNPL}; therefore, it requires an approximation at the subsystem interfaces.
           Although ray-tracing can be performed on small unique subsystems, similarly to the \ac{MRT} method, the rays on module interfaces are no longer guaranteed to align.
           This makes it necessary for an approximation of the spatial dependence of the angular flux on these interfaces.
           However, there are multiple different options for performing this approximation.
@@ -830,14 +865,14 @@
             \label{fig:RT:3-D Ray-tracing}
           \end{figure}
 
-          There are subtleties in the generation of three-dimensional tracks, which have led to the development of different 3-D modular ray-tracing techniques \cite{Kochunas2013,Shaner2015}.
+          There are subtleties in the generation of three-dimensional tracks, which have led to the development of different 3-D modular ray-tracing techniques \cite{Kochunas2013,Shaner2015,3DMOCCasl}.
           Previous work had reported that direct use of the \ac{MRT} method in 3-D, required that tracks be stored separately for the forward and backward directions \cite{Kochunas2013};
           this has, however, been shown not to be the case \cite{Shaner2015}.
           The simplified \ac{MRT} was developed to avoid this issue \cite{Kochunas2013}, but generates significantly more characteristic tracks \cite{Shaner2015}.
 
           As discussed in \cref{ssec:RT:Modular Ray-Tracing}, 2-D \ac{MRT} perturbs the azimuthal angles in the directional quadrature to ensure \ac{DNPL}.
           For 3-D \ac{MRT}, this also perturbs the polar angles in the directional quadrature.
-          \citet{Kochunas2013} also found that modularization of the directional quadratures led to clustering of the discrete directions, which introduces significant error in the integration of spherical harmonics moments \cite{Kochunas2013}, and has implications on particle conservation in anisotropic calculations (\cref{ssec:MOC:FSA:Particle Conservation}).
+          \citet{Kochunas2013,3DMOCCasl} also found that modularization of the directional quadratures led to clustering of the discrete directions, which introduces significant error in the integration of spherical harmonics moments \cite{Kochunas2013}, and has implications on particle conservation in anisotropic calculations (\cref{ssec:MOC:FSA:Particle Conservation}).
           In order to avoid this issue, the axial ray-spacing can be reduced until the modularized polar angle is only perturbed within some error criteria \cite{Kochunas2013}; however, this leads to significant increases in the number of tracks (and thus increases computational costs).
         }
 
@@ -875,7 +910,7 @@
 
       \subsection{Transport Sweeping with the Method of Characteristics}{\label{ssec:RT:Transport Sweeping with the Method of Characteristics}
         The \ac{MOC} is used to iteratively solve the transport equation, the iterations are generally referred to as \emph{transport sweeps}.
-        For given boundary conditions and source, a transport sweep is used to compute estimates of the scalar flux and other moments using equations in the form \cref{eqs:MOC:FSA:Region-Averaged Flux Moments} for \ac{FSMOC} and \cref{eqs:MOC:LSA:Region-Averaged Flux Moments} for \ac{LSMOC}.
+        For given boundary conditions and a source, a transport sweep is used to compute estimates of the scalar flux and other moments using equations in the form \cref{eqs:MOC:FSA:Region-Averaged Flux Moments} for \ac{FSMOC} and \cref{eqs:MOC:LSA:Region-Averaged Flux Moments} for \ac{LSMOC}.
         This is an overly generalized description of a transport sweep, and there are considerations that arise from the different ray-tracing techniques discussed.
 
         In global ray-tracking procedures, calculations are most often carried out by examining a ray from end to end.
@@ -887,13 +922,14 @@
         However, in the macroband method, transport sweeping is carried out in a different manner.
         It is not possible to generate a continuous characteristic track spanning the global domain when using \ac{MRMB} techniques.
         Thus, transport calculations are carried out in a pin-by-pin (assuming pins are the subsystems on which track data is generated) basis.
-        For each pin calculation, boundary or interface angular flux can be computed as described in \cref{sssec:RT:Interface Flux Approximations}, and transmission/accumulation calculations are carried out by sweeping over the tracks.
-        This can be done by considering each track separately, or by considering each macroband which are guaranteed to pass through the same regions.
-        The angular flux on the exiting interface must be approximated, this can be done as described in \cref{sssec:RT:Interface Flux Approximations}.
+        For each pin calculation, boundary or interface angular fluxes can be computed as described in \cref{sssec:RT:Interface Flux Approximations}, and transmission/accumulation calculations are carried out by sweeping over the tracks.
+        This can be done by considering each track separately, or by considering each macroband that is are guaranteed to pass through the same regions.
+        The resulting angular flux on the exiting interface must be then approximated, this can be done as described in \cref{sssec:RT:Interface Flux Approximations}.
 
-        Pin-by-pin transport calculations must be carried out in a specific order, by considering the dependencies of angular flux.
+        Pin-by-pin transport calculations must be carried out in a specific order, by considering the dependencies of the angular flux.
         \Cref{fig:RT:Macroband Sweep Order} displays the sweeping order for a $2\times2$ array of pins in 2-D; this order is significantly different than the ray-by-ray order used in traditional \ac{MRT}-based \ac{MOC} calculations.
-        Sweeping in this manner limits parallelism, though it may be possible to construct a dependency graph to get an optimal sweeping order considering macrorays individually, rather than on the pin-by-pin basis.
+        Sweeping in this manner limits parallelism, though it may be possible to construct a dependency graph to get an optimal sweeping order considering macrorays individually, rather than on the pin-by-pin basis; a similar idea was recently implemnted in a \ac{SN} code\cite{Adams2013}.
+        The dependency graph will be different for each direction of flight \footnote{if done in a pin-by-pin manner, this can be done per octant}.
 
         \begin{figure}[h]
           \centering
