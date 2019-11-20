@@ -445,7 +445,142 @@
 
   \section{Results}{\label{sec:LSMOC:Results}
     \subsection{C5G7 Benchmark}{\label{ssec:LSMOC:C5G7 Benchmark}
-      [C5G7 2-D Benchmark problem results]
+      The 2-D C5G7 benchmark \cite{Smith2006} is a neutronics benchmark used by various codes to help verify the correctness of the solvers used.
+      A 7-group cross section library of macroscopic cross sections is provided by the benchmark.
+      The benchmark consists of two \ac{UO2} assemblies and two \ac{MOX} assemblies surrounded by a large radial reflector, as shown in \cref{fig:LSMOC:C5G7:CoreGeom}.
+      Reflective boundary conditions are used on the north and west faces, while vacuum conditions are used on the south and east faces.
+      The benchmark provides reference MCNP calculation results, which can be used to determine the accuracy of the methods used to solve the benchmark cases.
+
+      \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.45\linewidth]{\figpath/c5g7/core}
+        \caption{Geometry and materials of the 2-D C5G7 benchmark. \label{fig:LSMOC:C5G7:CoreGeom}}
+      \end{figure}
+
+      This problem was studied in order to verify that the implementation of the \ac{LSA} derived in this chapter yields similar results to those found by \citet{Ferrer2016}.
+      Similar meshing, ray, and direction parameters were used in this study as were used in the original study \cite{Ferrer2016}; some parameters could not be replicated exactly due to differences in the MPACT and CASMO5 codes.
+      All cases used a uniform ray-spacing of 0.05 cm, and directional quadrature using 128 azimuthal angles and 6 polar angles in $\fourpi$.
+      Each case was run using od\ac{CMFD} \cite{Zhu2016}.
+
+      The fine pin cell mesh used 5 rings in the fuel region, 10 in the moderator region, and 16 azimuthal divisions in all regions.
+      The fine reflector cell mesh was divided into 0.105$\times$0.105 cm$^2$ cells.
+      The coarse pin cell mesh used a single fuel ring with four azimuthal divisions, and no moderator rings, using 8 azimuthal divisions in the surrounding moderator.
+      The coarse reflector cell mesh was divided into 0.42$\times$0.42 cm$^2$ cells.
+
+      Three cases were run in this study: fine mesh with \ac{FSA}, coarse mesh with \ac{FSA}, and coarse mesh with \ac{LSA}.
+      To be consistent with \citet{Ferrer2016} results, it is expected that the \ac{LSA} on the coarse mesh should reduce run-time while maintaining accuracy compared to the finely mesh \ac{FSA} calculation.
+      Additionally, the coarse mesh \ac{FSA} calculation should have significantly worse accuracy, thus justifying the use of the \ac{LSA}.
+
+      \Cref{tab:LSMOC:C5G7:Results} shows very clearly that the \ac{LSA} on the coarse mesh is more accurate than the \ac{FSA} on the fine mesh.
+      While \ac{FSA} on the fine mesh provides reasonable accuracy, the \ac{FSA} on the coarse mesh shows significant errors compared to the MCNP reference.
+      In terms of accuracy, the results agree very closely with those reported for the original derivation of the moment-based \ac{LSA}.
+      The reference pin-powers are visualized in \cref{figs:LSMOC:C5G7:Reference:PinPowers}, and the differences are shown in \cref{figs:LSMOC:C5G7:FineFS:PinPowers,figs:LSMOC:C5G7:CoarseFS:PinPowers,cpfigs:LSMOC:C5G7:CoarseLS:PinPowers}.
+      The largest pin-power differences for the fine mesh with \ac{FS} and coarse mesh with \ac{LS} are in the center assembly where pin-powers are higher.
+      Interestingly, the largest pin-power differences for the coares mesh with \ac{FS} case are in the pins bordering the radial reflector region;
+        this indicates that the mesh in the reflector was not sufficient.
+      Errors in the interior of the assemblies are still larger for this case than the others.
+
+      \Cref{tab:LSMOC:C5G7:Performance} indicates that the \ac{LSA} on the coarse mesh significantly out performs the \ac{FSA} on the fine mesh;
+      \ac{MOC} run-time is reduced by approximately 50\%, and memory usage is reduced by 45\%.
+      However, this also shows that for this problem the \ac{LSA} solver takes just under 2 times the time of the \ac{FSA} on the same mesh (coarse).
+      It is also shown, that there is very little memory overhead from using the \ac{LSA} on the same mesh as the \ac{FSA}.
+      The number of iterations is quite different of that reported by \citet{Ferrer2016}; however, the iteration scheme in CASMO5 is different than that of MPACT \cite{FerrerPersoanlCommunications2018}.
+      In MPACT, each iteration loops over all energy groups a single time, but in CASMO5 the thermal energy groups are iterated over multiple times.
+
+      \begin{table}[htbp]
+        \centering
+        \caption{
+          Accuracy comparisons for the C5G7 2-D benchmark calculation using different source approximations and meshes.
+          In addition to eigenvalue difference, several metrics for comparing pin-powers are provided.
+          The abbreviations are as follows:
+            MPP+ = difference in maximum pin-power, MPP- = difference in minimum pin-power,
+            AVE = average pin-power error, RMS = root-mean-square pin-power error,
+            MRE = mean relative error.
+          The number of pins with power within 68\% and 95\% of the MCNP reference results are also listed.
+        }
+        \label{tab:LSMOC:C5G7:Results}
+        \begin{tabular}{rrrrrrrrrrr}\toprule
+                 &      &                     & \multicolumn{6}{c}{Pin Powers (\%)} & \multicolumn{2}{c}{\# Pins within}\\
+          Solver & Mesh & $\Delta\keff$ (pcm) & MPP+ & MPP- & MPE & AVE & RMS & MRE & 68\% & 95\%\\\midrule
+          FSA    & Fine    & 8                & -0.13 & 0.89 & 0.98 & 0.18 & 0.24 & 0.15 & 494 & 763\\
+          FSA    & Coarse  & 65               & -0.76 & 3.74 & 4.23 & 0.78 & 1.16 & 0.61 & 142 & 217\\
+          LSA    & Coarse  & 2                &  0.02 & 0.30 & 0.66 & 0.12 & 0.16 & 0.10 & 663 & 901\\\bottomrule
+        \end{tabular}
+      \end{table}
+
+      \begin{table}[htbp]
+        \centering
+        \caption{Performance comparisons for the C5G7 2-D benchmark calculation using different source approximations and meshes.}
+        \label{tab:LSMOC:C5G7:Performance}
+        \begin{tabular}{rrrrrr}\toprule
+                 &      &            & \multicolumn{2}{c}{Run-time (s)} & \\\cline{4-5}
+          Solver & Mesh & Iterations & MoC & MoC / iter  & Memory (MB)\\\midrule
+          FSA    & Fine   & 13         & 435 & 33 & 409\\
+          FSA    & Coarse & 11         &  89 &  8 & 213\\
+          LSA    & Coarse & 13         & 209 & 16 & 223\\\bottomrule
+        \end{tabular}
+      \end{table}
+
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/c5g7/PinPowersCore}
+          \caption{core \label{fig:LSMOC:C5G7:Reference:PinPowers:Core}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+            \includegraphics[width=\textwidth]{\figpath/c5g7/PinPowersAssembly}
+            \caption{center assembly\label{fig:LSMOC:C5G7:Reference:PinPowers:Assembly}}
+        \end{subfigure}
+        \caption{Reference pin powers shown for the core and center assembly.\label{figs:LSMOC:C5G7:Reference:PinPowers}}
+      \end{figure}
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/c5g7/fineFS/DiffPinPowersCore}
+          \caption{core\label{fig:LSMOC:C5G7:FineFS:PinPowers:Core}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+            \includegraphics[width=\textwidth]{\figpath/c5g7/fineFS/DiffPinPowersAssembly}
+            \caption{center assembly\label{fig:LSMOC:C5G7:FineFS:PinPowers:Assembly}}
+        \end{subfigure}
+        \caption{Pin power differences from reference shown for the core and center assembly for the fine mesh using the FSA solver.\label{figs:LSMOC:C5G7:FineFS:PinPowers}}
+      \end{figure}
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/c5g7/coarseFS/DiffPinPowersCore}
+          \caption{core\label{fig:LSMOC:C5G7:CoarseFS:PinPowers:Core}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+            \includegraphics[width=\textwidth]{\figpath/c5g7/coarseFS/DiffPinPowersAssembly}
+            \caption{center assembly\label{fig:LSMOC:C5G7:CoarseFS:PinPowers:Assembly}}
+        \end{subfigure}
+        \caption{Pin power differences from reference shown for the core and center assembly for the coarse mesh using the FSA solver.\label{figs:LSMOC:C5G7:CoarseFS:PinPowers}}
+      \end{figure}
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/c5g7/coarseLS/DiffPinPowersCore}
+          \caption{core\label{fig:LSMOC:C5G7:CoarseLS:PinPowers:Core}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+            \includegraphics[width=\textwidth]{\figpath/c5g7/coarseLS/DiffPinPowersAssembly}
+            \caption{center assembly\label{fig:LSMOC:C5G7:CoarseLS:PinPowers:Assembly}}
+        \end{subfigure}
+        \caption{Pin power differences from reference shown for the core and center assembly for the coarse mesh using the LSA solver.\label{figs:LSMOC:C5G7:CoarseLS:PinPowers}}
+      \end{figure}
     }
 
     \subsection{Typical Pin Cell Depletion}{\label{ssec:LSMOC:Typical Pin Cell Depletion}
@@ -798,9 +933,11 @@
 
         In this section, the use of coarser ray-spacing is investigated for the \ac{VERA} problem 2 series.
         Results were generated using a ray-spacing of 0.1 cm and 0.2 cm for the default mesh with the \ac{FS} solver, and for the coarse mesh with \ac{LS} solver.
-        Eigenvalue and pin power comparisons are shown in [].
+        Eigenvalue and pin power comparisons are shown in \cref{tab:LSMOC:Lattice Results:Coarse Rays}.
 
         [SHOW DIFFERENCE FROM PREVIOUS!? - i.e. show affect of ray-spacing]
+
+        [Coarse rays work well if there are no finely meshed elements!]
 
         \begin{table}
           \centering
@@ -835,12 +972,74 @@
     }
 
     \subsection{Assembly with Feedback}{\label{ssec:LSMOC:Assembly with Feedback}
-      % [Rough outline:
-      %   1. Parameters applied to P6
-      %   2. At time of this work, no radial coupling possible
-      %   3. Mesh is valid or no?
-      %   4. Coarse rays
-      % ]
+      \ac{VERA} problem 6 is a single 3-D \ac{PWR} assembly with \ac{TH} feedback \cite{VERAProblems}.
+      The coarse meshing parameters from the previous sections were applied to this problem;
+        these results will help to determine whether or not the coarse mesh parameters are also sufficient when \ac{TH} feedback is present.
+      As a 3-D assembly, this problem has lower and upper plates, and nozzles.
+      These elements were models as rectilinear grids of 0.42$\times$0.42 cm$^2$ sized cells.
+
+      This problem was run with the default and coarse meshes using the \ac{FSA} and \ac{LSA} solvers.
+      A parallel spatial decomposition was applied into 58 sub-domains, each consisting of a single axial plane.
+      Each case was compared against a very finely meshed case run using the \ac{LSA} solver.
+      Each case used a Tabuchi-Yamamoto quadrature with 64 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.05 cm.
+      An additional case was run using the coarse mesh, \ac{LSA} solver, and 0.1 cm ray-spacing.
+
+      Results are summarized in \cref{tab:LSMOC:P6:Results}, and performance metrics are listed in \cref{tab:LSMOC:P6:Performance}.
+      It is quite clear that the \ac{LSA} solver on the coarse mesh is at least as accurate, for this problem, as the \ac{FSA} on the default mesh.
+      Additionally, the \ac{FSA} on the coarse mesh performs significantly worse in every metric of \cref{tab:LSMOC:P6:Results}.
+      Finally, it was shown that for this problem the use of coarser ray-spacing was possible and had very little affect on the results.
+      Problem 6 has no inserted control rods or other finely meshed elements, and this is likely why using coarsely spaced rays is possible in this case.
+
+      \Cref{tab:LSMOC:P6:Performance} might seem to imply that the \ac{LSA} solvers outperformed the \ac{FSA} solvers on the same mesh.
+      This is not the case, as the \ac{LSA} cases required fewer iterations to converge.
+      The iterations may differ due to non-uniform iterative convergence \footnote{due to complex eigenvalues in the spectral radius} that has previously been observed in problems with \ac{CMFD} acceleration and feedback \cite{Kochunas2017}.
+      If the \ac{MOC} run-time per iteration is compared, the \ac{LSA} solver takes 79\% longer than the \ac{FSA} solver on the default mesh, but only 35\% longer on the coarse mesh.
+
+      Because \ac{CTF} takes far longer in the first several iterations, it is not fair to compare total run-time per iteration.
+      Rather, we can look at the time that the \ac{FSA} solver cases took to complete the same number of iterations the \ac{LSA} solver cases needed.
+      The time to complete 9 iterations are shown in \cref{tab:LSMOC:P6:Performance}.
+      These results still show that the use of the \ac{LSA} on the coarse mesh is advantageous compared to the default mesh with \ac{FSA}.
+      The coarse mesh \ac{LSA} case reduced the run-time for 9 iterations by 4.8\%, but reduced \ac{MOC} run-time per iteration by 9.3\%.
+      By also using coarse rays the run-time is reduced by 8.4\% for total time, and 72.7\% for \ac{MOC} time per iteration.
+
+      The reduction in memory usage from using a coarser mesh is also an important aspect of the \ac{LSA} solvers.
+      The coarse mesh \ac{LSA} case reduced total memory usage, compared to the default mesh \ac{FSA} case, by 15.5\%, and maximum process memory usage by 4.2\%.
+      By using coarser ray-spacing, the reduction in total memory is significantly higher at 33.6\%, and 20.8\% reduction in maximum process memory.
+
+      \begin{table}[htbp]
+        \centering
+        \caption{
+          Results for VERA problem 6 simulations using different source approximations and mesh parameters.
+          MPPE is the maximum pin-power error, and MPT is the maximum pin temperature.}
+        \label{tab:LSMOC:P6:Results}
+        \begin{tabular}{rrrrr}\toprule
+          Solver & Mesh (Ray-Spacing) & $\Delta\keff$ (pcm) & MPPE (\%) & $\Delta$ MPT (K)\\\midrule
+          FSA    & Default (0.05 cm)  & 34    & 0.31 & -0.9\\
+          LSA    & Default (0.05 cm)  & -7    & 0.08 & -0.3\\
+          FSA    & Coarse  (0.05 cm)  & 109   & 0.85 & -3.5\\
+          LSA    & Coarse  (0.05 cm)  & 13    & 0.09 &  0.0\\
+          LSA    & Coarse  (0.10 cm)  & 12    & 0.17 &  0.1\\\bottomrule
+        \end{tabular}
+      \end{table}
+
+      \begin{table}[htbp]
+        \centering
+        \caption{
+          Performance metrics for VERA problem 6 using different source approximations and mesh parameters.
+        }
+        \label{tab:LSMOC:P6:Performance}
+        \begin{tabular}{rrrrrrrrrr}\toprule
+                 &                    &            & \phantom{aa}& \multicolumn{3}{c}{Run-time (s)} & \phantom{aa} &\multicolumn{2}{c}{Memory (MB)}\\\cline{5-7}\cline{9-10}
+          Solver & Mesh (Ray-Spacing) & Iterations && Total & 9 Iter. & MoC  && Total & Max.\\\midrule
+          FSA    & Default (0.05 cm)  & 11         && 391 & 393 & 16.1 && 12438 & 264\\
+          LSA    & Default (0.05 cm)  &  9         && 390 & 399 & 23.6 && 13156 & 272\\
+          FSA    & Coarse  (0.05 cm)  & 11         && 379 & 379 & 10.8 && 10381 & 248\\
+          LSA    & Coarse  (0.05 cm)  &  9         && 366 & 374 & 14.6 && 10506 & 253\\
+          LSA    & Coarse  (0.10 cm)  &  9         && 354 & 360 &  4.4 &&  7887 & 209\\\bottomrule
+        \end{tabular}
+      \end{table}
+
+      [INSERT VERAVIEW Pin-Power comparison for Default mesh FSA and Coarse mesh LSA]
     }
 
     \subsection{Core Depletion with Feedback}{\label{ssec:LSMOC:Core Depletion with Feedback}
