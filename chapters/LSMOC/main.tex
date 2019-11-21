@@ -444,6 +444,10 @@
   }
 
   \section{Results}{\label{sec:LSMOC:Results}
+    This section highlights several of the key results found using the \ac{LSA} solver implemented in MPACT.
+    Only results using 2-D transport or the 2D/1D method in MPACT are shown, as 3-D transport results will be discussed in [REF].
+    Isotopic depletion is performed using the ORIGEN code, and \ac{TH} feedback is performed using \ac{CTF}.
+
     \subsection{C5G7 Benchmark}{\label{ssec:LSMOC:C5G7 Benchmark}
       The 2-D C5G7 benchmark \cite{Smith2006} is a neutronics benchmark used by various codes to help verify the correctness of the solvers used.
       A 7-group cross section library of macroscopic cross sections is provided by the benchmark.
@@ -589,6 +593,7 @@
       Using the current default meshing parameters in MPACT as a starting point, various mesh parameters were coarsened to study their affect when using the \ac{LSMOC}.
       These cases were compared against a reference case which was very finely meshed with fine ray-spacing (0.001 cm), and a Tabuchi-Yamamoto \cite{Yamamoto2005} quadrature using 128 azimuthal angles and 4 polar angles over $\fourpi$
       All other cases were run using a Tabuchi-Yamamoto quadrature with 64 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.05 cm.
+      This case used the \ac{TCP0} approximation to scattering.
 
       \paragraph{Default Mesh}{
         MPACT's current default meshing parameters were used as a starting point.
@@ -655,6 +660,7 @@
       A mesh study similar to that done in \cref{ssec:LSMOC:Typical Pin Cell Depletion} was performed on modified \ac{VERA} problems 2A and 2P \cite{VERAProblems} with isotopic depletion up to 70 \ac{GWDMT}.
       This was done to verify that the meshing parameters previously found were valid for larger problems, and determine if even coarser parameters were sufficient.
       First, problem 2A was studied; the meshing parameters of the fuel cell and guide-tube cells were studied independently.
+      Both problems were simulated using the \ac{TCP0} scattering approximation.
       \subsubsection{Problem 2A}{\label{sssec:LSMOC:Problem 2A}
         \paragraph{2A - Default Mesh}{
           For this problem, a reference calculation was carried out on the lattice with a very fine mesh.
@@ -888,6 +894,7 @@
       In order to evaluate these coarse mesh parameters, they were applied to the \ac{VERA} problem 2 lattice series.
       This series contains 17 common lattice configurations, and it is expected that if the meshing parameters are sufficient for these cases, they will be sufficient in most applications.
       The eigenvalue and pin-power results compared to a very finely meshed reference case are shown in \cref{tab:LSMOC:Lattice Results}.
+
       On average, the \ac{LS} on the coarse mesh, using the parameters found in the previous sections, had accuracy comparable to the \ac{FS} on the default mesh.
       Additionally, the worst case errors were lower for the \ac{LS} on the coarse mesh.
       These results also show that the \ac{FS} on the coarse mesh is not sufficient, with significantly worse eigenvalue and pin-power comparisons.
@@ -1006,6 +1013,18 @@
       The coarse mesh \ac{LSA} case reduced total memory usage, compared to the default mesh \ac{FSA} case, by 15.5\%, and maximum process memory usage by 4.2\%.
       By using coarser ray-spacing, the reduction in total memory is significantly higher at 33.6\%, and 20.8\% reduction in maximum process memory.
 
+      \Cref{figs:LSMOC:P6:Reference:PinPowers:Planes} shows the radial shape of the pin-power for two axial planes of the references solution.
+      These planes were chosen as the highest power plane, and the plane with the highest pin-power error in the calculation using the default mesh with \ac{FSA} solver.
+      The planes with the largest pin-power errors for each of the cases run are shown in \cref{figs:LSMOC:P6:LargestPinPowerErrors}.
+      The pin-power errors in the case using the \ac{LSA} with coarse mesh are shown to be lower than that using the \ac{FSA} with default mesh.
+
+      The axial power shape can be found by taking the mean radial pin-power for each axial plane.
+      This reference axial power shape, and the errors in it for each of the calculations run are shown in \cref{fig:LSMOC:P6:AxialPowerShape}.
+      Though the errors might seem low (<.5\% in the worst case), it should be remembered that these are the radially averaged power and thus a 0.5\% error means the entire plane is mispredicted by an average of 0.5\%.
+      It is also clear that the using the coarse mesh significantly worsens accuracy when using the \ac{FSA}.
+      However, the \ac{LSA} calculation errors do not change significantly from changing from default to coarse mesh parameters.
+      Additionally, the \ac{LSA} calculations improve accuracy considerably compared to the \ac{FSA}, with errors <0.1\%.
+
       \begin{table}[htbp]
         \centering
         \caption{
@@ -1039,16 +1058,86 @@
         \end{tabular}
       \end{table}
 
-      [INSERT VERAVIEW Pin-Power comparison for Default mesh FSA and Coarse mesh LSA]
+      \begin{figure}[h]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/p6/reference/PinPowersMidPlane}
+          \caption{Plane (193.6 cm)\label{fig:LSMOC:P6:PinPowers:MidPlane}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+            \includegraphics[width=\textwidth]{\figpath/p6/reference/PinPowersQtrPlane}
+            \caption{Plane (89.2 cm)\label{fig:LSMOC:P6:PinPowers:QtrPlane}}
+        \end{subfigure}
+        \caption{Reference pin-powers from two planes of VERA problem 6.}
+        \label{figs:LSMOC:P6:Reference:PinPowers:Planes}
+      \end{figure}
+
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/p6/default/0/diffPinPowersLargest}
+          \caption{Default - FS\label{fig:LSMOC:P6:Default-FS:LargestPinPowerErrors}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/p6/coarse/0/diffPinPowersLargest}
+          \caption{Coarse - FS\label{fig:LSMOC:P6:Coarse-FS:LargestPinPowerErrors}}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\figpath/p6/coarse/1/diffPinPowersLargest}
+          \caption{Coarse - LS\label{fig:LSMOC:P6:Coarse-LS:LargestPinPowerErrors}}
+        \end{subfigure}
+        \caption{VERA problem 6, planes with largest pin power errors for different meshes and source approximations.}
+        \label{figs:LSMOC:P6:LargestPinPowerErrors}
+      \end{figure}
+
+      \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.75\linewidth]{\figpath/p6/AxialPowerShape}
+        \caption{VERA problem 6: radially averaged pin-power errors for each axial plane using different meshes and source approximations.
+                 The reference axial power shape is also given. \label{fig:LSMOC:P6:AxialPowerShape}}
+      \end{figure}
     }
 
     \subsection{Core Depletion with Feedback}{\label{ssec:LSMOC:Core Depletion with Feedback}
-      [Rough outline:
-        1. P9 depletion and TH Feedback
-        2. Radial coupling affect?
-        3. Mesh is valid or no? w/o radial coupling? w/ radial coupling?
-        4. Mention coarse rays = NO because control rods
-      ]
+      The \ac{VERA} progression problem 9 is based on the Watts Bar reactor and models a typical 18-month power cycle, though with simplified power changes \cite{VERA,VERAProblems}.
+      Simplified changes in power are used such that transient calculations are not necessary.
+      This problem models a 3-D quarter core with isotopic depletion and \ac{TH} feedback, and performs a critical boron search at each state.
+      As with \cref{ssec:LSMOC:Assembly with Feedback}, this calculations performed in this section use the 2D/1D method \cite{Collins2016,VERA}.
+      The \ac{VERA-CS} has previously been used to simulate problem 9 using the traditional \ac{FSA} on the default mesh in MPACT, and compared well against Watts Bar plant data \cite{VERA}.
+      In this section, the use of the coarse mesh with \ac{LSA} solver will be compared against the previous results.
+
+      [Power \& Inlet temperature \& Bank D height history plot]
+
+      The simulation used the graph partitioning spatial decomposition methods described in \cref{ch:Spatial Decomposition} with 692 spatial domains.
+      A Tabuchi-Yamamoto quadrature set with 32 azimuthal and 4 polar angles over $\fourpi$ was used with 0.05 cm ray-spacing.
+      The TCP0 scattering approximation was also used in this case.
+      These parameters are the same as those which were previously shown to yield results which agree closely with plant data \cite{VERA}.
+
+      Transverse leakage splitting, sometimes used to help iteration stability (\cref{sssec:3T:Transverse Leakage Splitting}), was disabled for these simulations.
+      In this problem, transverse leakage splitting was confirmed not to be necessary for convergence, and generally has negative impacts on accuracy.
+      Additionally, the use of transverse leakage splitting caused instability when using the \ac{LSA}.
+      In MPACT, the splitting factor is determined by the average source in a region; however, when this is applied to the linear source this guarantees that half the region will till have a negative source.
+
+      [Plot of Boron curve \& errors]
+
+      [Plot of Max (Pin power errors)]
+
+      [Plot of error in Max Pin temperature]
+
+      [VERAView of max power-plane at BOC, MOC, EOC]
+      [Error VeraView of max power-plane at BOC, MOC, EOC]
+
+      [Accuracy Summary table]
+      [Table of Performance]
+
+      [MESH IS SUFFICIENT - mention CTF radial coupling]
     }
   }
   \section{Conclusions}{\label{sec:Conclusions}
