@@ -105,7 +105,7 @@
         \begin{table}
           \centering
           \renewcommand{\arraystretch}{1.45}
-          \caption{Maximum error in $F_1(\opt)$ for interval width $\Delta$.}
+          \caption{Maximum error in $F_1(\tau)$ for interval width $\Delta$.}
           \label{tab:LSMOC:ET:Chebyshev Error}
           \begin{tabular}{@{}ccc@{}}\toprule
             Polynomial Order & Uniform points   & Chebyshev points\\\midrule
@@ -135,7 +135,7 @@
         \begin{figure}
           \centering
           \includegraphics[width=0.90\linewidth]{exponentials/MemoryAnalysis}
-          \caption{The memory usage of a single interpolation table (polar independent) for $F_1(\segopt)$ is shown as a function of the maximum error for different interpolation orders and tabulation methods.\label{fig:LSMOC:ET:Memory Analysis}}
+          \caption{The memory usage of a single interpolation table (polar independent) for $F_1(\tau^g_{mki})$ is shown as a function of the maximum error for different interpolation orders and tabulation methods.\label{fig:LSMOC:ET:Memory Analysis}}
         \end{figure}
 
         Because all the functions of \cref{eqs:LSMOC:ET:Exponential Functions} are related, it is possible to tabulate only a single function and compute the others from the resulting interpolated value.
@@ -235,7 +235,7 @@
 
         \begin{table}
           \centering
-          \caption{Results using the modified $\modFunc$ function, with maximum interpolation error of $10^{-7}$. Memory is under 1 MB in all cases.}
+          \caption{Results using the modified function, with maximum interpolation error of $10^{-7}$. Memory is under 1 MB in all cases.}
           \label{tab:LSMOC:ET:Final Results}
           \begin{tabular}{@{}ccccc@{}}\toprule
             Method & Order & Exp.     & \ac{MOC}& \# Intervals \\
@@ -447,6 +447,9 @@
     This section highlights several of the key results found using the \ac{LSA} solver implemented in MPACT.
     Only results using 2-D transport or the 2D/1D method in MPACT are shown, as 3-D transport results will be discussed in [REF].
     Isotopic depletion is performed using the ORIGEN code, and \ac{TH} feedback is performed using \ac{CTF}.
+    Although \cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications} provides the derivation of a spatially linear anisotropic source, the initial implementation in MPACT was limited to the isotropic scattering approximation.
+    With the use of the \ac{TCP0} approximation, problems of interest are able to be simulated with acceptable levels of error.
+    However, one of our recent works \cite{Herring2020} has implemented the \ac{LIFA} approximation in MPACT, but these results are not presented here.
 
     \subsection{C5G7 Benchmark}{\label{ssec:LSMOC:C5G7 Benchmark}
       The 2-D C5G7 benchmark \cite{Smith2006} is a neutronics benchmark used by various codes to help verify the correctness of the solvers used.
@@ -480,7 +483,7 @@
       In terms of accuracy, the results agree very closely with those reported for the original derivation of the moment-based \ac{LSA}.
       The reference pin-powers are visualized in \cref{figs:LSMOC:C5G7:Reference:PinPowers}, and the differences are shown in \cref{figs:LSMOC:C5G7:FineFS:PinPowers,figs:LSMOC:C5G7:CoarseFS:PinPowers,figs:LSMOC:C5G7:CoarseLS:PinPowers}.
       The largest pin-power differences for the fine mesh with \ac{FS} and coarse mesh with \ac{LS} are in the center assembly where pin-powers are higher.
-      Interestingly, the largest pin-power differences for the coares mesh with \ac{FS} case are in the pins bordering the radial reflector region;
+      Interestingly, the largest pin-power differences for the coarse mesh with \ac{FS} case are in the pins bordering the radial reflector region;
         this indicates that the mesh in the reflector was not sufficient.
       Errors in the interior of the assemblies are still larger for this case than the others.
 
@@ -518,10 +521,10 @@
         \label{tab:LSMOC:C5G7:Performance}
         \begin{tabular}{rrrrrr}\toprule
                  &      &            & \multicolumn{2}{c}{Run-time (s)} & \\\cline{4-5}
-          Solver & Mesh & Iterations & MoC & MoC / iter  & Memory (MB)\\\midrule
-          FSA    & Fine   & 13         & 435 & 33 & 409\\
-          FSA    & Coarse & 11         &  89 &  8 & 213\\
-          LSA    & Coarse & 13         & 209 & 16 & 223\\\bottomrule
+          Solver & Mesh & Iterations & MoC & MoC / iter   & Memory (MB)\\\midrule
+          FSA    & Fine   & 13         & 435 & 33         & 409\\
+          FSA    & Coarse & 11         &  89 &  8         & 213\\
+          LSA    & Coarse & 13         & 209 & 16         & 223\\\bottomrule
         \end{tabular}
       \end{table}
 
@@ -1108,36 +1111,231 @@
     \subsection{Core Depletion with Feedback}{\label{ssec:LSMOC:Core Depletion with Feedback}
       The \ac{VERA} progression problem 9 is based on the Watts Bar reactor and models a typical 18-month power cycle, though with simplified power changes \cite{VERA,VERAProblems}.
       Simplified changes in power are used such that transient calculations are not necessary.
+      The power levels, inlet coolant temperature, and bank D position over the cycle depletion and are shown in \cref{fig:LSMOC:P9:Operation}.
+      The radial materials are shown in \cref{fig:LSMOC:P9:Radial Core}.
       This problem models a 3-D quarter core with isotopic depletion and \ac{TH} feedback, and performs a critical boron search at each state.
       As with \cref{ssec:LSMOC:Assembly with Feedback}, this calculations performed in this section use the 2D/1D method \cite{Collins2016,VERA}.
       The \ac{VERA-CS} has previously been used to simulate problem 9 using the traditional \ac{FSA} on the default mesh in MPACT, and compared well against Watts Bar plant data \cite{VERA}.
       In this section, the use of the coarse mesh with \ac{LSA} solver will be compared against the previous results.
 
-      [Power \& Inlet temperature \& Bank D height history plot]
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.95\linewidth]{\figpath/p9/OperationHistory}
+        \caption{VERA problem 9 power, inlet temperature, and bank D position over the 18-month cycle. \label{fig:LSMOC:P9:Operation}}
+      \end{figure}
+
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.55\linewidth]{\figpath/p9/radial-core}
+        \caption{VERA problem 9: Visualization of the radial core materials. \label{fig:LSMOC:P9:Radial Core}}
+      \end{figure}
 
       The simulation used the graph partitioning spatial decomposition methods described in \cref{ch:Spatial Decomposition} with 692 spatial domains.
       A Tabuchi-Yamamoto quadrature set with 32 azimuthal and 4 polar angles over $\fourpi$ was used with 0.05 cm ray-spacing.
       The TCP0 scattering approximation was also used in this case.
       These parameters are the same as those which were previously shown to yield results which agree closely with plant data \cite{VERA}.
+      The default mesh contains a total of 51513673 source-regions, while the coarse mesh contains a total of 19743263 source-regions.
+      Unfortunately, the author forgot to include the coarse reflector (rectangular) pin parameters found in \cref{ssec:LSMOC:Assembly with Feedback}, which would have further reduced the number of source-regions to 14932511.
+      This may have resulted in considerably better performance for the coarse mesh calculations; however, as these calculations are computationally expensive, they were not re-run.
 
       Transverse leakage splitting, sometimes used to help iteration stability (\cref{sssec:3T:Transverse Leakage Splitting}), was disabled for these simulations.
       In this problem, transverse leakage splitting was confirmed not to be necessary for convergence, and generally has negative impacts on accuracy.
       Additionally, the use of transverse leakage splitting caused instability when using the \ac{LSA}.
       In MPACT, the splitting factor is determined by the average source in a region; however, when this is applied to the linear source this guarantees that half the region will till have a negative source.
 
-      [Plot of Boron curve \& errors]
+      \Cref{fig:LSMOC:P9:Boron} shows the reference critical boron levels and the errors of the coarse mesh solutions over the cycle.
+      The \ac{FSA} coarse mesh solution tends to over-predict the boron levels, while the \ac{LSA} coarse mesh solution tends to under-predict.
+      The maximum boron difference is about 3 ppm for the \ac{FSA} solution, and about 1.75 for the \ac{LSA} solution.
+      Each calculation finds that the core becomes sub-critical at the same state; for the last five sub-critical states the maximum eigenvalues are within 10 pcm of the reference.
 
-      [Plot of Max (Pin power errors)]
+      The maximum pin-power errors are shown in \cref{fig:LSMOC:P9:Max Pin Power Errors}.
+      The \ac{LSA} shows clear benefits over the \ac{FSA}, with the maximum pin-power difference being lower for all but two states where errors are similar.
+      Additionally, the maximum error is within 1\% using the \ac{LSA} solver, but reaches over 1.2\% for the \ac{FSA} solver.
+      \Cref{fig:LSMOC:P9:Max Pin Temperature} shows the maximum pin temperature, and the errors for the coarse mesh cases.
+      The errors for each of the coarse mesh solutions follows similar trends, but the \ac{FSA} results seem to show a slight negative bias.
+      Generally, the temperatures are within 2 K of the reference maximum.
 
-      [Plot of error in Max Pin temperature]
+      Detailed profiles of the pin-powers are provided for the beginning, middle, and end of cycles in \cref{figs:LSMOC:P9:Default-FS:PinPowers:BOC,figs:LSMOC:P9:Default-FS:PinPowers:MOC,figs:LSMOC:P9:Default-FS:PinPowers:EOC}, respectively.
+      A radial profile is shown for the mid-plane, and an axial profile is shown for the assembly which was hottest at the beginning of the cycle.
+      The pin-power difference profiles for the coarse mesh solutions are shown in \cref{figs:LSMOC:P9:Coarse-FS:PinPowers:BOC,figs:LSMOC:P9:Coarse-FS:PinPowers:MOC,figs:LSMOC:P9:Coarse-FS:PinPowers:EOC} for the \ac{FSA} solver, and \cref{figs:LSMOC:P9:Coarse-LS:PinPowers:BOC,figs:LSMOC:P9:Coarse-LS:PinPowers:MOC,figs:LSMOC:P9:Coarse-LS:PinPowers:EOC} for the \ac{LSA} solver.
+      At the beginning of the cycle, the \ac{FSA} solver tends to over-predict power near the center of the core and under predict near the peripherals, while the \ac{LSA} solver shows the opposite trend.
+      These figures, along with \cref{figs:LSMOC:P9:AxialPowerShape}, also show that using the radial \ac{LSA} is able to better capture the power-shape axially.
 
-      [VERAView of max power-plane at BOC, MOC, EOC]
-      [Error VeraView of max power-plane at BOC, MOC, EOC]
+      \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.95\linewidth]{\figpath/p9/Boron}
+        \caption{VERA problem 9: Critical boron levels for the FSA solver on the default mesh, and errors for the coarse mesh solutions. \label{fig:LSMOC:P9:Boron}}
+      \end{figure}
+      \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.95\linewidth]{\figpath/p9/PinPower-Max}
+        \caption{VERA problem 9: Maximum pin-power errors (compared to default mesh with FSA solver) for coarse mesh solutions. \label{fig:LSMOC:P9:Max Pin Power Errors}}
+      \end{figure}
+      \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.95\linewidth]{\figpath/p9/MaxPinTemperature}
+        \caption{VERA problem 9: Maximum pin temperature for the FSA solver on the default mesh, and errors for the coarse mesh solutions. \label{fig:LSMOC:P9:Max Pin Temperature}}
+      \end{figure}
 
-      [Accuracy Summary table]
-      [Table of Performance]
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/default/0/CorePinPowers-BOC}
+          \caption{Radial\label{fig:LSMOC:P9:Default-FS:CorePinPowers:BOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/default/0/AxialPinPowersHot-BOC}
+            \caption{Axial\label{fig:LSMOC:P9:Default-FS:AxialPinPowers:BOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: (Reference) Default mesh with FSA solver pin-powers for the beginning of the cycle.\label{figs:LSMOC:P9:Default-FS:PinPowers:BOC}}
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/default/0/CorePinPowers-MOC}
+          \caption{Radial\label{fig:LSMOC:P9:Default-FS:CorePinPowers:MOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/default/0/AxialPinPowersHot-MOC}
+            \caption{Axial\label{fig:LSMOC:P9:Default-FS:AxialPinPowers:MOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: (Reference) Default mesh with FSA solver pin-powers for a state in the middle of the cycle.\label{figs:LSMOC:P9:Default-FS:PinPowers:MOC}}
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/default/0/CorePinPowers-EOC}
+          \caption{Radial\label{fig:LSMOC:P9:Default-FS:CorePinPowers:EOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/default/0/AxialPinPowersHot-EOC}
+            \caption{Axial\label{fig:LSMOC:P9:Default-FS:AxialPinPowers:EOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: (Reference) Default mesh with FSA solver pin-powers for the end of the cycle.\label{figs:LSMOC:P9:Default-FS:PinPowers:EOC}}
+      \end{figure}
 
-      [MESH IS SUFFICIENT - mention CTF radial coupling]
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/coarse/0/CorePinPowers-BOC}
+          \caption{Radial\label{fig:LSMOC:P9:Coarse-FS:CorePinPowers:BOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/coarse/0/AxialPinPowersHot-BOC}
+            \caption{Axial\label{fig:LSMOC:P9:Coarse-FS:AxialPinPowers:BOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: Coarse mesh with FSA solver pin-power errors for the beginning of the cycle.\label{figs:LSMOC:P9:Coarse-FS:PinPowers:BOC}}
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/coarse/0/CorePinPowers-MOC}
+          \caption{Radial\label{fig:LSMOC:P9:Coarse-FS:CorePinPowers:MOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/coarse/0/AxialPinPowersHot-MOC}
+            \caption{Axial\label{fig:LSMOC:P9:Coarse-FS:AxialPinPowers:MOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: Coarse mesh with FSA solver pin-power errors for a state in the middle of the cycle.\label{figs:LSMOC:P9:Coarse-FS:PinPowers:MOC}}
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/coarse/0/CorePinPowers-EOC}
+          \caption{Radial\label{fig:LSMOC:P9:Coarse-FS:CorePinPowers:EOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/coarse/0/AxialPinPowersHot-EOC}
+            \caption{Axial\label{fig:LSMOC:P9:Coarse-FS:AxialPinPowers:EOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: Coarse mesh with FSA solver pin-power errors for the end of the cycle.\label{figs:LSMOC:P9:Coarse-FS:PinPowers:EOC}}
+      \end{figure}
+
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/coarse/1/CorePinPowers-BOC}
+          \caption{Radial\label{fig:LSMOC:P9:Coarse-LS:CorePinPowers:BOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/coarse/1/AxialPinPowersHot-BOC}
+            \caption{Axial\label{fig:LSMOC:P9:Coarse-LS:AxialPinPowers:BOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: Coarse mesh with LSA solver pin-power errors for the beginning of the cycle.\label{figs:LSMOC:P9:Coarse-LS:PinPowers:BOC}}
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/coarse/1/CorePinPowers-MOC}
+          \caption{Radial\label{fig:LSMOC:P9:Coarse-LS:CorePinPowers:MOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/coarse/1/AxialPinPowersHot-MOC}
+            \caption{Axial\label{fig:LSMOC:P9:Coarse-LS:AxialPinPowers:MOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: Coarse mesh with LSA solver pin-power errors for a state in the middle of the cycle.\label{figs:LSMOC:P9:Coarse-LS:PinPowers:MOC}}
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/p9/coarse/1/CorePinPowers-EOC}
+          \caption{Radial\label{fig:LSMOC:P9:Coarse-LS:CorePinPowers:EOC}}
+        \end{subfigure}%
+        \begin{subfigure}[t]{0.425\textwidth}
+          \centering
+            \includegraphics[width=0.475\textwidth]{\figpath/p9/coarse/1/AxialPinPowersHot-EOC}
+            \caption{Axial\label{fig:LSMOC:P9:Coarse-LS:AxialPinPowers:EOC}}
+        \end{subfigure}
+        \caption{VERA Problem 9: Coarse mesh with LSA solver pin-power errors for the end of the cycle.\label{figs:LSMOC:P9:Coarse-LS:PinPowers:EOC}}
+      \end{figure}
+
+      \begin{figure}[h]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=0.95\textwidth]{\figpath/p9/AxialPowerShape-BOC}
+          \caption{Beginning of cycle\label{fig:LSMOC:P9:AxialPowerShape:BOC}}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=0.95\textwidth]{\figpath/p9/AxialPowerShape-MOC}
+          \caption{Middle of cycle\label{fig:LSMOC:P9:AxialPowerShape:MOC}}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=0.95\textwidth]{\figpath/p9/AxialPowerShape-EOC}
+          \caption{End of cycle\label{fig:LSMOC:P9:AxialPowerShape:EOC}}
+        \end{subfigure}%
+        \caption{
+          VERA problem 9: Radially averaged pin-power at beginning, middle, and end of the cycle for the reference solution.
+          Errors are shown for the coarse mesh solutions.
+          \label{figs:LSMOC:P9:AxialPowerShape}
+          }
+      \end{figure}
+
+      Several performance metrics are listed in \cref{tab:LSMOC:P9:Performance}.
+      For the calculations with 696 spatial domains, the coarse \ac{LSA} uses 20\% more core-hours than the default \ac{FSA} calculation.
+      However, the use of the coarse mesh saves a considerable amount of memory: 249 GB.
+      Additionally, it is not clear from these results that there is not an advantage from using the \ac{LSA}.
+      Each of the coarse mesh cases required nearly 10\% more iterations, likely because of iterative inefficiency from the spatial decomposition (see \cref{ch:Spatial Decomposition}) which is different for the different meshes.
+      In fact, even the \ac{FSA} coarse mesh calculation was slightly slower than the \ac{FSA} calculation on the default mesh.
+
+      \begin{table}[htbp]
+        \centering
+        \caption{VERA problem 9: Performance metrics.\label{tab:LSMOC:P9:Performance}}
+        \begin{tabular}{rrrrrrrrr}\toprule
+                 &      & \multicolumn{2}{c}{Iterations} & & & \multicolumn{3}{c}{Memory (GB)}\\\cline{3-4}\cline{7-9}
+          Solver & Mesh    & Outer &   CTF & Total Time (hrs) & Core-Hours & Average & Max. & Total\\\midrule
+             FSA & Default &   895 & 58180 &            57.4  &      39954 &    2.67 & 3.21 & 1858\\
+             FSA &  Coarse &   969 & 58788 &            58.5  &      40681 &    2.16 & 3.00 & 1505\\
+             LSA &  Coarse &   958 & 59167 &            68.7  &      47835 &    2.31 & 3.19 & 1609\\\bottomrule
+        \end{tabular}
+      \end{table}
+
+      These results have shown that the mesh that was found in the previous mesh-convergence study are sufficient for this quarter-core cycle depletion with \ac{TH} feedback.
+      This along with the results of previous sections have shown that the coarse mesh parameters are sufficient for a large range of problems, and should be considered as new default parameters when using the \ac{LSA} in MPACT.
+      [Mention performance]
+      [Radial Coupling?]
     }
   }
   \section{Conclusions}{\label{sec:Conclusions}
