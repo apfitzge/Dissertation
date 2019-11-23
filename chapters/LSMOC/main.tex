@@ -262,7 +262,7 @@
 
       This investigation revealed that the cause of the instability was the $F_2(\segopt)$ function in the transmission equation.
       By instead manipulating the term including this function, the cause of the instabilities can be addressed.
-      This approach no longer requires excessively large interpolation tables; however, some key-findings from the first approach can be applied to make this appraoch faster.
+      This approach no longer requires excessively large interpolation tables; however, some key-findings from the first approach can be applied to make this approach faster.
       First, the use of Chebyshev points significantly increases interpolation accuracy for the same number of intervals as uniformly spaced points, at no run-time cost.
       Additionally, by interpolating a single function and using the result to compute the other functions performance can be significantly improved.
     }
@@ -889,50 +889,232 @@
       }
 
       \subsubsection{Performance}{\label{sssec:Performance}
-        [TIME/MEMORY RESULTS HERE]
+        Several performance metrics for the 2A and 2P lattice depletion calculations are listed in \cref{tab:LSMOC:LatticeDepletion:Performance}.
+        For these two cases, compared to the default \ac{FSA} calculation, the coarse mesh \ac{LSA} calculation reduced total run-time by 17\% and 11\%.
+        Total memory requirements were reduced by 14\% and 9.3\%, and also shows there is very little memory overhead from the use of the \ac{LSA}.
+        Interestingly, the \ac{MOC} calculations seem to be slowed in these cases with run-times increased by 7\% and 6\%.
+        The majority of the time saved comes from the reduction in the depletion calculation time; this time is reduced because with the coarse mesh, there are fewer material regions.
+        The material region reduction comes only from the elimination of radial rings, not the azimuthal coarsening.
+
+        % This shows that for these two cases the use of the \ac{LSA} on the coarse mesh reduces total run-times by 22\% and 15\%.
+        % Interestingly, the \ac{MOC} calculations seem to be slowed in these cases with run-times increased by 20\% and 26\%.
+        % The reduction in total run-time comes from the reduced number of source regions and cross section regions, which reduces the work necessary in the calculation of macroscopic cross sections, and isotopic depletion.
+        % Additionally, memory is reduced by 12\% in each case.
+
+        % Workstation Results
+        \begin{table}[htbp]
+          \caption{VERA Problems 2A and 2P: Performance metrics.\label{tab:LSMOC:LatticeDepletion:Performance}}
+          \begin{tabular}{rrrrrrrrr}\toprule
+                                &        &         & \multicolumn{5}{c}{Time (s)} & \\\cline{4-8}
+            Problem             & Solver & Mesh    & Total & MoC & calcMacro & CMFD & Depl & Memory (MB)\\\midrule
+            \multirow{4}{*}{2A} &    FSA & Default &  665 &  92 &  76 & 102 & 328 & 232\\
+                                &    FSA & Coarse  &  483 &  55 &  53 &  98 & 227 & 196\\
+                                &    LSA & Default &  845 & 219 &  79 & 108 & 344 & 255\\
+                                &    LSA & Coarse  &  553 &  98 &  56 & 104 & 238 & 200\\\midrule
+            \multirow{4}{*}{2P} &    FSA & Default & 1370 & 548 & 101 & 202 & 415 & 558\\
+                                &    FSA & Coarse  & 1070 & 401 &  79 & 196 & 313 & 504\\
+                                &    LSA & Default & 1834 & 965 & 103 & 200 & 428 & 591\\
+                                &    LSA & Coarse  & 1217 & 579 &  74 & 190 & 294 & 506\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        % NIGHTFORT RESULTS
+        % \begin{table}[htbp]
+        %   \caption{VERA Problems 2A and 2P: Performance metrics.\label{tab:LSMOC:LatticeDepletion:Performance}}
+        %   \begin{tabular}{rrrrrrrrr}\toprule
+        %                         &        &         & \multicolumn{5}{c}{Time (s)} & \\\cline{4-8}
+        %     Problem             & Solver & Mesh    & Total & MoC & calcMacro & CMFD & Depl & Memory (MB)\\\midrule
+        %     \multirow{4}{*}{2A} &    FSA & Default &  1400 & 171 &       186 &  150 &  772 &         228\\
+        %                         &    FSA & Coarse  &   993 & 118 &       129 &  137 &  522 &         194\\
+        %                         &    LSA & Default &  1680 & 373 &       186 &  151 &  768 &         251\\
+        %                         &    LSA & Coarse  &  1091 & 205 &       129 &  140 &  509 &         200\\\midrule
+        %     \multirow{4}{*}{2P} &    FSA & Default &  1754 & 207 &       247 &  184 &  974 &         234\\
+        %                         &    FSA & Coarse  &  1286 & 144 &       180 &  167 &  690 &         198\\
+        %                         &    LSA & Default &  2093 & 445 &       246 &  184 &  969 &         260\\
+        %                         &    LSA & Coarse  &  1496 & 261 &       189 &  183 &  733 &         204\\\bottomrule
+        %   \end{tabular}
+        % \end{table}
       }
     }
 
     \subsection{2-D Lattices}{\label{ssec:LSMOC:2-D Lattices}
       In order to evaluate these coarse mesh parameters, they were applied to the \ac{VERA} problem 2 lattice series.
       This series contains 17 common lattice configurations, and it is expected that if the meshing parameters are sufficient for these cases, they will be sufficient in most applications.
-      The eigenvalue and pin-power results compared to a very finely meshed reference case are shown in \cref{tab:LSMOC:Lattice Results}.
+      The eigenvalue and pin-power results compared to a very finely meshed reference case are shown in \cref{tab:LSMOC:Lattice:Eigenvalue} and \cref{tab:LSMOC:Lattice:PinPower}, respectively.
 
       On average, the \ac{LS} on the coarse mesh, using the parameters found in the previous sections, had accuracy comparable to the \ac{FS} on the default mesh.
       Additionally, the worst case errors were lower for the \ac{LS} on the coarse mesh.
       These results also show that the \ac{FS} on the coarse mesh is not sufficient, with significantly worse eigenvalue and pin-power comparisons.
 
-      \begin{table}
+      The run-time per iteration and number of iterations are listed in \cref{tab:LSMOC:Lattice:Iterations} and \cref{tab:LSMOC:Lattice:Run-time}, respectively.
+      In most cases, the number of iterations is approximately the same; however, the \ac{LSA} solver often takes an additional iteration or two to converge for the same problem.
+      As discussed in \cref{ssec:LSMOC:C5G7 Benchmark} and iteration scheme which performs more thermal-group sweeps, as is done in CASMO5, may help to improve performance of both solvers \cite{FerrerPersoanlCommunications2018}.
+      In terms of computational performance, the \ac{LSA} solver reduces total run-time per iteration by 7\% on average.
+
+      \begin{table}[htbp]
         \centering
-        \caption{Results for VERA Problem 2 lattices for different mesh and source approximations.}
-        \footnotesize
-        \begin{tabular}{rrrrr@{\hskip 1cm}rrrr} \toprule
-          Case  & \multicolumn{4}{c}{$\Delta \keff$ (pcm)} & \multicolumn{4}{c}{Max Pin Power Difference (\%)}\\\midrule
-                & FS Default & LS Default & FS Coarse & LS Coarse & FS Default & LS Default & FS Coarse & LS Coarse\\\midrule
-                A    & -17  &   -51   &  44     & -36             & 0.07 & 0.05 & 0.24 & 0.08\\
-                B    & -15  &   -49   &  46     & -34             & 0.07 & 0.05 & 0.24 & 0.08\\
-                C    & -17  &   -51   &  44     & -36             & 0.07 & 0.05 & 0.24 & 0.08\\
-                D    & -25  &   -59   &  39     & -41             & 0.07 & 0.05 & 0.24 & 0.08\\
-                E    & -49  &   -40   &  -52    & -27             & 0.12 & 0.05 & 0.37 & 0.08\\
-                F    & -74  &   -32   &  -120   & -26             & 0.15 & 0.05 & 0.51 & 0.08\\
-                G    & -98  &   -45   &  -210   & -43             & 0.19 & 0.09 & 0.59 & 0.10\\
-                H    & -78  &   17    &  -206   & 18              & 0.25 & 0.15 & 0.58 & 0.15\\
-                I    & 2    &   -43   &  82     & -24             & 0.09 & 0.05 & 0.29 & 0.08\\
-                J    & -74  &   -32   &  -119   & -26             & 0.10 & 0.05 & 0.34 & 0.08\\
-                K    & -61  &   -26   &  -97    & -19             & 0.17 & 0.06 & 0.55 & 0.08\\
-                L    & 60   &   37    &  105    & 52              & 0.13 & 0.07 & 0.35 & 0.12\\
-                M    & 74   &   54    &  124    & 71              & 0.11 & 0.06 & 0.26 & 0.11\\
-                N    & -1   &   31    &  -45    & 43              & 0.18 & 0.05 & 0.51 & 0.11\\
-                O    & -21  &   9     &  -109   & 7               & 0.15 & 0.06 & 0.43 & 0.08\\
-                P    & -115 &   -42   &  -311   & -64             & 0.17 & 0.08 & 0.69 & 0.14\\
-                Q    & -12  &   -48   &  54     & -30             & 0.08 & 0.05 & 0.28 & 0.08\\\midrule
-                AVG  & 47   &   39    &  106    & 35              & 0.13 & 0.06 & 0.39 & 0.09\\
-                MAX  & 115  &   59    &  311    & 71              & 0.25 & 0.15 & 0.69 & 0.15\\\bottomrule
+        \caption{VERA Problem 2: Eigenvalue errors for each mesh and source approximation.\label{tab:LSMOC:Lattice:Eigenvalue}}
+        \small
+        \begin{tabular}{rrrrr} \toprule
+                     & \multicolumn{4}{c}{$\Delta \keff$ (pcm)}\\\cline{2-5}
+            Case     & FS Default & LS Default & FS Coarse & LS Coarse\\\midrule
+                A    & -17  &   -51   &  44     & -36\\
+                B    & -15  &   -49   &  46     & -34\\
+                C    & -17  &   -51   &  44     & -36\\
+                D    & -25  &   -59   &  39     & -41\\
+                E    & -49  &   -40   &  -52    & -27\\
+                F    & -74  &   -32   &  -120   & -26\\
+                G    & -98  &   -45   &  -210   & -43\\
+                H    & -78  &   17    &  -206   & 18 \\
+                I    & 2    &   -43   &  82     & -24\\
+                J    & -74  &   -32   &  -119   & -26\\
+                K    & -61  &   -26   &  -97    & -19\\
+                L    & 60   &   37    &  105    & 52 \\
+                M    & 74   &   54    &  124    & 71 \\
+                N    & -1   &   31    &  -45    & 43 \\
+                O    & -21  &   9     &  -109   & 7  \\
+                P    & -115 &   -42   &  -311   & -64\\
+                Q    & -12  &   -48   &  54     & -30\\\midrule
+                AVG  & 47   &   39    &  106    & 35 \\
+                MAX  & 115  &   59    &  311    & 71 \\\bottomrule
         \end{tabular}
-        \label{tab:LSMOC:Lattice Results}
       \end{table}
 
-      [ADD TABLE OF TIME (per iter?) / MEMORY][MAKE NOTE OF ITERATION NUMBERS]
+      \begin{table}[htbp]
+        \centering
+        \caption{VERA Problem 2: Maximum pin-power errors for each mesh and source approximation.\label{tab:LSMOC:Lattice:PinPower}}
+        \small
+        \begin{tabular}{rrrrr} \toprule
+                     & \multicolumn{4}{c}{Max Pin Power Difference (\%)}\\
+            Case     & FS Default & LS Default & FS Coarse & LS Coarse\\\midrule
+                A    & 0.07 & 0.05 & 0.24 & 0.08\\
+                B    & 0.07 & 0.05 & 0.24 & 0.08\\
+                C    & 0.07 & 0.05 & 0.24 & 0.08\\
+                D    & 0.07 & 0.05 & 0.24 & 0.08\\
+                E    & 0.12 & 0.05 & 0.37 & 0.08\\
+                F    & 0.15 & 0.05 & 0.51 & 0.08\\
+                G    & 0.19 & 0.09 & 0.59 & 0.10\\
+                H    & 0.25 & 0.15 & 0.58 & 0.15\\
+                I    & 0.09 & 0.05 & 0.29 & 0.08\\
+                J    & 0.10 & 0.05 & 0.34 & 0.08\\
+                K    & 0.17 & 0.06 & 0.55 & 0.08\\
+                L    & 0.13 & 0.07 & 0.35 & 0.12\\
+                M    & 0.11 & 0.06 & 0.26 & 0.11\\
+                N    & 0.18 & 0.05 & 0.51 & 0.11\\
+                O    & 0.15 & 0.06 & 0.43 & 0.08\\
+                P    & 0.17 & 0.08 & 0.69 & 0.14\\
+                Q    & 0.08 & 0.05 & 0.28 & 0.08\\\midrule
+                AVG  & 0.13 & 0.06 & 0.39 & 0.09\\
+                MAX  & 0.25 & 0.15 & 0.69 & 0.15\\\bottomrule
+        \end{tabular}
+      \end{table}
+
+      % Workstation performance
+      \begin{table}[htbp]
+        \centering
+        \caption{VERA Problem 2: Number of iterations.\label{tab:LSMOC:Lattice:Iterations}}
+        \small
+        \begin{tabular}{rrrrr}\toprule
+                & \multicolumn{4}{c}{Iterations}\\\cline{2-5}
+           Case & FS Default & LS Default & FS Coarse & LS Coarse\\\midrule
+            A   &  10 & 10 &  9 & 10\\
+            B   &  10 & 10 &  9 & 10\\
+            C   &  10 & 10 &  9 & 10\\
+            D   &  10 & 10 &  9 & 10\\
+            E   &  12 & 12 & 11 & 12\\
+            F   &  12 & 13 & 11 & 13\\
+            G   &  12 & 12 & 11 & 12\\
+            H   &  12 & 12 & 11 & 12\\
+            I   &  10 & 11 & 10 & 11\\
+            J   &  12 & 13 & 11 & 13\\
+            K   &  12 & 13 & 11 & 13\\
+            L   &   8 & 10 &  8 & 10\\
+            M   &   8 & 10 &  8 & 10\\
+            N   &  13 & 13 & 12 & 13\\
+            O   &  12 & 12 & 11 & 12\\
+            P   &  12 & 12 & 11 & 12\\
+            Q   &  10 & 10 &  9 & 11\\\bottomrule
+        \end{tabular}
+      \end{table}
+      \begin{table}[htbp]
+        \centering
+        \caption{VERA Problem 2: Run-time per iteration.\label{tab:LSMOC:Lattice:Run-time}}
+        \small
+        \begin{tabular}{rrrrr}\toprule
+                & \multicolumn{4}{c}{Run-time per iteration (s)}\\\cline{2-5}
+           Case & FS Default & LS Default & FS Coarse & LS Coarse\\\midrule
+            A   &  0.56 & 0.76 & 0.46 & 0.51\\
+            B   &  0.56 & 0.77 & 0.46 & 0.52\\
+            C   &  0.56 & 0.77 & 0.46 & 0.51\\
+            D   &  0.56 & 0.77 & 0.45 & 0.51\\
+            E   &  0.53 & 0.74 & 0.43 & 0.52\\
+            F   &  0.54 & 0.76 & 0.44 & 0.51\\
+            G   &  0.57 & 0.78 & 0.49 & 0.55\\
+            H   &  0.56 & 0.79 & 0.47 & 0.55\\
+            I   &  0.56 & 0.77 & 0.44 & 0.50\\
+            J   &  0.54 & 0.75 & 0.44 & 0.51\\
+            K   &  0.54 & 0.75 & 0.45 & 0.51\\
+            L   &  1.57 & 2.07 & 1.20 & 1.43\\
+            M   &  1.58 & 2.10 & 1.19 & 1.44\\
+            N   &  1.46 & 2.09 & 1.16 & 1.49\\
+            O   &  0.56 & 0.78 & 0.45 & 0.51\\
+            P   &  0.56 & 0.78 & 0.44 & 0.51\\
+            Q   &  0.63 & 0.99 & 0.48 & 0.52\\\bottomrule
+        \end{tabular}
+      \end{table}
+
+      % NIGHTFORT RESULTS
+      % \begin{table}[htbp]
+      %   \caption{VERA Problem 2: Performance Metrics.\label{tab:LSMOC:Lattice:Performance}}
+      %   \begin{tabular}{rrrrrrrrr}\toprule
+      %     Case  & \multicolumn{4}{c}{Iterations} & \multicolumn{4}{c}{run-time/iter (s/iter)}\\\midrule
+      %           & FS Default & LS Default & FS Coarse & LS Coarse & FS Default & LS Default & FS Coarse & LS Coarse\\\midrule
+      %       A   &  10 & 10 &  9 & 10 &     1.11   &  1.74   &  0.88   &  1.22\\
+      %       B   &  10 & 10 &  9 & 10 &     1.10   &  1.75   &  0.87   &  1.22\\
+      %       C   &  10 & 10 &  9 & 10 &     1.10   &  1.75   &  0.88   &  1.22\\
+      %       D   &  10 & 10 &  9 & 10 &     1.10   &  1.75   &  0.87   &  1.22\\
+      %       E   &  12 & 12 & 11 & 12 &     1.07   &  1.73   &  0.85   &  1.24\\
+      %       F   &  12 & 13 & 11 & 13 &     1.09   &  1.74   &  0.89   &  1.29\\
+      %       G   &  12 & 12 & 11 & 12 &     1.09   &  1.76   &  0.90   &  1.31\\
+      %       H   &  12 & 12 & 11 & 12 &     1.10   &  1.75   &  0.91   &  1.31\\
+      %       I   &  10 & 11 & 10 & 11 &     1.10   &  1.73   &  0.85   &  1.20\\
+      %       J   &  12 & 13 & 11 & 13 &     1.08   &  1.74   &  0.89   &  1.32\\
+      %       K   &  12 & 13 & 11 & 13 &     1.09   &  1.75   &  0.89   &  1.29\\
+      %       L   &   8 & 10 &  8 & 10 &     5.00   &  7.53   &  3.63   &  5.33\\
+      %       M   &   8 & 10 &  8 & 10 &     5.07   &  7.67   &  3.74   &  5.44\\
+      %       N   &  13 & 13 & 12 & 13 &     4.64   &  7.67   &  3.65   &  5.68\\
+      %       O   &  12 & 12 & 11 & 12 &     1.09   &  1.75   &  0.86   &  1.23\\
+      %       P   &  12 & 12 & 11 & 12 &     1.10   &  1.79   &  0.86   &  1.24\\
+      %       Q   &  10 & 10 &  9 & 11 &     0.40   &  0.60   &  0.37   &  0.38\\\bottomrule
+      %   \end{tabular}
+      % \end{table}
+
+      \begin{table}{htbp}
+        \centering
+        \caption{VERA Problem 2: Mesh and ray-segment metrics.\label{tab:LSMOC:Lattices:Mesh}}
+        \small
+        \begin{tabular}{rrrrrrrr}\toprule
+                & \multicolumn{3}{c}{\# Source Regions} &\phantom{a}& \multicolumn{3}{c}{\# Ray-Segments}\\\cline{2-4}\cline{6-8}
+           Case & Default & Coarse & Reduction && Default & Coarse & Reduction\\\midrule
+           A  & 3946  & 595	  & 85\%  && 715699  & 402620  & 44\%\\
+           B  & 3946  & 595	  & 85\%  && 715699  & 402620  & 44\%\\
+           C  & 3946  & 595	  & 85\%  && 715699  & 402620  & 44\%\\
+           D  & 3946  & 595	  & 85\%  && 715699  & 402620  & 44\%\\
+           E  & 4102  & 851	  & 79\%  && 728469  & 428444  & 41\%\\
+           F  & 4258  & 1107  & 74\%  && 741268  & 454290  & 39\%\\
+           G  & 4114  & 963	  & 77\%  && 733619  & 446641  & 39\%\\
+           H  & 4114  & 963	  & 77\%  && 733204  & 446226  & 39\%\\
+           I  & 3951  & 607	  & 85\%  && 715923  & 403726  & 44\%\\
+           J  & 4263  & 1119  & 74\%  && 741492  & 455396  & 39\%\\
+           K  & 4258  & 1107  & 74\%  && 741268  & 454290  & 39\%\\
+           L  & 4106  & 675	  & 84\%  && 3632023 & 2097604 & 42\%\\
+           M  & 4202  & 723	  & 83\%  && 3695367 & 2166086 & 41\%\\
+           N  & 4414  & 1125  & 75\%  && 3792640 & 2367134 & 38\%\\
+           O  & 4114  & 613	  & 85\%  && 730899  & 415100  & 43\%\\
+           P  & 4282  & 637	  & 85\%  && 745991  & 427608  & 43\%\\
+           Q  & 3946  & 595   & 85\%  && 715699  & 402620  & 44\%\\\bottomrule
+        \end{tabular}
+      \end{table}
 
       \subsubsection{Coarse Rays}{\label{sssec:LSMOC:Coarse Rays}
         In each of the these lattice calculations, the \ac{MOC} calculation takes up the majority of the runtime.
@@ -943,50 +1125,138 @@
 
         In this section, the use of coarser ray-spacing is investigated for the \ac{VERA} problem 2 series.
         Results were generated using a ray-spacing of 0.1 cm and 0.2 cm for the default mesh with the \ac{FS} solver, and for the coarse mesh with \ac{LS} solver.
-        Eigenvalue and pin power comparisons are shown in \cref{tab:LSMOC:Lattice Results:Coarse Rays}.
+        Eigenvalue and pin power comparisons are shown in \cref{tab:LSMOC:Lattice:CR:Eigenvalue} and \cref{tab:LSMOC:Lattice:CR:PinPower}, respectively.
+        In most of the cases, it is possible to use a reasonably coarser ray-spacing (0.10 cm) without incurring significant error.
+        The original hypothesis of this work was that using a coarser mesh would allow for the use of coarser rays; however, \cref{tab:LSMOC:Lattice:CR:Eigenvalue,tab:LSMOC:Lattice:CR:PinPower} show that this is not the case.
+        The determining factor for whether or not coarser rays can be used is the presence of fine material discretizations in some rods.
+        However, \cref{tab:LSMOC:Lattice:CR:Segments} shows that the use of a coarse mesh and coarse rays reduces the number of ray-segments (from the default parameters) by a much more significant fraction; meaning the expected run-time will be considerably lower.
 
-        [SHOW DIFFERENCE FROM PREVIOUS!? - i.e. show affect of ray-spacing]
-
-        [Coarse rays work well if there are no finely meshed elements!]
-
-        \begin{table}
+        \begin{table}[htbp]
           \centering
-          \caption{Results for VERA Problem 2 lattices for different mesh and source approximations and coarse ray-spacings.}
-          \footnotesize
-          \begin{tabular}{rrrrr@{\hskip 1cm}rrrr} \toprule
-            Case  & \multicolumn{4}{c}{$\Delta \keff$ (pcm)} & \multicolumn{4}{c}{Max Pin Power Difference (\%)}\\\midrule
-                  & FS (0.1 cm) & FS (0.2 cm) & LS (0.1 cm) & LS (0.2cm) & FS (0.1 cm) & FS (0.2 cm) & LS (0.1 cm) & LS (0.2cm)\\\midrule
-            A     & 42   &   34    &  21   &   18   & 0.15 & 0.45 & 0.10 & 0.33\\
-            B     & 41   &   33    &  19   &   16   & 0.15 & 0.45 & 0.10 & 0.33\\
-            C     & 42   &   34    &  21   &   18   & 0.15 & 0.45 & 0.10 & 0.33\\
-            D     & 45   &   38    &  23   &   20   & 0.15 & 0.45 & 0.10 & 0.33\\
-            E     & 4    &   -59   &  25   &   -29  & 0.22 & 0.28 & 0.09 & 0.28\\
-            F     & -22  &   -32   &  26   &   28   & 0.19 & 0.31 & 0.09 & 0.42\\
-            G     & 27   &   73    &  98   &   162  & 0.31 & 0.49 & 0.24 & 0.44\\
-            H     & -37  &   71    &  59   &   180  & 0.35 & 0.52 & 0.24 & 0.51\\
-            I     & 54   &   45    &  25   &   22   & 0.16 & 0.47 & 0.10 & 0.32\\
-            J     & -22  &   -31   &  26   &   28   & 0.19 & 0.31 & 0.08 & 0.42\\
-            K     & -5   &   -15   &  37   &   38   & 0.20 & 0.33 & 0.10 & 0.43\\
-            L     & -30  &   -171  &  70   &   -40  & 0.79 & 0.90 & 0.80 & 1.30\\
-            M     & -140 &   -220  &  -43  &   -15  & 1.08 & 0.94 & 1.11 & 1.20\\
-            N     & -95  &   -227  &  23   &   -103 & 0.91 & 0.85 & 0.98 & 0.98\\
-            O     & 4    &   -36   &  27   &   -21  & 0.25 & 0.62 & 0.14 & 0.43\\
-            P     & -7   &   -35   &  39   &   -7   & 0.30 & 0.61 & 0.20 & 0.40\\
-            Q     & 43   &   35    &  22   &   19   & 0.15 & 0.46 & 0.11 & 0.32\\\midrule
-            AVG   & 39   &   70    &  36   &   45   & 0.34 & 0.52 & 0.28 & 0.52\\
-            MAX   & 140  &   227   &  98   &   180  & 1.08 & 0.94 & 1.11 & 1.30\\\bottomrule
+          \caption{VERA Problem 2: Eigenvalue errors with coarse-rays.\label{tab:LSMOC:Lattice:CR:Eigenvalue}}
+          \small
+          \begin{tabular}{rrrrr} \toprule
+            Case  & \multicolumn{4}{c}{$\Delta \keff$ (pcm)}\\\cline{2-5}
+                  & FS (0.1 cm) & FS (0.2 cm) & LS (0.1 cm) & LS (0.2cm)\\\midrule
+            A     & 42   &   34    &  21   &   18  \\
+            B     & 41   &   33    &  19   &   16  \\
+            C     & 42   &   34    &  21   &   18  \\
+            D     & 45   &   38    &  23   &   20  \\
+            E     & 4    &   -59   &  25   &   -29 \\
+            F     & -22  &   -32   &  26   &   28  \\
+            G     & 27   &   73    &  98   &   162 \\
+            H     & -37  &   71    &  59   &   180 \\
+            I     & 54   &   45    &  25   &   22  \\
+            J     & -22  &   -31   &  26   &   28  \\
+            K     & -5   &   -15   &  37   &   38  \\
+            L     & -30  &   -171  &  70   &   -40 \\
+            M     & -140 &   -220  &  -43  &   -15 \\
+            N     & -95  &   -227  &  23   &   -103\\
+            O     & 4    &   -36   &  27   &   -21 \\
+            P     & -7   &   -35   &  39   &   -7  \\
+            Q     & 43   &   35    &  22   &   19  \\\midrule
+            AVG   & 39   &   70    &  36   &   45  \\
+            MAX   & 140  &   227   &  98   &   180 \\\bottomrule
           \end{tabular}
-          \label{tab:LSMOC:Lattice Results:Coarse Rays}
+        \end{table}
+        \begin{table}[htbp]
+          \centering
+          \caption{VERA Problem 2: Maximum pin-power errors with coarse-rays.\label{tab:LSMOC:Lattice:CR:PinPower}}
+          \small
+          \begin{tabular}{rrrrr} \toprule
+            Case  & \multicolumn{4}{c}{$\Delta \keff$ (pcm)}\\\cline{2-5}
+                  & FS (0.1 cm) & FS (0.2 cm) & LS (0.1 cm) & LS (0.2cm)\\\midrule
+            A     & 0.15 & 0.45 & 0.10 & 0.33\\
+            B     & 0.15 & 0.45 & 0.10 & 0.33\\
+            C     & 0.15 & 0.45 & 0.10 & 0.33\\
+            D     & 0.15 & 0.45 & 0.10 & 0.33\\
+            E     & 0.22 & 0.28 & 0.09 & 0.28\\
+            F     & 0.19 & 0.31 & 0.09 & 0.42\\
+            G     & 0.31 & 0.49 & 0.24 & 0.44\\
+            H     & 0.35 & 0.52 & 0.24 & 0.51\\
+            I     & 0.16 & 0.47 & 0.10 & 0.32\\
+            J     & 0.19 & 0.31 & 0.08 & 0.42\\
+            K     & 0.20 & 0.33 & 0.10 & 0.43\\
+            L     & 0.79 & 0.90 & 0.80 & 1.30\\
+            M     & 1.08 & 0.94 & 1.11 & 1.20\\
+            N     & 0.91 & 0.85 & 0.98 & 0.98\\
+            O     & 0.25 & 0.62 & 0.14 & 0.43\\
+            P     & 0.30 & 0.61 & 0.20 & 0.40\\
+            Q     & 0.15 & 0.46 & 0.11 & 0.32\\\midrule
+            AVG   & 0.34 & 0.52 & 0.28 & 0.52\\
+            MAX   & 1.08 & 0.94 & 1.11 & 1.30\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{VERA Problem 2: Run-time per iteration with coarse rays.\label{tab:LSMOC:Lattice:CR:Run-time}}
+          \small
+          \begin{tabular}{rrrrr}\toprule
+                  & \multicolumn{4}{c}{Run-time per iteration (s)}\\
+             Case & FS (0.1 cm) & FS (0.2 cm) & LS (0.1 cm) & LS (0.2cm)\\\midrule
+              A   & 0.46 & 0.41 & 0.43 & 0.37\\
+              B   & 0.47 & 0.42 & 0.41 & 0.38\\
+              C   & 0.46 & 0.41 & 0.42 & 0.37\\
+              D   & 0.47 & 0.41 & 0.42 & 0.37\\
+              E   & 0.43 & 0.38 & 0.41 & 0.40\\
+              F   & 0.49 & 0.39 & 0.42 & 0.36\\
+              G   & 0.47 & 0.42 & 0.44 & 0.40\\
+              H   & 0.47 & 0.43 & 0.45 & 0.40\\
+              I   & 0.46 & 0.40 & 0.41 & 0.37\\
+              J   & 0.45 & 0.40 & 0.42 & 0.42\\
+              K   & 0.49 & 0.43 & 0.45 & 0.37\\
+              L   & 0.49 & 0.45 & 0.46 & 0.38\\
+              M   & 0.47 & 0.43 & 0.41 & 0.35\\
+              N   & 0.45 & 0.39 & 0.43 & 0.38\\
+              O   & 0.46 & 0.41 & 0.42 & 0.37\\
+              P   & 0.46 & 0.43 & 0.46 & 0.40\\
+              Q   & 0.61 & 0.44 & 0.43 & 0.37\\\bottomrule
+          \end{tabular}
+        \end{table}
+        \begin{table}[htbp]
+          \centering
+          \caption{
+            VERA Problem 2: Number of ray-segments with coarse rays.
+            Also shows reduction in number of segments from the default mesh with default ray parameters.\label{tab:LSMOC:Lattice:CR:Segments}}
+          \small
+          \begin{tabular}{rrrrr}\toprule
+                  & \multicolumn{4}{c}{\# Segments (\% Reduction from default)}\\
+             Case & Default (0.1 cm) & Default (0.2 cm) & Coarse (0.1 cm) & Coarse (0.2cm)\\\midrule
+              A   & 371468 (48\%) & 187746 (74\%) & 208804 (71\%) & 105532 (85\%)\\
+              B   & 371468 (48\%) & 187746 (74\%) & 208804 (71\%) & 105532 (85\%)\\
+              C   & 371468 (48\%) & 187746 (74\%) & 208804 (71\%) & 105532 (85\%)\\
+              D   & 371468 (48\%) & 187746 (74\%) & 208804 (71\%) & 105532 (85\%)\\
+              E   & 378076 (48\%) & 191152 (74\%) & 222210 (69\%) & 112348 (85\%)\\
+              F   & 384682 (48\%) & 194434 (74\%) & 235618 (68\%) & 119092 (84\%)\\
+              G   & 380680 (48\%) & 192394 (74\%) & 231616 (68\%) & 117052 (84\%)\\
+              H   & 380484 (48\%) & 192300 (74\%) & 231420 (68\%) & 116958 (84\%)\\
+              I   & 371564 (48\%) & 187786 (74\%) & 209360 (71\%) & 105804 (85\%)\\
+              J   & 384778 (48\%) & 194474 (74\%) & 236174 (68\%) & 119364 (84\%)\\
+              K   & 384682 (48\%) & 194434 (74\%) & 235618 (68\%) & 119092 (84\%)\\
+              L   & 382584 (89\%) & 193342 (95\%) & 220850 (94\%) & 111590 (97\%)\\
+              M   & 389264 (89\%) & 196682 (95\%) & 228044 (94\%) & 115230 (97\%)\\
+              N   & 399506 (89\%) & 201840 (95\%) & 249250 (93\%) & 125894 (97\%)\\
+              O   & 379328 (48\%) & 191718 (74\%) & 215300 (71\%) & 108824 (85\%)\\
+              P   & 387276 (48\%) & 195650 (74\%) & 221776 (70\%) & 112124 (85\%)\\
+              Q   & 371468 (48\%) & 187746 (74\%) & 208804 (71\%) & 105532 (85\%)\\\bottomrule
+          \end{tabular}
         \end{table}
       }
     }
 
     \subsection{Assembly with Feedback}{\label{ssec:LSMOC:Assembly with Feedback}
-      \ac{VERA} problem 6 is a single 3-D \ac{PWR} assembly with \ac{TH} feedback \cite{VERAProblems}.
+      \ac{VERA} problem 6 is a single 3-D \ac{PWR} assembly with \ac{TH} feedback \cite{VERAProblems}, as visualized in \cref{fig:LSMOC:P6:Problem}.
       The coarse meshing parameters from the previous sections were applied to this problem;
         these results will help to determine whether or not the coarse mesh parameters are also sufficient when \ac{TH} feedback is present.
       As a 3-D assembly, this problem has lower and upper plates, and nozzles.
       These elements were models as rectilinear grids of 0.42$\times$0.42 cm$^2$ sized cells.
+
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.65\linewidth]{\figpath/p6/p6vis}
+        \caption{VERA Problem 6: Geometry.\label{fig:LSMOC:P6:Problem}}
+      \end{figure}
 
       This problem was run with the default and coarse meshes using the \ac{FSA} and \ac{LSA} solvers.
       A parallel spatial decomposition was applied into 58 sub-domains, each consisting of a single axial plane.
@@ -1023,10 +1293,10 @@
 
       The axial power shape can be found by taking the mean radial pin-power for each axial plane.
       This reference axial power shape, and the errors in it for each of the calculations run are shown in \cref{fig:LSMOC:P6:AxialPowerShape}.
-      Though the errors might seem low (<.5\% in the worst case), it should be remembered that these are the radially averaged power and thus a 0.5\% error means the entire plane is mispredicted by an average of 0.5\%.
+      Though the errors might seem low ($<$0.5\% in the worst case), it should be remembered that these are the radially averaged power and thus a 0.5\% error means the entire plane is mispredicted by an average of 0.5\%.
       It is also clear that the using the coarse mesh significantly worsens accuracy when using the \ac{FSA}.
       However, the \ac{LSA} calculation errors do not change significantly from changing from default to coarse mesh parameters.
-      Additionally, the \ac{LSA} calculations improve accuracy considerably compared to the \ac{FSA}, with errors <0.1\%.
+      Additionally, the \ac{LSA} calculations improve accuracy considerably compared to the \ac{FSA}, with errors $<$0.1\%.
 
       \begin{table}[htbp]
         \centering
@@ -1339,7 +1609,31 @@
     }
   }
   \section{Conclusions}{\label{sec:Conclusions}
-    [INSERT CONCLUSIONS HERE]
+    In this chapter, techniques for more stable and efficient exponential calculations for the \ac{LSMOC}, and a new formulation of the \ac{LSMOC} that is more efficient in calculations with non-constant cross-sections, were presented.
+    Previously, due to the tabulation error, the exponential functions in \ac{LSMOC} could cause problems to become unstable when they contained near-void regions, such as the fuel-clad gap.
+    This could be solved by using more accurate tables, but at the expense of performance.
+    Instead, a different function, that is not scaled by the inverse transport cross section in the transmission calculation, can be tabulated and used to calculate the other exponential functions.
+    This solved the issue which caused the instability and reduced the cost of exponential computations in \ac{LSMOC} calculations by 10\% and total \ac{MOC} time by 3\%.
+
+    The improved formulation is equivalent to the previous formulation, but is found in such a way that the group-dependent coefficients, $\C$, can be eliminated.
+    This reduces memory usage, as the $\C$ terms are no longer need to be stored, which was at least as expensive as storing an additional current term on the fine mesh.
+    Additionally, the $\C$ terms no longer need to be computed (previous results have indicated this takes around 15-20\% of the time a transport sweep take \cite{Fitzgerald2019}).
+    This is particularly advantageous in cases with non-constant cross sections, such as multi-physics calculations.
+    In calculations with \ac{TH} feedback, the cross sections can change each iteration, meaning the new formulation removes a 15-20\% \ac{MOC} overhead.
+
+    The improved \ac{LSMOC} formulation was used in calculations to generate results for a variety of steady-state single and multi-physics calculations.
+    These cases were used to determine possible default meshing parameters for MPACT.
+    The determined coarse meshing parameters were shown to sufficient for a 3-D quarter core cycle depletion with \ac{TH} feedback.
+    It was shown that the \ac{LSA} allowed for significant reduction in the number of source regions, memory usage, and reduced overall run-time in many of these cases.
+
+    While it is known the use of the \ac{LSA} allows for a coarser mesh while maintaining accuracy and typically reducing run-times, this work has led to two additional conclusions.
+    First, the maintained accuracy and reduced run-times seem to hold even in the presence of additional physics such as isotropic depletion, and \ac{TH} feedback.
+    Additionally, it was hypothesized that the use of a coarser mesh may allow for coarser ray-spacing.
+    However, this work has demonstrated that this is not the case; the determining factor for whether or not coarse rays are possible, without negatively impacting accuracy, is the presence of fine material discretizations such as control rods, or other strong absorbing elements.
+    In reactors, these problematic elements only make up a small fraction of the total number of pins, and is is expected, that the additional detail provided by using finer ray-spacing is need only locally within the elements.
+    This motivates the use of a ray-tracing technique that allows for finer \emph{effective} ray-spacing to be used in these elements, while coarser ray-spacing is used elsewhere.
+    The macroband method seems to fit this bill for 2-D calculations, but there exists no similar ray-tracing technique for 3-D calculations.
+    \Cref{ch:MacroRay} will provide details on the extension of the macroband method for 3-D calculations.
   }
 
   % References
