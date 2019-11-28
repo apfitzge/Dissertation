@@ -1,6 +1,177 @@
-\chapter{Conclusions}{
+\chapter{Summary, Conclusions, and Future Work}{
   \label{ch:Conclusions}
-  \blindtext[16]
+  This chapter will give a brief summary of the motivations for this work, and what was done.
+  The key findings for each study will be listed.
+  Finally, possible paths for future research in these topics will be given.
+
+  \section{Summary of Work}{\label{sec:Summary of Work}
+    % 1. Spatial Decomposition
+    %   - Motivations:
+    %     * Load imbalance -> inefficient parallel calculations
+    %     * Load imbalance particularly bad if LS and large reflector region!
+    %     * Unable to use arbitrary number of processors...
+    %   - What was done:
+    %     * Graph partitioning methods implemented for spatial decomp in MPACT
+    %       (Why not METIS?)
+    %     * 2-D methods studied
+    %     * Different 3-D schemes studied
+    % 2. Linear Source
+    %   - Motivations:
+    %     * Reduce transport cost (run-time, memory)
+    %     * Reduced mesh -> other things (physics) are also cheaper
+    %     * Unstable if exponential table is not large (F2) in problems with near-void regions
+    %     * Inefficient in multiphysics (damn C coefficients)
+    %   - What was done:
+    %     * Use a modified exponential form: eliminates source of instability
+    %     * Re-formulate LSA implicitly to eliminate C coefficients
+    %     * Coarse mesh parameters were found for
+    %       - Shown to be sufficient for large 3-D quarter core cycle depletion
+    % 3. MacroRay
+    %   - Motivations:
+    %     * Primary driver of transport run-time is number of segments
+    %     * Unable to use coarser rays if there are small strong absorber regions ANYWHERE in your problem
+    %     * Macroband showed some promising results in 2-D (though not studied a lot)
+    %     * No studies on advanced transverse integration in 3-D
+    %   - What was done
+    %     * A 3-D extension of the macroband was implemented (2-D/2-D ray-tracing approach)
+    %     * Using sub-boundary averaging for treatment of interface and boundary flux
+    %     * Tested on several 3-D transport benchmarks
+    \subsection{Summary: Spatial Decomposition}{\label{ssec:Summary:Spatial Decomposition}
+      Prior to this work, MPACT \cite{MPACT2016} use an automated spatial decomposition method based on the fuel assemblies.
+      This method was limited, and only allowed for specific numbers of spatial domains to be used.
+      Additionally, such methods have been shown, in other codes, to result in very poor load balance, particularly when a large coarsely meshed radial reflector is present \cite{Gunow2018}.
+      Stimpson \cite{StimpsonPartitioning2017} improved MPACT's parallel capabilities, allowing for a problem to be decomposed into groups of ray-tracing modules.
+      However, that work did not introduce a method for generating better spatial decompositions, and relied on the user to enter a decomposition map.
+      This was tedious for the user, and ofter resulted in non-optimal decompositions.
+
+      This dissertation's work on spatial decomposition sought to develop decomposition methods to
+      \begin{enumerate}
+        \item{improve load-balance,}
+        \item{improve user experience (no additional work),}
+        \item{and, allow for less restrictions on the number of domains.}
+      \end{enumerate}
+      These improvements can be made by utilizing graph partitioning methods, which have been highly studied in computer science \cite{Elsner1997}.
+      Software libraries exist for performing graph partitioning (METIS \cite{METIS}, Zoltan \cite{Boman2012}, etc.).
+      However, due to MPACT's strict requirements on the decomposition (see \cref{sec:Spatial Decomposition:Spatial Decomposition in MPACT}), these libraries could not easily be used in MPACT.
+      Several graph partitioning methods were implemented in MPACT.
+      For unweighted graphs, and not conforming to MPACT's restrictions, these method were shown to be comparable to METIS \cite{Fitzgerald2017}.
+
+      The methods were then applied to MPACT and made to conform with the restrictions MPACT places on its' spatial decomposition \cite{Fitzgerald2019a}.
+      This work introduced a new graph partitioning method based on the recursive expansion methods, and an improvement to the Kernighan-Lin \cite{Kernighan1970} algorithm for the application to \ac{MOC}.
+      These new methods, as well as the \acf{RSB} and \acf{RIB} were used to decompose a 2-D transport problem and resource comparisons of the simulations were compared.
+      In 3-D several different decomposition approaches were investigated, and a 3-D core was decomposed.
+      For the 3-D calculations, only metrics of the decomposition were compared, rather than actual simulation results.
+    }
+
+    \subsection{Summary: Linear Source}{\label{ssec:Summary:Linear Source}
+      In the past, \acf{MOC} codes have used the \acf{FSA}, but more recently codes have been using the \acf{LSA} \cite{Halsall1993,Petkov1999,Santandrea2002,Tang2009,Rabiti2009,Hebert2016,Ferrer2016,Gunow2018}.
+      The general goal of these \acp{LSA} is to coarsen the computational mesh, leading to overall improved run-times.
+      However, many of these previous \acp{LSA} have been \emph{ad-hoc}.
+      Several of these methods \cite{Santandrea2002,Hebert2016,Ferrer2016} have been based on particle conservation.
+      The \ac{LSA} developed by \citet{Ferrer2016} was implemented into the MPACT code \cite{Fitzgerald2018,Fitzgerald2019}.
+
+      Once implemented in MPACT, the \ac{LSA} was tested on several problems, and two flaws were observed.
+      The first was an implementation detail; typically, exponential functions in the \ac{MOC} are approximated so reduce run-time \cite{Yamamoto2004}.
+      However, when the exponential functions in the \ac{LSA} were approximated in problems with near-void regions, such as the fuel-clad gap, iterative instability was observed.
+      Different methods for addressing this instability were studied in this work \cite{Fitzgerald2018}.
+
+      The second flaw, was that for problems with multiple physics (\acf{TH} feedback, or isotropic depletion) or in the 2D/1D approximation \cite{Collins2016}, the method was far less efficient.
+      This was due to the changing macroscopic cross sections, which led to coefficients needing to be recalculated every state-point, or even every iteration.
+      This work sought to eliminate the need to recompute these coefficients by eliminating their dependence on the cross section \cite{Fitzgerald2019}.
+      The elimination of the group-dependent coefficients in the \ac{LSA} was achieved by re-formulating the method \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}.
+    }
+
+    \subsection{Summary: MacroRay}{\label{ssec:Summary:MacroRay}
+      Three-dimensional \ac{MOC} calculations are generally considered to be too expensive for use in realistic calculations; the methods rarely see use outside academia or national laboratories.
+      The primary factor in determining \ac{MOC} run-time is the number of track segments.
+      By using a coarser ray-spacing, far fewer track-segments are generated and can significantly improve run-time (\cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}).
+      However, the presence of small strong absorber regions anywhere in a problem can prevent the use of coarser rays.
+      This motivates the use of a ray-tracing method which is able to use different effective ray-spacings in regions with different requirements.
+
+      The macroband \cite{Villarino1992,Petkov1999,Yamamoto2005,Fevotte2007} is a ray-tracing method which bases the placement of rays on the computational mesh of the problem.
+      This method forces the use of finer ray-spacing where small regions are present, and allows for coarser ray-spacing where there are not small regions.
+      With the use of non-uniform ray-spacing \cite{Yamamoto2005}, these methods can reduce the number of rays necessary for accurate integration.
+      However, the method is not compatible with \acf{DNPL}, meaning that an approximation of the angular flux at interfaces is necessary, unlike the traditional \acf{MRT} ray-tracing methods.
+
+      While the macroband has been previously studied for 2-D \ac{MOC}, there has been no extension or investigation of the method for 3-D \ac{MOC} calculations.
+      This dissertation seeks to fill that gap, and provides one possible extension of the macroband to 3-D problems.
+      This extension, the macroray ray-tracing method, was implemented in a library dependent on MPACT, and tested on several 3-D transport problems.
+      The method was compared against the traditional \ac{MRT} ray-tracing method, with a particular focus on accuracy versus the number of track-segments.
+    }
+  }
+
+  \section{Conclusions}{\label{sec:Conclusions}
+
+    \subsection{Conclusions: Spatial Decomposition}{\label{ssec:Conclusions:Spatial Decomposition}
+    }
+
+    \subsection{Conclusions: Linear Source}{\label{ssec:Conclusions:Linear Source}
+    }
+
+    \subsection{Conclusions: MacroRay}{\label{ssec:Conclusions:MacroRay}
+    }
+
+
+    1. Spatial Decomposition
+      - Greatly improved user experience:
+        * Able to use any number of radial domains (must be same for each level in 2D/1D)
+        * Automatic
+        * Improves load-balance compared with manual decompositions
+      - Load-balance greatly improved over current methods
+      - Iterative efficiency decreased due to ``jagged'' domains (re-entrant rays)
+      - CMFD solvers need to be improved...for large cases this becomes significantly more expensive than transport
+        * Other groups have not seen this
+    2. Linear Source
+      - Exponentials:
+        * Instability no longer observed for problems with near-void regions
+        * Exponential and MOC run-times improved
+      - Improved Formulation:
+        * IMO: A more elegant form
+        * Same number of operations (assuming FMA instructions are available)
+        * Run-times improved by 10-15\% in multiphysics cases (T/H feedback)
+    3. MacroRay
+      - Uniform convergence behavior is nice
+      - Much more of a ``black-box'' solver (I don't really need to know what my problem looks like)
+      - Implementation is (unfortunately) inefficient:
+        * However, this method has NOT had years of optimization like the MRT
+        * Particularly bad in MPI communication (What\%):
+          - Can be improved:
+            * Fewer wait alls
+            * Collected communication
+        * Interface flux:
+          - Setting/getting flux to/from the interfaces takes up a large chunk of time (What\%)
+        * Actual transport is quite fast (What\%)
+        * Number of segments improved for accurate result?
+      - Compared to MIT still not great.
+  }
+
+  \section{Future Work}{\label{sec:Future Work}
+
+    \subsection{Future Work: Spatial Decomposition}{\label{ssec:Future Work:Spatial Decomposition}
+    }
+
+    \subsection{Future Work: Linear Source}{\label{ssec:Future Work:Linear Source}
+    }
+
+    \subsection{Future Work: MacroRay}{\label{ssec:Future Work:MacroRay}
+    }
+    1. Spatial Decomposition
+      - Improved CMFD solvers (underway)
+      - Deeper investigation into iterative inefficiencies (can we make this not as bad)
+    2. Linear source
+      - Quadratic axial source for 3-D MOC problems
+      - Arbitrary higher-order source in MOC? (Generic extension of Ferrer's thesis work)
+      - GPU
+    3. MacroRay
+      - Investigation of:
+        * Non-rectangular rays
+        * Other interface flux approximations
+      - Improved efficiency:
+        * MPI
+        * Interface
+        * Transport?
+        * GPU?
+  }
 
   % References
   \printbibliography

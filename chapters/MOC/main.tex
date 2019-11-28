@@ -950,7 +950,7 @@
         \citet{Kochunas2013} developed a hybrid-parallel algorithm for the \ac{MOC} that included thread-based parallelism over characteristic tracks, as well as spatial and angular decomposition.
         This work showed that the \ac{MOC} was able to scale well up to 10000's of processors.
         While this work is important, and has led to significant advancement, the use of 1000's of processors is not feasible for industrial use.
-        It is thus the author's opinion that the primary focus of research on 3-D \ac{MOC} techniques should be on serial efficiency, such as the \acf{LSA} (\cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}), and macroray (\cref{ch:MacroRay Three-Dimensional Ray-tracing Technique});
+        It is thus the author's opinion that the primary focus of research on 3-D \ac{MOC} techniques should be on serial efficiency, such as the \acf{LSA} (\cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}), and macroray (\cref{ch:MacroRay});
         however, moderate levels of parallelism are feasible for industry, and so more efficient use of parallel resources should also be a focus of research (\cref{ch:Spatial Decomposition}).
 
         In \ac{MOC} calculations, each characteristic track calculation is nearly independent from others; previous works have indicated that loops over characteristic tracks can be parallelized efficiently by using threads on traditional \acp{CPU} \cite{Kochunas2013} or on \acp{GPGPU} \cite{Boyd2014}.
