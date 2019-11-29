@@ -101,76 +101,140 @@
   }
 
   \section{Conclusions}{\label{sec:Conclusions}
+    % 1. Spatial Decomposition
+    %   - Greatly improved user experience:
+    %     * Able to use any number of radial domains (must be same for each level in 2D/1D)
+    %     * Automatic
+    %     * Improves load-balance compared with manual decompositions
+    %   - Load-balance greatly improved over current methods
+    %   - Iterative efficiency decreased due to ``jagged'' domains (re-entrant rays)
+    %   - CMFD solvers need to be improved...for large cases this becomes significantly more expensive than transport
+    %     * Other groups have not seen this
+    % 2. Linear Source
+    %   - Exponentials:
+    %     * Instability no longer observed for problems with near-void regions
+    %     * Exponential and MOC run-times improved
+    %   - Improved Formulation:
+    %     * IMO: A more elegant form
+    %     * Same number of operations (assuming FMA instructions are available)
+    %     * Run-times improved by 10-15\% in multiphysics cases (T/H feedback)
+    % 3. MacroRay
+    %   - Uniform convergence behavior is nice
+    %   - Much more of a ``black-box'' solver (I don't really need to know what my problem looks like)
+    %   - Implementation is (unfortunately) inefficient:
+    %     * However, this method has NOT had years of optimization like the MRT
+    %     * Particularly bad in MPI communication (What\%):
+    %       - Can be improved:
+    %         * Fewer wait alls
+    %         * Collected communication
+    %     * Interface flux:
+    %       - Setting/getting flux to/from the interfaces takes up a large chunk of time (What\%)
+    %     * Actual transport is quite fast (What\%)
+    %     * Number of segments improved for accurate result?
+    %   - Compared to MIT still not great.
+
+
 
     \subsection{Conclusions: Spatial Decomposition}{\label{ssec:Conclusions:Spatial Decomposition}
+      The use of graph partitioning for spatial decomposition in MPACT has been very successful.
+      The methods have greatly improved user experience, as they allow for an arbitrary number of radial domains in 2D/1D calculations \footnote{or an arbitrary number of domains in 3-D \ac{MOC} calculations}.
+      Unlike previous capabilities in MPACT, these methods also require no additional effort from the user.
+      User feedback has been very positive on these methods, and the default partitioning in MPACT is now the \ac{REB} graph partitioning method.
+
+      For 2-D (or 2D/1D) calculations, the three graph partitioning methods tested did not yield significantly different results.
+      However, for general 3-D decompositions, the \ac{RSB} and \ac{RIB} generally performed better than the \ac{REB} method for low to medium numbers of domains.
+      The \ac{REB} method showed significant advantage for highly decomposed cores.
+      These methods greatly improved the parallel efficiency of the \ac{MOC} calculation (per iteration).
+
+      However, as more spatial domains are used, the convergence rate decreases and more iterations are necessary.
+      This problem is present in previous methods, but seems to be worsened by using the graph partitioning methods; this is likely due to re-entrant rays becoming possible in this methods.
+      Additionally, the parallel scaling of the \ac{CMFD} solvers in MPACT is far worse than that of the \ac{MOC} solvers.
+      In fact, for highly decomposed cores, the \ac{CMFD} acceleration takes up more run-time than the \ac{MOC}.
     }
 
     \subsection{Conclusions: Linear Source}{\label{ssec:Conclusions:Linear Source}
+      The modified exponential function used to address the instability in \ac{LSMOC} calculations with near void regions was successful.
+      Problems that previously demonstrated instabilities were no longer unstable, even when using an interpolation table with the same accuracy as that used with \ac{FS} calculations.
+      Additionally, the study performed on more accurate tables showed that using an interpolation table for a single function and computing other functions was more efficient than tabulating the three functions.
+      This was able to improve exponential calculation time by 9\% and total \ac{MOC} run-time by 3\%, compared to the previous method of tabulating all three functions.
+
+      The improved formulation of the \ac{LSA} was able to entirely eliminate the group-dependent coefficients by reducing them to only spatial dependent terms.
+      In fact, these terms were reduced to a form of the same matrix used to transform from spatial moments to the spatial expansion coefficients.
+      It is the author's opinion that the form found in this work is more elegant than those previously presented, and does not introduce any additional operations (assuming a modern computer architecture, with \acf{FMA} instructions).
+      The elimination of the group-dependence in these coefficients was able to reduce run-times in multiphysics calculations by up to 15\%, as the recomputation of these coefficients was no longer necessary.
+
+      Mesh sensitivity studies were performed on several \ac{VERA} progression problems \cite{VERAProblems}.
+      Coarse mesh parameters were found, which maintained accuracy, while reducing the number of source regions in realistic calculations by up to 85\%.
+      On \ac{VERA} problem 9, a 3-D cycle depletion of a quarter core with \ac{TH} feedback showed 10\% improvement in total run-time, and 30\% reduction in memory.
+      Previous studies have shown that the \ac{LSA} was able to improve run-times in neutronics only calculations \cite{Ferrer2016,Gunow2018};
+      this work has shown that the use of the improved formulation allows for advantages over the \ac{FSA} even in cases with multiple physics.
     }
 
     \subsection{Conclusions: MacroRay}{\label{ssec:Conclusions:MacroRay}
+      The macroray ray-tracing method was a novel ray-tracing method studied as part of this dissertation work.
+      The aim of this method was to allow for maintained accuracy while reducing the number of track-segments generated during ray-tracing, and thus reducing the amount of work during computation.
+      The underlying idea was to use advanced transverse integration methods to improve the integration accuracy within each region.
+      A similar idea, the macroband, had been studied in 2-D, but no extension to 3-D has been made.
+
+      The method was shown to reduce the number of track-segments necessary for calculations in some cases with thin strong absorbers.
+      Though in benchmarks without these features the method did not show significant advantages over traditional ray-tracing methods.
+      Unlike traditional ray-tracing methods, this method exhibits near uniform convergence with number of segments.
+      This means as the number of rays is increased, the user can expect that the result will become closer to the converged result.
+      Additionally, because of the dependence on internal geometry for ray-tracing, rays are forced through thin regions;
+        this means the method can be used as more of a ``black box'' solver, without requiring knowledge of the method by the user.
     }
-
-
-    1. Spatial Decomposition
-      - Greatly improved user experience:
-        * Able to use any number of radial domains (must be same for each level in 2D/1D)
-        * Automatic
-        * Improves load-balance compared with manual decompositions
-      - Load-balance greatly improved over current methods
-      - Iterative efficiency decreased due to ``jagged'' domains (re-entrant rays)
-      - CMFD solvers need to be improved...for large cases this becomes significantly more expensive than transport
-        * Other groups have not seen this
-    2. Linear Source
-      - Exponentials:
-        * Instability no longer observed for problems with near-void regions
-        * Exponential and MOC run-times improved
-      - Improved Formulation:
-        * IMO: A more elegant form
-        * Same number of operations (assuming FMA instructions are available)
-        * Run-times improved by 10-15\% in multiphysics cases (T/H feedback)
-    3. MacroRay
-      - Uniform convergence behavior is nice
-      - Much more of a ``black-box'' solver (I don't really need to know what my problem looks like)
-      - Implementation is (unfortunately) inefficient:
-        * However, this method has NOT had years of optimization like the MRT
-        * Particularly bad in MPI communication (What\%):
-          - Can be improved:
-            * Fewer wait alls
-            * Collected communication
-        * Interface flux:
-          - Setting/getting flux to/from the interfaces takes up a large chunk of time (What\%)
-        * Actual transport is quite fast (What\%)
-        * Number of segments improved for accurate result?
-      - Compared to MIT still not great.
   }
 
   \section{Future Work}{\label{sec:Future Work}
 
     \subsection{Future Work: Spatial Decomposition}{\label{ssec:Future Work:Spatial Decomposition}
+      The spatial decomposition in MPACT has several avenues for future improvement.
+      This most obvious is to improve the parallel efficiency of the \ac{CMFD} solvers; \ac{CMFD} begins to dominate run-time as large numbers of spatial domains are used.
+      The next is that, the methods of this work created and partitioned a graph that only considered the computational expenses of \ac{MOC}.
+      As \ac{CMFD} becomes a significant component of run-time in highly decomposed cases, it is warranted to investigate constructing a graph that considers both \ac{MOC} and \ac{CMFD} costs.
+      Finally, it may be possible to modify the graph partitioning methods to avoid ``jagged'' domains, which negatively impact convergence, without negatively affecting load-balance.
     }
 
     \subsection{Future Work: Linear Source}{\label{ssec:Future Work:Linear Source}
+      The \ac{LSA} has been shown to allow for significantly coarser meshes while maintaining accuracy.
+      While unlikely to improve run-times for 2-D calculations, some groups have begun to investigate quadratic axial sources for 3-D \ac{MOC} calculations [CITATION].
+      The use of these methods would allow the axial mesh to be significantly coarsened.
+      Due to the success of the \ac{LSA}, a quadratic axial source may be able to improve run-times for axially large calculations, such as reactors.
+      It may also be possible to extend \citetp{Ferrer2012b} work for an arbitrary source-order \ac{MOC} for general geometries.
+
+      Finally, the use of \acp{GPGPU} has been studied for \ac{FSMOC} calculations [CITATION], but not for the \ac{LSMOC}.
+      Many recent computing clusters require codes to utilize \acp{GPGPU}; if this method is to see continued use, the efficient implementation on \acp{GPGPU} is a necessity.
+      Even if clusters are ignored, \acp{GPGPU} allow for significant speed-up of \ac{MOC} calculations, and it is the author's opinion that all modern \ac{MOC} codes should utilize them.
     }
 
     \subsection{Future Work: MacroRay}{\label{ssec:Future Work:MacroRay}
+      While the macroray was shown to reduce the number of segments for some cases, it is generally still slower than the solvers using the traditional ray-tracing methods.
+      This is not entirely surprising, as the traditional solvers have been heavily optimized over the past decade of the \ac{CASL} project, whereas the macroray solver was a first-pass implementation for this research.
+      Nonetheless, if the method is to be used the efficiency of the implementation must be improved; in particular, the MPI communication, and the cost of the interface approximations must be made more efficient.
+      One possibility to improve these, is to use a different approximation of the flux on the interfaces.
+      While this work has been initial research into the use of the macroray method, if the method is to be considered for use in production, it will need to be implemented efficiently on \acp{GPGPU}.
+
+      Additionally, one of the primary difficulties in this work was due to the choice of rectangular rays in the 2D-2D ray-tracing approach.
+      The use of 2D-2D ray-tracing is common for \ac{MRT} method, but may not be the best choice for macroray methods.
+      Indeed, there is a good argument against its' use due to the fact that rays are guaranteed not to ``span'' the problem's surfaces.
+      A reasonable next step for this work would be to investigate the use of non-rectangular rays, which eliminate the need for some of the fix-ups used in this work.
     }
-    1. Spatial Decomposition
-      - Improved CMFD solvers (underway)
-      - Deeper investigation into iterative inefficiencies (can we make this not as bad)
-    2. Linear source
-      - Quadratic axial source for 3-D MOC problems
-      - Arbitrary higher-order source in MOC? (Generic extension of Ferrer's thesis work)
-      - GPU
-    3. MacroRay
-      - Investigation of:
-        * Non-rectangular rays
-        * Other interface flux approximations
-      - Improved efficiency:
-        * MPI
-        * Interface
-        * Transport?
-        * GPU?
+    % 1. Spatial Decomposition
+    %   - Improved CMFD solvers (underway)
+    %   - Deeper investigation into iterative inefficiencies (can we make this not as bad)
+    % 2. Linear source
+    %   - Quadratic axial source for 3-D MOC problems
+    %   - Arbitrary higher-order source in MOC? (Generic extension of Ferrer's thesis work)
+    %   - GPU
+    % 3. MacroRay
+    %   - Investigation of:
+    %     * Non-rectangular rays
+    %     * Other interface flux approximations
+    %   - Improved efficiency:
+    %     * MPI
+    %     * Interface
+    %     * Transport?
+    %     * GPU?
   }
 
   % References
