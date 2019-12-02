@@ -6,4 +6,3 @@ output/*
 *.log
 *.tkzfct.gnuplot
 *.tkzfct.table
-*.pdf
