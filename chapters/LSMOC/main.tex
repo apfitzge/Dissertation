@@ -1404,9 +1404,9 @@
       A Tabuchi-Yamamoto quadrature set with 32 azimuthal and 4 polar angles over $\fourpi$ was used with 0.05 cm ray-spacing.
       The TCP0 scattering approximation was also used in this case.
       These parameters are the same as those which were previously shown to yield results which agree closely with plant data \cite{VERA}.
-      The default mesh contains a total of 51513673 source-regions, while the coarse mesh contains a total of 19743263 source-regions.
-      Unfortunately, the author forgot to include the coarse reflector (rectangular) pin parameters found in \cref{ssec:LSMOC:Assembly with Feedback}, which would have further reduced the number of source-regions to 14932511.
-      This may have resulted in considerably better performance for the coarse mesh calculations; however, as these calculations are computationally expensive, they were not re-run.
+      The default mesh contains a total of 51513673 source-regions, while the coarse mesh contains a total of 14932511 source-regions. %19743263
+      The initial coarse mesh results were generated using a fine reflector region, with coarse fuel rod meshes; this mesh had a total of 19743263 source-regions.
+      These initial coarse mesh results were generated due to a mistake by the author, but these show close agreement in terms of accuracy with the actual coarse mesh results.
 
       Transverse leakage splitting, sometimes used to help iteration stability (\cref{sssec:3T:Transverse Leakage Splitting}), was disabled for these simulations.
       In this problem, transverse leakage splitting was confirmed not to be necessary for convergence, and generally has negative impacts on accuracy.
@@ -1597,15 +1597,22 @@
                  &      & \multicolumn{2}{c}{Iterations} & & & \multicolumn{3}{c}{Memory (GB)}\\\cline{3-4}\cline{7-9}
           Solver & Mesh    & Outer &   CTF & Total Time (hrs) & Core-Hours & Average & Max. & Total\\\midrule
              FSA & Default &   895 & 58180 &            57.4  &      39954 &    2.67 & 3.21 & 1858\\
-             FSA &  Coarse &   969 & 58788 &            58.5  &      40681 &    2.16 & 3.00 & 1505\\
-             LSA &  Coarse &   958 & 59167 &            68.7  &      47835 &    2.31 & 3.19 & 1609\\\bottomrule
+             FSA &  Coarse\footnotemark[1] &   969 & 58788 &            58.5  &      40681 &    2.16 & 3.00 & 1505\\
+             LSA &  Coarse\footnotemark[1] &   958 & 59167 &            68.7  &      47835 &    2.31 & 3.19 & 1609\\
+             LSA\footnote{this calculation used 464 processors instead of the 696 used by the other calculations. This was possible due to the significant reduction in memory usage.}
+                 & Coarse  & 963 & 59397 & 76.7 & 35607 & 2.79 & 3.25 & 1295\\\bottomrule
         \end{tabular}
+        \footnotetext[1]{Coarse fuel rods but default reflector mesh.}
       \end{table}
 
       These results have shown that the mesh that was found in the previous mesh-convergence study are sufficient for this quarter-core cycle depletion with \ac{TH} feedback.
       This along with the results of previous sections have shown that the coarse mesh parameters are sufficient for a large range of problems, and should be considered as new default parameters when using the \ac{LSA} in MPACT.
-      [Mention performance]
-      [Radial Coupling?]
+      The use of the coarse mesh with the \ac{LSA} was able to reduce the number of core-hours by 10.8\%, and total memory usage by 30.3\%.
+      This represents significant advantage of the \ac{LSA} even in simulations with multiple physics.
+
+      The results presented in this section did not use the recently added capability for radial power, temperature, and burnup between MPACT and CTF.
+      In initial testing with the coarse mesh parameters, it appears that the capability assumed that each radial division in the fuel was equal volume, which is not the case for the coarse mesh parameters developed in this work.
+      Further testing on the coarse mesh with \ac{LSA} and radial coupling will be required once this assumption is lifted from the new capability.
     }
   }
   \section{Conclusions}{\label{sec:LSMOC:Conclusions}
