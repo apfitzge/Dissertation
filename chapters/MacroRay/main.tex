@@ -80,6 +80,50 @@
         \caption{Ray-tracing process for macroband.}
         \label{fig:MR:Macroband Process}
       \end{figure}
+
+      As it is difficult to visualize 3-D ray-tracing data in a 2-D textual media, a quarter \ac{IFBA} fuel pin will be used as an example to demonstrate the differences between ray-tracing methods.
+      \Cref{figs:MR:Macroband-Single-Visualization,figs:MR:Macroband-All-Visualization} compare the traditional \ac{MRT} ray-tracing technique with the macroband method with Gauss-Legendre spacing.
+      The rays for a single direction make it clear that the \ac{MRT} in no way accounts for the internal geometry.
+      In the macroband method, there are clearly regions which have more rays passing through them; in this case, it is the boron layer coating the fuel.
+      When all directions are visualized, again the \ac{MRT} would use this same pattern of rays whether this was an \ac{IFBA} rods, or a rectangular reflector (of the same size).
+      In the macroband methods, some of the geometry becomes very apparent, the outline of the pin can clearly be seen due to the methods forcing rays through the thin coating.
+
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.33\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/Macroband/MRT-single}
+          \caption{MRT}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.33\textwidth}
+          \centering
+          \includegraphics[width=0.9\textwidth]{\figpath/Macroband/MBGL-single}
+          \caption{Macroband (Gauss-Legendre)}
+        \end{subfigure}
+        \caption{2-D single angle ray-tracing comparison for quarter IFBA pin. \label{figs:MR:Macroband-Single-Visualization}}
+      \end{figure}
+
+      \begin{figure}[htbp]
+        \centering
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=0.95\textwidth]{\figpath/Macroband/MRT-all}
+          \caption{MRT}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=0.95\textwidth]{\figpath/Macroband/MBGL-all}
+          \caption{Macroband (Gauss-Legendre)}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.49\textwidth}
+          \centering
+          \includegraphics[width=0.95\textwidth]{\figpath/Macroband/MBGL-fixed-all}
+          \caption{Macroband-fixed (Gauss-Legendre)}
+        \end{subfigure}
+        \caption{2-D ray-tracing comparison for quarter IFBA pin. \label{figs:MR:Macroband-All-Visualization}}
+      \end{figure}
     }
     There have been different approaches to 3-D ray-tracing for \ac{MOC}; the most common approach is to first generate 2-D tracking data, forming characteristic planes.
     Then 2-D tracking data is generated for each of the characteristic planes.
@@ -276,6 +320,9 @@
         \end{subequations}
         As this was derived from \cref{eq:MR:Surface-Integrated Angular Flux}, these forms guarantee that the surface-integrated angular flux is conserved.
         It should also be noted that if the surfaces are spanned by the rays the factors, $A(R_j)/A_p(R_j)$ and $A(S_i)/A_p(S_i)$, are one, giving back the original form of the equations.
+
+        Another consequence of the rays not spanning the problems surfaces, is that larger sub-boundary sizes become necessary to ensure that each sub-boundary is intersected by at least one ray.
+        The larger sub-boundary sizes will have a negative impact on the accuracy of the simulations, particularly in cases where neighboring pins are significantly different.
       }
 
       \subsubsection{Alternative Approaches}{\label{sssec:MR:Alternative Approaches}
@@ -595,21 +642,29 @@
     }
 
     \subsection{C5G7}{\label{ssec:MR:C5G7}
-      % The C5G7 [CITATION] benchmark was the primary benchmark case used to evaluate the initial capability of the macroray ray-tracing method.
-      % The benchmark is commonly used as part of the verification of neutronics codes, both 2-D and 3-D.
-
       The C5G7 \cite{Smith2002,Smith2006} benchmarks are a set of benchmark problems commonly used to help the verification of 2-D and 3-D transport methods.
+      The benchmarks provide a reference Monte Carlo solution which can be used to evaluate the accuracy of methods used to solve the problems.
       The original benchmark specified a 3-D problem, and a second benchmark reduced the axial size of this problem and added configurations with inserted control rods.
       In this work, each of the three extended 3-D benchmark problems are solved using both the traditional ray-tracing method (\ac{MRT}), and the new macroray ray-tracing method.
       \cref{figs:MR:C5G7:Layout} shows the configuration of the C5G7 core benchmark cases; the different problems differ only in their axial description.
       The radial layout of each fuel assembly is shown in \cref{fig:MR:C5G7:RadialAssemblyLayout}.
 
-      The \ac{LSA} was used for all of the calculations in this work, and the meshing parameters used were found to be sufficient in previous studies on the \ac{LSA} [CITATION].
+      The \ac{LSA} was used for all of the calculations in this work, and the meshing parameters used were found to be sufficient in previous studies on the \ac{LSA} \cite{Gunow2016}.
       In the axial direction, the problem was meshed into 2.38 cm slices.
       The rods (fuel, guide-tubes, and control rods), used a single radius of 0.540 cm, with 4 azimuthal divisions, and 8 azimuthal divisions in the surrounding moderator.
       The reflector pins used a radial mesh of 0.42$\times$0.42 cm$^2$.
       A Chebyshev-Gauss directional quadrature with 64 azimuthal angles and 8 polar angles over $\fourpi$ was used, as it was shown to yield good agreement in previous works with 3-D \ac{MOC} \cite{Kochunas2013}.
       A pin-wise modular ray-tracing was used, with each ray-tracing module being 1.26$\times$1.26$\times$2.38 cm$^3$.
+      Convergence criteria of 1e-6 and 1e-5 were used for the eigenvalue and fission norm respectively.
+      1080 spatial domains, determined by the \ac{RSB} graph-partitioning method, were used for each calculation.
+
+      The macroray method calculations used 3 rays in each radial band and 5 rays in each axial band.
+      The \ac{MRT} method calculations used 0.05 cm ray-spacing in the radial direction, and 0.15 cm in the axial direction.
+      \ac{MIT} has reported that for these problems they were able to use 1.5 cm ray-spacing \cite{Gunow2016}, but in this study this was not found to be sufficient.
+      This is most likely due to differences in how rays are set up within the \ac{MRT} procedures in MPACT and OpenMOC.
+
+      Unfortunately, due to an inefficient implementation determining surface indices on parallel boundaries for 3-D \ac{MOC} in MPACT, \ac{CMFD} could not be utilized for the \ac{MRT} calculations.
+      However, the time that the accelerated method would take can be estimated roughly by the ratio of iterations from the \ac{MRT} to the macrorray calculations (that used \ac{CMFD} accleration).
 
       \begin{figure}[htbp]
         \centering
@@ -638,35 +693,199 @@
         \caption{C5G7 Assembly layouts.\label{fig:MR:C5G7:RadialAssemblyLayout}}
       \end{figure}
 
-
-      % \subsubsection{C5G7 Pin-Cells}{\label{sssec:MR:C5G7:Pin-Cells}
-
-      % }
-
-      % \subsubsection{C5G7 Mini-Case}{\label{sssec:MR:C5G7:Mini-Case}
-
-      % }
-
       \subsubsection{C5G7 Benchmark: Unrodded}{\label{sssec:MR:C5G7:Unrodded}
         The unrodded case has no control rods inserted into the fuel, but control rods are present in the axial reflector region above the fuel region.
         This is shown in \cref{fig:MR:C5G7:Unrodded}.
+
+        Eigenvalue and errors are listed in \cref{tab:MR:C5G7:Unrodded-Eigenvalues}, and pin-power results are summarized in \cref{tab:MR:C5G7:Unrodded-MRT,tab:MR:C5G7:Unrodded-MacroRay}.
+        The eigenvalues for either ray-tracing method are within 100 pcm of the reference value.
+        Although there is a 8 pcm difference between the two methods, this is not a significant difference.
+
+        Overall, the macroray method results in better pin-power comparisons in each metric except for slightly higher error in the maximum pin-power.
+        Additionally, the number of pins within the uncertainty levels of the reference is much higher for the macroray method, indicating better overall predictions in pin-power.
+        However, the macroray method seems to have a bias in the top 1/3 of the fuel, where the power level is lower.
+        The pin-power comparisons within this axial level are significantly worse than in the lower 2/3.
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Unrodded eigenvalue comparisons. \label{tab:MR:C5G7:Unrodded-Eigenvalues}}
+          \begin{tabular}{rrr}\toprule
+            Case & Eigenvalue & Error (pcm)\\\midrule
+            Reference & 1.143080 & $\pm$ 7\\
+            MRT       & 1.142453 & -63\\
+            MacroRay  & 1.142366 & -71\\\bottomrule
+          \end{tabular}
+        \end{table}
 
         \begin{figure}[htbp]
           \centering
           \includegraphics[width=0.85\linewidth]{\figpath/results/3D/C5G7/Diagrams/C5G7-Unrodded}
           \caption{C5G7 Benchmark: Unrodded core configuration. \label{fig:MR:C5G7:Unrodded}}
         \end{figure}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Unrodded pin-power comparisons for the MRT method. \label{tab:MR:C5G7:Unrodded-MRT}}
+          \scriptsize
+          \begin{tabular}{rrrrrrrrr}\toprule
+                                  & \multicolumn{2}{c}{Z Slice \# 1} & \multicolumn{2}{c}{Z Slice \# 2} & \multicolumn{2}{c}{Z Slice \# 3} & \multicolumn{2}{c}{Overall}\\
+                                  & Reference & MRT & Reference & MRT & Reference & MRT & Reference & MRT\\\midrule
+            Maximum Pin Power     & 1.108 & 1.107 & 0.882 & 0.881 & 0.491 & 0.488 & 2.481 & 2.476\\
+            Percent Error         & 0.090 & -0.093 & 0.100 & -0.184 & 0.130 & -0.545 & 0.060 & -0.215\\\midrule
+            Maximum Error         & 0.290 & 2.483 & 0.320 & 2.538 & 0.430 & 2.618 & 0.192 & 2.454\\
+            AVG Error             & 0.164 & 0.354 & 0.183 & 0.358 & 0.245 & 0.363 & 0.109 & 0.329\\
+            RMS Error             & 0.171 & 0.522 & 0.190 & 0.518 & 0.255 & 0.505 & 0.114 & 0.486\\
+            MRE Error             & 0.062 & 0.114 & 0.055 & 0.094 & 0.042 & 0.058 & 0.093 & 0.241\\\midrule
+            \# Pins within 68\%   & 371 & 177 & 371 & 197 & 371 & 234 & 371 & 142\\
+            \# Pins within 95\%   & 518 & 323 & 518 & 335 & 518 & 392 & 518 & 248\\
+            \# Pins within 99\%   & 540 & 388 & 540 & 414 & 540 & 457 & 540 & 310\\
+            \# Pins within 99.9\% & 544 & 438 & 544 & 456 & 544 & 499 & 544 & 368\\\midrule
+            UO2-1 Power           & 219.04 & 218.63 & 174.24 & 173.91 & 97.93 & 97.73 & 491.21 & 490.27\\
+            MOX Power             & 94.53 & 94.61 & 75.25 & 75.27 & 42.92 & 42.97 & 212.70 & 212.85\\
+            UO2-2 Power           & 62.12 & 62.43 & 49.45 & 49.68 & 27.82 & 27.91 & 139.39 & 140.02\\
+            UO2-1 Power \% Error  & 0.082 & -0.185 & 0.073 & -0.188 & 0.055 & -0.212 & 0.123 & -0.192\\
+            MOX Power \% Error    & 0.061 & 0.082 & 0.054 & 0.032 & 0.041 & 0.116 & 0.092 & 0.071\\
+            UO2-2 Power \% Error  & 0.043 & 0.508 & 0.038 & 0.466 & 0.029 & 0.334 & 0.065 & 0.458\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Unrodded pin-power comparisons for the macroray method. \label{tab:MR:C5G7:Unrodded-MacroRay}}
+          \scriptsize
+          \begin{tabular}{rrrrrrrrr}\toprule
+                                  & \multicolumn{2}{c}{Z Slice \# 1} & \multicolumn{2}{c}{Z Slice \# 2} & \multicolumn{2}{c}{Z Slice \# 3} & \multicolumn{2}{c}{Overall}\\
+                                  & Reference & MacroRay & Reference & MacroRay & Reference & MacroRay & Reference & MacroRay\\\midrule
+            Maximum Pin Power     & 1.108 & 1.105 & 0.882 & 0.880 & 0.491 & 0.491 & 2.481 & 2.475\\
+            Percent Error         & 0.090 & -0.331 & 0.100 & -0.309 & 0.130 & 0.108 & 0.060 & -0.236\\\midrule
+            Maximum Error         & 0.280 & 0.862 & 0.250 & 1.131 & 0.330 & 2.014 & 0.192 & 0.910\\
+            AVG Error             & 0.164 & 0.257 & 0.183 & 0.235 & 0.245 & 0.830 & 0.109 & 0.190\\
+            RMS Error             & 0.171 & 0.300 & 0.190 & 0.294 & 0.255 & 0.902 & 0.114 & 0.248\\
+            MRE Error             & 0.062 & 0.130 & 0.055 & 0.083 & 0.042 & 0.149 & 0.093 & 0.161\\\midrule
+            \# Pins within 68\%   & 371 & 188 & 371 & 229 & 371 & 9 & 371 & 180\\
+            \# Pins within 95\%   & 518 & 328 & 518 & 396 & 518 & 74 & 518 & 342\\
+            \# Pins within 99\%   & 540 & 399 & 540 & 462 & 540 & 132 & 540 & 411\\
+            \# Pins within 99.9\% & 544 & 441 & 544 & 508 & 544 & 232 & 544 & 480\\\midrule
+            UO2-1 Power           & 219.04 & 218.21 & 174.24 & 173.79 & 97.93 & 98.48 & 491.21 & 490.47\\
+            MOX Power             & 94.53 & 94.40 & 75.25 & 75.23 & 42.92 & 43.33 & 212.70 & 212.97\\
+            UO2-2 Power           & 62.12 & 62.09 & 49.45 & 49.48 & 27.82 & 28.03 & 139.39 & 139.59\\
+            UO2-1 Power \% Error  & 0.082 & -0.380 & 0.073 & -0.259 & 0.055 & 0.554 & 0.123 & -0.151\\
+            MOX Power \% Error    & 0.061 & -0.134 & 0.054 & -0.021 & 0.041 & 0.957 & 0.092 & 0.126\\
+            UO2-2 Power \% Error  & 0.043 & -0.047 & 0.038 & 0.053 & 0.029 & 0.744 & 0.065 & 0.147\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \Cref{tab:MR:C5G7:Unrodded-Performance} lists the total run-time of each calculation.
+        The \ac{MRT} calculation took 911 iterations to converge (unaccelerated), while the macroray method took 30 to converge.
+        This gives an estimate for the accelerated \ac{MRT} method at 240 core-hours.
+        Unfortunately, this is quite significantly better than how the macroray method performed.
+        A further discussion of this will be presented in \cref{sec:Discussion one the Performance of MacroRay}.
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Unrodded Performance. \label{tab:MR:C5G7:Unrodded-Performance}}
+          \begin{tabular}{rrr}\toprule
+            Case                        & Acclerated? & Time (core-hours)\\\midrule
+            LSMoC - MRT                 & F & 7293\\
+            LSMoC - MacroRay            & T & 618\\\bottomrule
+          \end{tabular}
+        \end{table}
       }
 
       \subsubsection{C5G7 Benchmark: Rodded A}{\label{sssec:MR:C5G7:Rodded A}
         The C5G7 rodded A case has control rods partially inserted 14.28 cm, one third of the fuel height, into the central \ac{UO2} assembly.
         The remaining \ac{UO2} assembly and \ac{MOX} assemblies have no inserted control rods.
         The core layout is depicted in \cref{fig:MR:C5G7:Rodded A}.
+
+        Eigenvalue and errors are listed in \cref{tab:MR:C5G7:Rodded A-Eigenvalues}, and pin-power results are summarized in \cref{tab:MR:C5G7:Rodded A-MRT,tab:MR:C5G7:Rodded A-MacroRay}.
+        Similarly to the unrodded case, the eigenvalues for each ray-tracing method are within 100 pcm; however, the error is 34 pcm higher for the macroray method.
+        Again, in overall pin-power comparisons, the macroray method out performs the MRT method in all except the error in the maximum pin-power.
+        Additionally, the number of pins predicted within the uncertainty levels of the reference are significantly higher for the macroray method.
+        But, just like in the unrodded case, the macroray method performs significantly worse in the low-power upper third of the fuel.
+
         \begin{figure}[htbp]
           \centering
           \includegraphics[width=0.85\linewidth]{\figpath/results/3D/C5G7/Diagrams/C5G7-RoddedB}
           \caption{C5G7 Benchmark: Rodded A core configuration. \label{fig:MR:C5G7:Rodded A}}
         \end{figure}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Rodded A eigenvalue comparisons. \label{tab:MR:C5G7:Rodded A-Eigenvalues}}
+          \begin{tabular}{rrr}\toprule
+            Case & Eigenvalue & Error (pcm)\\\midrule
+            Reference & 1.128060 & $\pm$ 7\\
+            MRT       & 1.127585 & -47\\
+            MacroRay  & 1.127248 & -81\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Rodded A pin-power comparisons for the MRT method. \label{tab:MR:C5G7:Rodded A-MRT}}
+          \scriptsize
+          \begin{tabular}{rrrrrrrrr}\toprule
+                                  & \multicolumn{2}{c}{Z Slice \# 1} & \multicolumn{2}{c}{Z Slice \# 2} & \multicolumn{2}{c}{Z Slice \# 3} & \multicolumn{2}{c}{Overall}\\
+                                  & Reference & MRT & Reference & MRT & Reference & MRT & Reference & MRT\\\midrule
+            Maximum Pin Power     & 1.197 & 1.198 & 0.832 & 0.830 & 0.304 & 0.300 & 2.253 & 2.249\\
+            Percent Error         & 0.080 & 0.085 & 0.100 & -0.151 & 0.200 & -1.237 & 0.059 & -0.211\\\midrule
+            Maximum Error         & 0.270 & 1.948 & 0.310 & 2.168 & 0.180 & 2.014 & 0.183 & 1.934\\
+            AVG Error             & 0.157 & 0.429 & 0.180 & 0.334 & 0.260 & 0.837 & 0.108 & 0.294\\
+            RMS Error             & 0.163 & 0.566 & 0.186 & 0.471 & 0.266 & 0.962 & 0.111 & 0.430\\
+            MRE Error             & 0.066 & 0.156 & 0.056 & 0.093 & 0.037 & 0.146 & 0.094 & 0.220\\\midrule
+            \# Pins within 68\%   & 371 & 106 & 371 & 197 & 371 & 93 & 371 & 151\\
+            \# Pins within 95\%   & 518 & 237 & 518 & 350 & 518 & 175 & 518 & 270\\
+            \# Pins within 99\%   & 540 & 312 & 540 & 415 & 540 & 223 & 540 & 338\\
+            \# Pins within 99.9\% & 544 & 386 & 544 & 471 & 544 & 281 & 544 & 391\\\midrule
+            UO2-1 Power           & 237.41 & 237.80 & 167.51 & 167.23 & 56.26 & 55.47 & 461.18 & 460.49\\
+            MOX Power             & 104.48 & 104.85 & 78.01 & 77.99 & 39.23 & 38.95 & 221.71 & 221.78\\
+            UO2-2 Power           & 69.80 & 70.22 & 53.39 & 53.58 & 28.21 & 28.14 & 151.39 & 151.94\\
+            UO2-1 Power \% Error  & 0.087 & 0.164 & 0.071 & -0.170 & 0.040 & -1.404 & 0.119 & -0.149\\
+            MOX Power \% Error    & 0.065 & 0.351 & 0.056 & -0.022 & 0.040 & -0.716 & 0.094 & 0.031\\
+            UO2-2 Power \% Error  & 0.047 & 0.608 & 0.040 & 0.356 & 0.029 & -0.232 & 0.068 & 0.363\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Rodded A pin-power comparisons for the macrorray method. \label{tab:MR:C5G7:Rodded A-MacroRay}}
+          \scriptsize
+          \begin{tabular}{rrrrrrrrr}\toprule
+                                  & \multicolumn{2}{c}{Z Slice \# 1} & \multicolumn{2}{c}{Z Slice \# 2} & \multicolumn{2}{c}{Z Slice \# 3} & \multicolumn{2}{c}{Overall}\\
+                                  & Reference & MacroRay & Reference & MacroRay & Reference & MacroRay & Reference & MacroRay\\\midrule
+            Maximum Pin Power     & 1.197 & 1.190 & 0.832 & 0.828 & 0.304 & 0.307 & 2.253 & 2.245\\
+            Percent Error         & 0.080 & -0.542 & 0.100 & -0.387 & 0.200 & 1.088 & 0.059 & -0.387\\\midrule
+            Maximum Error         & 0.210 & 0.976 & 0.240 & 1.120 & 0.350 & 1.881 & 0.143 & 0.985\\
+            AVG Error             & 0.157 & 0.240 & 0.180 & 0.256 & 0.260 & 0.937 & 0.108 & 0.222\\
+            RMS Error             & 0.163 & 0.288 & 0.186 & 0.320 & 0.266 & 0.986 & 0.111 & 0.275\\
+            MRE Error             & 0.066 & 0.136 & 0.056 & 0.091 & 0.037 & 0.140 & 0.094 & 0.198\\\midrule
+            \# Pins within 68\%   & 371 & 212 & 371 & 229 & 371 & 8 & 371 & 145\\
+            \# Pins within 95\%   & 518 & 341 & 518 & 369 & 518 & 38 & 518 & 272\\
+            \# Pins within 99\%   & 540 & 390 & 540 & 429 & 540 & 100 & 540 & 360\\
+            \# Pins within 99.9\% & 544 & 433 & 544 & 490 & 544 & 194 & 544 & 439\\\midrule
+            UO2-1 Power           & 237.41 & 236.50 & 167.51 & 167.00 & 56.26 & 56.74 & 461.18 & 460.24\\
+            MOX Power             & 104.48 & 104.40 & 78.01 & 78.04 & 39.23 & 39.61 & 221.71 & 222.04\\
+            UO2-2 Power           & 69.80 & 69.76 & 53.39 & 53.46 & 28.21 & 28.45 & 151.39 & 151.67\\
+            UO2-1 Power \% Error  & 0.087 & -0.382 & 0.071 & -0.305 & 0.040 & 0.855 & 0.119 & -0.203\\
+            MOX Power \% Error    & 0.065 & -0.077 & 0.056 & 0.040 & 0.040 & 0.972 & 0.094 & 0.150\\
+            UO2-2 Power \% Error  & 0.047 & -0.050 & 0.040 & 0.128 & 0.029 & 0.849 & 0.068 & 0.180\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \Cref{tab:MR:C5G7:Rodded A-Performance} lists the total run-time of each calculation.
+        The \ac{MRT} calculation took 936 iterations to converge (unaccelerated), while the macroray method took 31 to converge.
+        This gives an estimate for the accelerated \ac{MRT} method at 246 core-hours.
+        Again, this is much better than how the macroray method performed.
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Rodded A Performance. \label{tab:MR:C5G7:Rodded A-Performance}}
+          \begin{tabular}{rrr}\toprule
+            Case                        & Acclerated? & Time (core-hours)\\\midrule
+            LSMoC - MRT                 & F &  7433\\
+            LSMoC - MacroRay            & T &   587\\\bottomrule
+          \end{tabular}
+        \end{table}
       }
 
       \subsubsection{C5G7 Benchmark: Rodded B}{\label{sssec:MR:C5G7:Rodded B}
@@ -675,17 +894,142 @@
         The center \ac{UO2} assembly has control rods inserted 28.56 cm, two thirds of the fuel height; the outer \ac{UO2} assembly has no inserted control rods.
         This layout is depicted in \cref{fig:MR:C5G7:Rodded B}.
 
+        Eigenvalue and errors are listed in \cref{tab:MR:C5G7:Rodded B-Eigenvalues}, and pin-power results are summarized in \cref{tab:MR:C5G7:Rodded B-MRT,tab:MR:C5G7:Rodded B-MacroRay}.
+        In this case, the macroray method yields eigenvalue error just over 100 pcm, while the \ac{MRT} method is well under 100.
+        The difference in eigenvalue error is likely primarily due to the fact that the \ac{MRT} benefits from cancellation of error while the macrorray generally does not.
+
+        Interestingly, the overall pin-power comparisons are much closer in this case compared to the unrodded and rodded A configurations.
+        The average, RMS and mean relative errors are all similar compared to the \ac{MRT} method; the error in the maximum power is higher for the macroray method, just as in the previous cases.
+        The macroray method also does not out perform the \ac{MRT} method in the number of pins within each uncertainty level of the reference.
+        Finally, the macroray method again shows the most significant errors in the upper 1/3 of the fuel, as in previous cases.
+
         \begin{figure}[htbp]
           \centering
           \includegraphics[width=0.85\linewidth]{\figpath/results/3D/C5G7/Diagrams/C5G7-RoddedB}
           \caption{C5G7 Benchmark: Rodded B core configuration. \label{fig:MR:C5G7:Rodded B}}
         \end{figure}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Rodded B eigenvalue comparisons. \label{tab:MR:C5G7:Rodded B-Eigenvalues}}
+          \begin{tabular}{rrr}\toprule
+            Case & Eigenvalue & Error (pcm)\\\midrule
+            Reference & 1.077770 & $\pm$ 7\\
+            MRT       & 1.077268  & -50\\
+            MacroRay  & 1.076628 & -114\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Unrodded pin-power comparisons for the MRT method. \label{tab:MR:C5G7:Rodded B-MRT}}
+          \scriptsize
+          \begin{tabular}{rrrrrrrrr}\toprule
+                                  & \multicolumn{2}{c}{Z Slice \# 1} & \multicolumn{2}{c}{Z Slice \# 2} & \multicolumn{2}{c}{Z Slice \# 3} & \multicolumn{2}{c}{Overall}\\
+                                  & Reference & MRT & Reference & MRT & Reference & MRT & Reference & MRT\\\midrule
+            Maximum Pin Power     & 1.200 & 1.208 & 0.554 & 0.549 & 0.217 & 0.211 & 1.835 & 1.834\\
+            Percent Error         & 0.090 & 0.691 & 0.150 & -0.909 & 0.240 & -2.738 & 0.083 & -0.065\\\midrule
+            Maximum Error         & 0.240 & 2.449 & 0.270 & 1.641 & 0.240 & 2.738 & 0.163 & 1.850\\
+            AVG Error             & 0.146 & 0.639 & 0.181 & 0.546 & 0.285 & 1.593 & 0.105 & 0.251\\
+            RMS Error             & 0.150 & 0.730 & 0.184 & 0.619 & 0.290 & 1.712 & 0.108 & 0.366\\
+            MRE Error             & 0.073 & 0.348 & 0.055 & 0.183 & 0.034 & 0.208 & 0.098 & 0.203\\\midrule
+            \# Pins within 68\%   & 371 & 28 & 371 & 78 & 371 & 25 & 371 & 167\\
+            \# Pins within 95\%   & 518 & 83 & 518 & 161 & 518 & 61 & 518 & 308\\
+            \# Pins within 99\%   & 540 & 124 & 540 & 225 & 540 & 80 & 540 & 375\\
+            \# Pins within 99.9\% & 544 & 183 & 544 & 290 & 544 & 110 & 544 & 427\\\midrule
+            UO2-1 Power           & 247.75 & 249.43 & 106.56 & 105.72 & 41.12 & 40.23 & 395.43 & 395.38\\
+            MOX Power             & 125.78 & 126.48 & 81.41 & 81.09 & 29.42 & 28.94 & 236.62 & 236.51\\
+            UO2-2 Power           & 91.64 & 92.22 & 65.02 & 65.02 & 30.68 & 30.36 & 187.34 & 187.60\\
+            UO2-1 Power \% Error  & 0.091 & 0.681 & 0.056 & -0.791 & 0.035 & -2.180 & 0.112 & -0.013\\
+            MOX Power \% Error    & 0.073 & 0.556 & 0.058 & -0.394 & 0.034 & -1.635 & 0.100 & -0.043\\
+            UO2-2 Power \% Error  & 0.055 & 0.636 & 0.046 & -0.010 & 0.032 & -1.046 & 0.078 & 0.137\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Rodded B pin-power comparisons for the macroray method. \label{tab:MR:C5G7:Rodded B-MacroRay}}
+          \scriptsize
+          \begin{tabular}{rrrrrrrrr}\toprule
+                                  & \multicolumn{2}{c}{Z Slice \# 1} & \multicolumn{2}{c}{Z Slice \# 2} & \multicolumn{2}{c}{Z Slice \# 3} & \multicolumn{2}{c}{Overall}\\
+                                  & Reference & MacroRay & Reference & MacroRay & Reference & MacroRay & Reference & MacroRay\\\midrule
+            Maximum Pin Power     & 1.200 & 1.190 & 0.554 & 0.553 & 0.217 & 0.219 & 1.835 & 1.831\\
+            Percent Error         & 0.090 & -0.801 & 0.150 & -0.128 & 0.240 & 0.832 & 0.083 & -0.215\\\midrule
+            Maximum Error         & 0.100 & 0.925 & 0.240 & 1.207 & 0.370 & 2.771 & 0.157 & 1.100\\
+            AVG Error             & 0.146 & 0.329 & 0.181 & 0.216 & 0.285 & 1.322 & 0.105 & 0.222\\
+            RMS Error             & 0.150 & 0.391 & 0.184 & 0.291 & 0.290 & 1.367 & 0.108 & 0.290\\
+            MRE Error             & 0.073 & 0.225 & 0.055 & 0.060 & 0.034 & 0.160 & 0.098 & 0.203\\\midrule
+            \# Pins within 68\%   & 371 & 133 & 371 & 286 & 371 & 1 & 371 & 172\\
+            \# Pins within 95\%   & 518 & 268 & 518 & 444 & 518 & 3 & 518 & 288\\
+            \# Pins within 99\%   & 540 & 332 & 540 & 501 & 540 & 14 & 540 & 342\\
+            \# Pins within 99.9\% & 544 & 385 & 544 & 530 & 544 & 65 & 544 & 405\\\midrule
+            UO2-1 Power           & 247.75 & 246.26 & 106.56 & 106.63 & 41.12 & 41.63 & 395.43 & 394.51\\
+            MOX Power             & 125.78 & 125.56 & 81.41 & 81.48 & 29.42 & 29.84 & 236.62 & 236.89\\
+            UO2-2 Power           & 91.64 & 91.55 & 65.02 & 65.15 & 30.68 & 31.02 & 187.34 & 187.71\\
+            UO2-1 Power \% Error  & 0.091 & -0.600 & 0.056 & 0.063 & 0.035 & 1.227 & 0.112 & -0.231\\
+            MOX Power \% Error    & 0.073 & -0.179 & 0.058 & 0.095 & 0.034 & 1.423 & 0.100 & 0.115\\
+            UO2-2 Power \% Error  & 0.055 & -0.104 & 0.046 & 0.192 & 0.032 & 1.120 & 0.078 & 0.199\\\bottomrule
+          \end{tabular}
+        \end{table}
+
+        \Cref{tab:MR:C5G7:Rodded B-Performance} lists the total run-time of each calculation.
+        The \ac{MRT} calculation took 933 iterations to converge (unaccelerated), while the macroray method took 30 to converge.
+        This gives an estimate for the accelerated \ac{MRT} method at 241 core-hours.
+        Just as the previous two cases, this is significantly lower than the time the macroray method took.
+
+        \begin{table}[htbp]
+          \centering
+          \caption{C5G7 Benchmark: Rodded B Performance. \label{tab:MR:C5G7:Rodded B-Performance}}
+          \begin{tabular}{rrr}\toprule
+            Case                        & Acclerated? & Time (core-hours)\\\midrule
+            LSMoC - MRT                 & F & 7493\\
+            LSMoC - MacroRay            & T & 579\\\bottomrule
+          \end{tabular}
+        \end{table}
       }
     }
   }
 
-  \section{Conclusions}{\label{sec:MR:Conclusions}
+  \section{Discussion on the Performance of MacroRay}{\label{sec:Discussion one the Performance of MacroRay}
+    While the macroray method was able to reduce the number of segments in some cases, macroray calculations generally took longer for the same number of segments compared to the \ac{MRT} method.
+    To determine where the performance was lacking, a miniaturized C5G7 unrodded case was profiled.
+    This case was profiled without using \ac{CMFD} acceleration, and with 18 spatial domains, using both the \ac{MRT} and macroray methods.
+    For each calculation, nearly all the time was spent in the transport routines ($>$95\%).
+    The transmission calculations and moment accumulation are typically the largest run-time contributors in \ac{MRT} calculations, and the profiler revealed that 61.8\% of the time was spent in these loops.
+    An additional 33\% was spent on waiting for messages from other domains.
 
+    However, in the macroray calculation, only 22\% of the total time was spent on these loops.
+    15.1 \% was spent on the conversion between ray fluxes and surface fluxes.
+    The largest contributor to run-time was waiting for MPI messages, at 57.4\%.
+    In the current implementation, a MPI waitall command is used after sweeping each direction.
+    The fractional run-time can be reduced to 26\% if the waitall is moved to after sweeping all directions.
+    This is the same approach used by the \ac{MRT} sweepers in MPACT.
+    However, the method of generating unique tags must be improved for the macrorray sweepers, because the current method results in a tag overflow on larger cases such as the C5G7 benchmarks.
+
+    While the conversion between ray and surface fluxes will never be zero, it is unlikely that the naive implementation of these routines in this work are near optimal.
+    A better implementation of these routines may significantly cut down on run-time costs.
+  }
+
+
+  \section{Conclusions}{\label{sec:MR:Conclusions}
+    The macroray method is a novel method which was motivated by previous studies on the macroband method that claimed significantly reduced number of rays with maintained accuracy.
+    It was expected that the method, if extended to 3-D, would allow for significantly fewer track-segments, and thus lead to less computational work.
+    For some problems, this is certainly the case; for \ac{VERA} progression problem 1E, a single \ac{IFBA} rod, this method was able to significantly reduce the number of segments to reach a converged result.
+    Additionally, for the shielded-box problem, this method demonstrated that it is able to act as more of a ``black box'' solver, allowing for users without deep knowledge of the method to use it.
+
+    The method was then tested on the extended 3-D C5G7 benchmarks, and proved it was able to handle larger calculations.
+    Compared to the \ac{MRT} method on the same mesh, the macroray method typically better predicted the pin-powers, even when eigenvalue errors were larger.
+    Additionally, the macrorray method consistently showed the highest errors in the upper 1/3 of the fuel in the C5G7 benchmark cases, where the pin-powers are lower.
+
+    In the C5G7 benchmark cases, which do not have small absorber regions, the method was unable to significantly reduce the number of segments for similar accuracy.
+    It is expected that the macroray method may show more beneficial results in cases where there are small strong absorber regions present.
+    Additionally, the macroray method may show significant benefits for more arbitrary geometries, such as the shielded-box.
+
+    This work was is the first implementation of the macroray method for 3-D \ac{MOC} calculations.
+    Due to the significantly different ray-tracing data structure, and sweeping order, separate routines needed to be written for this work.
+    It is not surprising that the initial performance of these routines is worse than that of the \ac{MRT}-based routines, for similar numbers of segments, given that the \ac{MRT} sweeping routines have been optimized over the past several years of the \ac{CASL} project.
+    The original performance of the 3-D \ac{MOC} using \ac{MRT} in MPACT was significantly worse \cite{Kochunas2013}.
+    While some of the improvements made to these methods were utilized in this work, it is very likely that optimization work on this method would significantly reduce run-times.
   }
   % References
   \printbibliography
