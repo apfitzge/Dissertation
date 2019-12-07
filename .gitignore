@@ -6,3 +6,6 @@ output/*
 *.log
 *.tkzfct.gnuplot
 *.tkzfct.table
+chapters/SpatialDecomposition/figures/alignmentComparion*.pdf
+chapters/SpatialDecomposition/figures/REB/*.pdf
+chapters/SpatialDecomposition/figures/RIB/*.pdf
