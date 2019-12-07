@@ -35,9 +35,9 @@
         H(\segopt) \defined \frac{\segopt}{2} - G_1(\segopt),
       \end{equation}
     \end{subequations}
-    where $\opt$ is the variable optical thickness, and $\segopt$ is the total optical thickness of a segment.
-    Although the functions $F_1(\opt)$, and $F_2(\opt)$ are functions of variable $\opt$, in the implementation of this method in code they are only ever evaluated over the full optical thickness, $\segopt$.
-    The functions, $G_1(\segopt)$, $G_2(\segopt)$, and $H(\segopt)$ all require special treatment around $\segopt = 0$, in this work this is handled via Taylor interpolation about $\segopt=0$.
+    where $\segopt$ is the total optical thickness of a segment, and $\opt$ is the variable optical thickness at any point along the track-segment.
+    Although the functions $F_1(\opt)$, and $F_2(\opt)$ are functions of variable $\opt$, in the implementation of this method in the code they are only ever evaluated over the total segment optical thickness, $\segopt$.
+    The functions, $G_1(\segopt)$, $G_2(\segopt)$, and $H(\segopt)$ all require special treatment around $\segopt = 0$, in this work this is handled via Taylor expansion about $\segopt=0$.
 
     \begin{figure}
         \centering
@@ -46,12 +46,13 @@
     \end{figure}
 
     These functions all involve an exponential, $e^{-\segopt}$; although this does not present a problem mathematically, the exponential function is a transcendental function that tends to be slow when evaluated computationally.
-    For efficient transport codes, this presents a challenge.
-    Previous works have demonstrated that function interpolation can provide significant run-time reduction \cite{Yamamoto2004}, and the original formulation \cite{Ferrer2016} suggested the use of function interpolation (though no details were provided).
+    For transport codes to be efficient, this presents a challenge.
+    Previous works have demonstrated that tabulation of the exponential and interpolation in the table can provide significant run-time reduction \cite{Yamamoto2004}, reducing exponential calculation times by up to a factor of 3.
+    The original formulation \cite{Ferrer2016} suggested the use of tabulation for each the functions \cref{eqs:LSMOC:ET:Exponential Functions} (though no details were provided).
 
     \subsection{First Approach: Improved Accuracy}{\label{ssec:LSMOC:ET:First Approach: Improved Accuracy}
       With the implementation of \ac{LSA} into MPACT, stability issues were observed in problems with very small transport cross sections, such as the fuel-clad gap in \acp{LWR}.
-      These stability issues were only observed when exponential function interpolation was used, and the simplest method for addressing the issue was to increase the accuracy of the exponential interpolation.
+      These stability issues were only observed when exponential function interpolation was used, and the simplest method for addressing the issue was to increase the accuracy of the exponential evaluation.
       It was discovered that the root of the problem was the $F_2(\segopt)$ function in the transmission equation
       \begin{equation}\label{eq:LSMOC:ET:Transmission Original}
         \afluxout = \afluxin
@@ -62,12 +63,12 @@
       In problems with near-void regions, where $\xst$ is small, any error in $F_2(\segopt)$ interpolation will be magnified.
       The simplest approach is to increase the accuracy of the exponential interpolation to account for the lowest expected cross sections; in the test problem this was on the order of $10^{-5}$.
       Thus, the expectation is that an interpolation 5 orders of magnitude more accurate than previous accuracy would be sufficient.
-      Previous work \cite{Yamamoto2004} indicated that for \ac{FSMOC} calculations an max interpolation error of $10^{-7}$ was sufficient, i.e. for \ac{LSMOC} the max error would be within $10^{-12}$.
+      Previous work \cite{Yamamoto2004} indicated that for \ac{FSMOC} calculations a max interpolation error of $10^{-7}$ was sufficient, i.e. for \ac{LSMOC} the max error would need to be approximately $10^{-12}$.
 
       Creating interpolation tables with the necessary accuracy for these problems requires some care.
       The original investigation of exponential interpolation for transport calculations  done by \citet{Yamamoto2004} indicated two methods of controlling interpolation accuracy.
-      One method to increase interpolation accuracy is to increase the number of intervals (decreased interval width); however, this increased the memory.
-      Alternatively, higher order polynomials can be used in the interpolation, which overall tends to reduce memory at the expense of increased run-times.
+      One method to increase interpolation accuracy is to increase the number of intervals (decreased interval width); however, this increases the memory required to store the table.
+      Alternatively, higher order polynomials can be used in the interpolation, that overall tends to reduce memory at the expense of increased run-times.
 
       In this investigation, two additional methods for controlling accuracy were investigated: interpolation node choice, and non-uniform interval widths.
       \subsubsection{Interpolation Points}{\label{sssec:ET:Interpolation Points}
@@ -82,8 +83,7 @@
           \caption{Example of linear interpolation with uniform interval widths and interpolation points on the edge of the domain.\label{fig:LSMOC:ET:Interpolation Example}}
         \end{figure}
 
-        Let $P_n(x)$ be the order $n$ polynomial approximating a function, $f(x)$, on an arbitrary interval $[a,b]$.
-        The maximum error, $\epsilon$, within an interval is given by
+        For $P_n(x)$, a polynomial of order $n$, approximating a function, $f(x)$, on an arbitrary interval $[a,b]$, the maximum error, $\epsilon$, within an interval is given by
         \begin{equation}\label{eq:LSMOC:ET:Interpolation Error}
           \epsilon = \frac{1}{(n+1)!}\left(\max_{\xi\in[a,b]}\lrabs{f^{(n+1)}(\xi)}\right)\left(\max_{x\in[a,b]}\lrabs{\prodl[j=1][n+1](x-x_j)}\right),
         \end{equation}
@@ -122,10 +122,10 @@
         The second and higher order derivatives of each of the exponential functions (\cref{eqs:LSMOC:ET:Exponential Functions}) approach zero as $\segopt$ approaches infinity.
         This indicates that the interpolation error typically decreases as the optical thickness increases in the conventional approach.
 
-        However, is is possible to maintain the same maximum error over each interval if a variable interval width, $\Delta_i$, is used, where $i$ indicates the interval index.
+        However, it is possible to maintain the same maximum error over each interval if a variable interval width, $\Delta_i$, is used, where $i$ indicates the interval index.
         By using a variable interval width, a table can use fewer intervals while maintaining the same maximum error.
         However, since the widths are no longer constant, there is no longer a simple/direct conversion from $\segopt$ to $i$.
-        Although there may be better ways, for this work the smallest interval is used to break up the domain into a map which points to the correct interval for that range of values.
+        Although there may be better ways to address this, for this work the smallest interval is used to divide the domain into a map that points to the correct interval for that range of values.
 
         It was found that the use of non-uniform interval widths allowed for significantly fewer total intervals, reducing the memory usage, but incurring overhead for the additional mapping to index.
         \Cref{fig:LSMOC:ET:Memory Analysis} shows the memory usage for a polar-independent interpolation table for $F_1(\segopt)$.
@@ -140,7 +140,12 @@
 
         Because all the functions of \cref{eqs:LSMOC:ET:Exponential Functions} are related, it is possible to tabulate only a single function and compute the others from the resulting interpolated value.
         However, if $F_1(\segopt)$ is known accurately, it is not possible to compute $H(\segopt)$ for very small $\segopt$ due to round-off errors.
-        Instead one can tabulate $H(\segopt)$ and use the result to compute the other functions; however, this may incur more error than directly interpolating these functions.
+        Instead one can tabulate $H(\segopt)$ and use the result to compute the other functions.
+
+        Results for this approach are detailed in \cref{ssec:LSMOC:ET:Results}.
+        In cases with near-void regions, the function tables are required to be very accurate.
+        This has an adverse affect on performance, and is not a robust solution as if cross sections change the required accuracy might also change.
+        In the next section, an alternative approach will be provided.
       }
     }
     \subsection{Function Modification}{\label{ssec:LSMOC:ET:Function Modification}
@@ -154,32 +159,29 @@
       \begin{equation}\label{eq:LSMOC:ET:F2 Modified}
         \modFunc \defined 2\left(1-\frac{F_1(\segopt)}{\segopt}\right) - F_1(\segopt).
       \end{equation}
-      The $\modFunc$ function can be tabulated in place of $F_2(\segopt)$; this will require an additional multiplication by the segment length $\nsegl$ causing slight reduction in performance.
-      But, by using the modified $\modFunc$ function, the underlying cause of the numerical instability is addressed, and the more accurate interpolation is no longer necessary.
+      The $\modFunc$ function can be tabulated in place of $F_2(\segopt)$; however, this does require an additional multiplication by the segment length $\nsegl$.
+      But, by using the modified $\modFunc$ function, the underlying cause of the numerical instability of the \ac{LSMOC} transport sweep with near-void regions is addressed, and the more accurate interpolation (e.g. larger interpolation tables) is no longer necessary.
 
-      One approach is to tabulate the $\modFunc$ function in place of the $F_2(\segopt)$ function, and multiply by $\nsegl$ during evaluation.
-      However, as stated in the previous section, it is possible to tabulate a single function and compute the others.
-      The $H(\segopt)$ function could be tabulated again; but tabulating an intermediate function,
+      Although one approach is to tabulate the $\modFunc$ function in place of the $F_2(\segopt)$ function, and multiply by $\nsegl$ during evaluation, it is possible to tabulate a single function and compute the others.
+      As stated in the previous section, the $H(\segopt)$ function could be tabulated again; however, tabulating an intermediate function,
       \begin{equation}\label{eq:LSMOC:ET:E1}
         E_1(\segopt) \defined \frac{1-e^{-\segopt}}{\segopt},
       \end{equation}
       uses the same number of operations to compute the other functions.
       This $E_1(\segopt)$ function also has smaller derivative terms around $\segopt=0$, allowing for larger interval widths with no loss in accuracy.
-      Therefore, it is expected that $E_1(\segopt)$ tabulation will be more efficient.
+      Therefore, it is expected that $E_1(\segopt)$ tabulation is more efficient than tabulating $H(\segopt)$.
     }
     \subsection{Results}{\label{ssec:LSMOC:ET:Results}
       The results of this section were generated in serial on a Linux system with an Intel Xeon E3-1241 v3 (3.50 GHz) processors with 8 MB L3 cache.
       Results were generated for a 2-D \ac{MOC} transport calculation.
       In 2-D it is sometimes convenient to store separate interpolation tables for each polar angle.
       Both polar dependent and independent tables were tested.
-
       In both of the results sections, results were generated using tables for the three functions ($F_1(\segopt)$, $F_2(\segopt)$, $H(\segopt)$), or a single function (which is then used to compute the others).
-      In the results, it is considered 3 functions, as the $G_1(\segopt)$, and $G_2(\segopt)$ functions are only used in pre-computing coefficients, and not in the main \ac{MOC} solver routine.
 
       \subsubsection{Results using More Accurate Tables}{\label{sssec:LSMOC:ET:Results using More Accurate Tables}
         \Cref{tab:LSMOC:ET:Naive Results} shows results for the different interpolation methods in a 2-D \ac{MOC} calculation.
         The use of non-uniform intervals significantly reduced the memory usage, but the run-times generally increased.
-        This is likely due to the overhead from the additional index mapping operation; it is possible that a more efficient index mapping would change these results.
+        This is likely due to the overhead from the additional index mapping operation; it is possible that a more efficient index mapping could change these results.
 
         The linear tables were significantly slower than higher-order interpolations, and the non-uniform linear tables were actually slower than just using the builtin transcendental functions.
         The poor performance is due to the main memory accesses caused by the table size exceeding the largest (L3) cache size.
@@ -260,7 +262,7 @@
       One approach to deal with these instabilities is to improve the accuracy of the interpolation tables based on the lowest cross section in the problem.
       While this approach can be made efficient, if cross sections become too small the tables may become exceedingly large and significantly hamper performance.
 
-      This investigation revealed that the cause of the instability was the $F_2(\segopt)$ function in the transmission equation.
+      This investigation indicated that the cause of the instability was the $F_2(\segopt)$ function in the transmission equation.
       By instead manipulating the term including this function, the cause of the instabilities can be addressed.
       This approach no longer requires excessively large interpolation tables; however, some key-findings from the first approach can be applied to make this approach faster.
       First, the use of Chebyshev points significantly increases interpolation accuracy for the same number of intervals as uniformly spaced points, at no run-time cost.
@@ -272,32 +274,35 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}{\label{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}
     As stated in \cref{sec:MOC:LSA}, the original derivation of the moment-based \acf{LSA} from \citet{Ferrer2016} faced inefficiencies in problems with non-constant cross sections.
-    The inefficiencies arose from the use of pre-computed coefficients, \cref{eq:MOC:LSA:C Matrix}, which must be re-computed if cross sections change.
-    In multiphysics calculations, such as with \ac{TH} feedback, cross sections typically change each iteration, leading to significant overhead from re-computing these terms.
-    This section presents and equivalent formulation, which eliminates the need to re-compute these terms if cross sections change, without additional operations.
+    The inefficiencies arose from the use of pre-computed coefficients, \cref{eq:MOC:LSA:C Matrix}, that must be re-computed if the cross sections change.
+    The computation of these coefficients was approximately 10-20\% the run-time cost of a \ac{MOC} sweep.
+    In multiphysics calculations, such as with \ac{TH} feedback, cross sections typically change every iteration, leading to significant overhead from re-computing these terms.
+    This section presents an equivalent formulation, that eliminates the need to re-compute these terms if cross sections change, without additional operations.
 
     \subsection{Derivation}{\label{ssec:LSMOC:Derivation}
-      The derivation of this improved formulation begins with the same initial steps as the derivation detailed in \cref{ssec:MOC:LSA:Derivation}.
+      The notation used in this section is described in detail in \cref{ch:The Method of Characteristics}.
+      The derivation of this improved formulation begins with the same initial steps as the \ac{LSMOC} derivation detailed in \cref{ssec:MOC:LSA:Derivation}.
       Several of these equations are repeated in this section for clarity.
       The source is assumed to have a spatially linear shape
       \begin{equation}\label{eq:LSMOC:Source Shape}
         \source[mi][g][\loc] \approx \srcF[mi] + \loc\vdot\srcL[][mi],
       \end{equation}
-      and the angular flux moments can be expanded similarly
+      and the angular flux moments can be similarly expanded
       \begin{equation}\label{eq:LSMOC:Flux Expansion}
         \fluxA(\loc) = \fluxF + \loc\vdot\fluxL.
       \end{equation}
       The source can be computed from the flux moments using \cref{eq:MOC:LSA:Linear Source Computation}.
 
-      Computing the source requires the flux to be evaluated during transport sweeping.
-      The angular flux moments are given by \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, but are repeated here for clarity.
+      Computing the source requires the flux to be evaluated during the transport sweep.
+      The angular flux moments are given by \cref{eqs:MOC:LSA:Region-Averaged Flux Moments Definitions}, and are repeated here in \cref{eq:LSMOC:Region-Averaged Flux Moment Definition}.
       \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Flux Moments Definitions}
         The spatially flat angular flux moments are defined by integrating the flux multiplied by a spherical harmonics moment function over space and directions,
         \begin{equation}\label{eq:LSMOC:Region-Averaged Flux Moment Definition}
             \fluxF \defined \MOCIntegral{\SH \aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\MOCTrackIntegral{\aflux[][g][]}.
         \end{equation}
         To determine the spatial expansion coefficients of the flux moments, \cref{eq:LSMOC:Flux Expansion} is operated on by $\MOCIntegral{\SH\loc(\vdot)}$.
-        As before, this should be directly proportional to the angular flux operated on by $\MOCIntegral{\SH\loc\aflux[][g][]}$, a system of equations is found
+        As before, this should be directly proportional to the angular flux operated on by $\MOCIntegral{\SH\loc\aflux[][g][]}$.
+        From this a system of equations is found
         \begin{equation}\label{eq:LSMOC:Moment to Expansion Coefficient}
             \M\fluxL = \MOCIntegral{\SH\loc\aflux[][g][]},
         \end{equation}
@@ -305,7 +310,7 @@
         \begin{equation}\label{eq:LSMOC:Geometric Moments}
             \M \defined \MOCIntegral{\loc^T\loc}.
         \end{equation}
-        The spatial angular flux moments, $\MOCIntegral{\SH\loc\aflux[][g][]}$, are then defined as
+        The spatial-angular flux moments, $\MOCIntegral{\SH\loc\aflux[][g][]}$, are then defined as
         \begin{equation}\label{eq:LSMOC:Region-Averaged Spatial Angular Flux Moments Definition}
             \MOCIntegral{\SH\loc\aflux[][g][]} = \frac{\fourpi}{V_i}\suml[m]\wt\SH[\ell][n][\dirm]\suml[k]\tA[mki]\nsegl\left(\locIn\MOCTrackIntegral{\aflux[][g][]} + \dirm\MOCTrackIntegral{\nlen\aflux[][g][]} / \renorm[mi]\right).
         \end{equation}
@@ -313,7 +318,6 @@
 
       With the assumed source shape, \cref{eq:LSMOC:Source Shape}, the characteristic transport equation becomes
       \begin{subequations}\label[subeqs]{eqs:LSMOC:Characteristic Form}
-        The characteristic transport equation becomes
         \begin{equation}\label{eq:LSMOC:Characteristic Form}
           \left[\deriv{}{\nlen} + \xst\right]\aflux = \tsrcF + \tsrcL\left(\nlen - \frac{\nsegl}{2}\right),
         \end{equation}
@@ -324,7 +328,7 @@
         \begin{equation}\label{eq:LSMOC:Track Linear Source}
           \tsrcL \defined \rfourpi\left[\frac{\dirm\vdot\srcL[][mi]}{\renorm[mi]}\right],
         \end{equation}
-        and $\locCent$ is the local-coordinate centroid of the track-segment.
+        and $\locCent$ is the centroid of the track-segment in local-coordinates.
       \end{subequations}
       Substituting this assumed source shape (linear) into the generic \ac{MOC} solution, given by \cref{eq:MOC:MOC Generic Solution}, the angular flux along a track-segment is found to be
       \begin{subequations}\label[subeqs]{eqs:LSMOC:Angular Flux Solution}
@@ -362,7 +366,7 @@
 
       Previously, the average track flux, $\MOCTrackIntegral{\aflux[][g][]}$, was expanded to find a simpler final form.
       This is the case here as well; however, the out-going flux, $\afluxout$, will not be expanded, as this must necessarily be computed during transmission.
-      \Cref{eqs:LSMOC:Region-Averaged Flux Moments Definitions} can be simplified into
+      \Cref{eqs:LSMOC:Region-Averaged Flux Moments Definitions} are then simplified into
       \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Flux Moments}
         \begin{equation}\label{eq:LSMOC:Region-Averaged Flat Flux Moments}
           \fluxF = \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left(\nsegl\tsrcF + \dflux\right),
@@ -420,23 +424,23 @@
         \end{equation}
       \end{subequations}
 
-      Although the above form seems to more computationally efficient, it would be negligent for this chapter to not include a more mathematically elegant form of \cref{eq:LSMOC:Region-Averaged Linear Flux Moments}.
+      Although the above form seems to be more computationally efficient, it would be negligent for this chapter to not include a more mathematically elegant form of \cref{eq:LSMOC:Region-Averaged Linear Flux Moments}.
       The terms in the second summation may be rewritten as
       \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Linear Flux Moments Elegant}
         \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments Elegant}
           \MOCIntegral{\SH\loc\aflux[][g][]} =&
             \suml[m]\wt\SH\M[][mi]\frac{\srcL}{\xst} \\
-            &+ \frac{\fourpi}{V_i}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\left(\afluxin-\tfluxF\right)-\locOut\left(\afluxout-\tfluxF\right)\right],
+            &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\left(\afluxin-\tfluxF\right)-\locOut\left(\afluxout-\tfluxF\right)\right],
         \end{aequation}
         where $\tfluxF$ is the average track flux,
         \begin{equation}\label{eq:Average Track Flux}
           \tfluxF \defined \MOCTrackIntegral{\aflux[][g][]}.
         \end{equation}
       \end{subequations}
-      In this form, the interior summation over track-segments becomes a spatially weighted summation of the incident and outlet flux differences from the average flux.
+      In this form, the interior summation over track-segments becomes a spatially weighted average of the incident and outlet flux differences from the average flux.
     }
     \subsection{Isotropic Simplifications}{\label{ssec:LSMOC:Isotropic Simplifications}
-      If the so called \acf{LIFA} scheme is used, the spatially flat moment equations do not change; however, \cref{eq:LSMOC:Region-Averaged Linear Flux Moments} can be simplified to
+      If the so called \acf{LIFA} scheme is used, the spatially flat moment equations do not change, however, \cref{eq:LSMOC:Region-Averaged Linear Flux Moments} can be simplified to
       \begin{aequation}\label{eq:LSMOC:LIFA:Region-Averaged Linear Flux Moments}
         \MOCIntegral{\SH\loc\aflux[][g][]} &= \M\frac{\srcL}{\xst}\\ &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA\left[\locIn\dflux+\dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right]
       \end{aequation}
