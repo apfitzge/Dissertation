@@ -1,8 +1,8 @@
 \chapter{Summary, Conclusions, and Future Work}{
   \label{ch:Conclusions}
-  This chapter will give a brief summary of the motivations for this work, and what was done.
-  The key findings for each study will be listed.
-  Finally, possible paths for future research in these topics will be given.
+  This chapter gives a brief summary of the motivations for this work, and what was accomplished.
+  The key findings for each study are listed.
+  Also, possible paths for future research in these topics are given.
 
   \section{Summary of Work}{\label{sec:Summary of Work}
     % 1. Spatial Decomposition
@@ -37,9 +37,9 @@
     %     * Using sub-boundary averaging for treatment of interface and boundary flux
     %     * Tested on several 3-D transport benchmarks
     \subsection{Summary: Spatial Decomposition}{\label{ssec:Summary:Spatial Decomposition}
-      Prior to this work, MPACT \cite{MPACT2016} use an automated spatial decomposition method based on the fuel assemblies.
+      Prior to this work, MPACT \cite{MPACT2016} used an automated spatial decomposition method based on the fuel assemblies.
       This method was limited, and only allowed for specific numbers of spatial domains to be used.
-      Additionally, such methods have been shown, in other codes, to result in very poor load balance, particularly when a large coarsely meshed radial reflector is present \cite{Gunow2018}.
+      Additionally, such methods have been shown, in other codes, to result in poor load balance, particularly when a large coarsely-meshed radial reflector is present \cite{Gunow2018}.
       Stimpson \cite{StimpsonPartitioning2017} improved MPACT's parallel capabilities, allowing for a problem to be decomposed into groups of ray-tracing modules.
       However, that work did not introduce a method for generating better spatial decompositions, and relied on the user to enter a decomposition map.
       This was tedious for the user, and ofter resulted in non-optimal decompositions.
@@ -50,16 +50,16 @@
         \item{improve user experience (no additional work),}
         \item{and, allow for less restrictions on the number of domains.}
       \end{enumerate}
-      These improvements can be made by utilizing graph partitioning methods, which have been highly studied in computer science \cite{Elsner1997}.
+      These improvements were made by utilizing graph partitioning methods, which have been highly studied in computer science \cite{Elsner1997}.
       Software libraries exist for performing graph partitioning (METIS \cite{METIS}, Zoltan \cite{Boman2012}, etc.).
       However, due to MPACT's strict requirements on the decomposition (see \cref{sec:Spatial Decomposition:Spatial Decomposition in MPACT}), these libraries could not easily be used in MPACT.
       Several graph partitioning methods were implemented in MPACT.
       For unweighted graphs, and not conforming to MPACT's restrictions, these method were shown to be comparable to METIS \cite{Fitzgerald2017}.
 
-      The methods were then applied to MPACT and made to conform with the restrictions MPACT places on its' spatial decomposition \cite{Fitzgerald2019a}.
+      The methods were then applied to MPACT and made to conform with the restrictions MPACT places on its spatial decomposition \cite{Fitzgerald2019a}.
       This work introduced a new graph partitioning method based on the recursive expansion methods, and an improvement to the Kernighan-Lin \cite{Kernighan1970} algorithm for the application to \ac{MOC}.
-      These new methods, as well as the \acf{RSB} and \acf{RIB} were used to decompose a 2-D transport problem and resource comparisons of the simulations were compared.
-      In 3-D several different decomposition approaches were investigated, and a 3-D core was decomposed.
+      These new methods, as well as the \acf{RSB} and \acf{RIB}, were used to decompose a 2-D transport problem, and resource comparisons of the simulations were compared.
+      In 3-D, several different decomposition approaches were investigated, and a 3-D core was decomposed.
       For the 3-D calculations, only metrics of the decomposition were compared, rather than actual simulation results.
     }
 
@@ -71,12 +71,12 @@
       The \ac{LSA} developed by \citet{Ferrer2016} was implemented into the MPACT code \cite{Fitzgerald2018,Fitzgerald2019}.
 
       Once implemented in MPACT, the \ac{LSA} was tested on several problems, and two flaws were observed.
-      The first was an implementation detail; typically, exponential functions in the \ac{MOC} are approximated so reduce run-time \cite{Yamamoto2004}.
+      The first was an implementation detail; typically, exponential functions in the \ac{MOC} are approximated to reduce run-time \cite{Yamamoto2004}.
       However, when the exponential functions in the \ac{LSA} were approximated in problems with near-void regions, such as the fuel-clad gap, iterative instability was observed.
       Different methods for addressing this instability were studied in this work \cite{Fitzgerald2018}.
 
-      The second flaw, was that for problems with multiple physics (\acf{TH} feedback, or isotropic depletion) or in the 2D/1D approximation \cite{Collins2016}, the method was far less efficient.
-      This was due to the changing macroscopic cross sections, which led to coefficients needing to be recalculated every state-point, or even every iteration.
+      The second flaw was that for problems with multiple physics (\acf{TH} feedback, or isotropic depletion) or in the 2D/1D approximation \cite{Collins2016}, the method was far less efficient.
+      This was due to the changing macroscopic cross sections, which led to coefficients needing to be recalculated at every state-point, or even every iteration.
       This work sought to eliminate the need to recompute these coefficients by eliminating their dependence on the cross section \cite{Fitzgerald2019}.
       The elimination of the group-dependent coefficients in the \ac{LSA} was achieved by re-formulating the method \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}.
     }
@@ -84,9 +84,9 @@
     \subsection{Summary: MacroRay}{\label{ssec:Summary:MacroRay}
       Three-dimensional \ac{MOC} calculations are generally considered to be too expensive for use in realistic calculations; the methods rarely see use outside academia or national laboratories.
       The primary factor in determining \ac{MOC} run-time is the number of track segments.
-      By using a coarser ray-spacing, far fewer track-segments are generated and can significantly improve run-time (\cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}).
+      By using a coarser ray-spacing, far fewer track-segments are generated, which can significantly improve run-time (\cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}).
       However, the presence of small strong absorber regions anywhere in a problem can prevent the use of coarser rays.
-      This motivates the use of a ray-tracing method which is able to use different effective ray-spacings in regions with different requirements.
+      This motivates the use of a ray-tracing method that is able to use different effective ray-spacings in regions with different requirements.
 
       The macroband \cite{Villarino1992,Petkov1999,Yamamoto2005,Fevotte2007} is a ray-tracing method which bases the placement of rays on the computational mesh of the problem.
       This method forces the use of finer ray-spacing where small regions are present, and allows for coarser ray-spacing where there are not small regions.
@@ -132,9 +132,6 @@
     %     * Actual transport is quite fast (What\%)
     %     * Number of segments improved for accurate result?
     %   - Compared to MIT still not great.
-
-
-
     \subsection{Conclusions: Spatial Decomposition}{\label{ssec:Conclusions:Spatial Decomposition}
       The use of graph partitioning for spatial decomposition in MPACT has been very successful.
       The methods have greatly improved user experience, as they allow for an arbitrary number of radial domains in 2D/1D calculations \footnote{or an arbitrary number of domains in 3-D \ac{MOC} calculations}.
@@ -142,13 +139,13 @@
       User feedback has been very positive on these methods, and the default partitioning in MPACT is now the \ac{REB} graph partitioning method.
 
       For 2-D (or 2D/1D) calculations, the three graph partitioning methods tested did not yield significantly different results.
-      However, for general 3-D decompositions, the \ac{RSB} and \ac{RIB} generally performed better than the \ac{REB} method for low to medium numbers of domains.
+      However, for general 3-D decompositions, the \ac{RSB} and \ac{RIB} methods generally performed better than the \ac{REB} method for low to medium numbers of domains.
       The \ac{REB} method showed significant advantage for highly decomposed cores.
       These methods greatly improved the parallel efficiency of the \ac{MOC} calculation (per iteration).
 
       However, as more spatial domains are used, the convergence rate decreases and more iterations are necessary.
       This problem is present in previous methods, but seems to be worsened by using the graph partitioning methods; this is likely due to re-entrant rays becoming possible in this methods.
-      Additionally, the parallel scaling of the \ac{CMFD} solvers in MPACT is far worse than that of the \ac{MOC} solvers.
+      Additionally, the parallel scaling of the \ac{CMFD} solvers in MPACT is worse than that of the \ac{MOC} solvers.
       In fact, for highly decomposed cores, the \ac{CMFD} acceleration takes up more run-time than the \ac{MOC}.
     }
 
@@ -171,13 +168,13 @@
     }
 
     \subsection{Conclusions: MacroRay}{\label{ssec:Conclusions:MacroRay}
-      The macroray ray-tracing method was a novel ray-tracing method studied as part of this dissertation work.
-      The aim of this method was to allow for maintained accuracy while reducing the number of track-segments generated during ray-tracing, and thus reducing the amount of work during computation.
-      The underlying idea was to use advanced transverse integration methods to improve the integration accuracy within each region.
+      The macroray ray-tracing method is a novel ray-tracing method studied as part of this dissertation work.
+      The aim of this method is to allow for maintained accuracy while reducing the number of track-segments generated during ray-tracing, and thus reducing the amount of work during computation.
+      The underlying idea is to use advanced transverse integration methods to improve the integration accuracy within each region.
       A similar idea, the macroband, had been studied in 2-D, but no extension to 3-D has been made.
 
       The method was shown to reduce the number of track-segments necessary for calculations in some cases with thin strong absorbers.
-      Though in benchmarks without these features the method did not show significant advantages over traditional ray-tracing methods.
+      Though, in benchmarks without these features, the method did not show significant advantages over traditional ray-tracing methods.
       Unlike traditional ray-tracing methods, this method exhibits near uniform convergence with number of segments.
       This means as the number of rays is increased, the user can expect that the result will become closer to the converged result.
       Additionally, because of the dependence on internal geometry for ray-tracing, rays are forced through thin regions;
@@ -186,10 +183,10 @@
   }
 
   \section{Future Work}{\label{sec:Future Work}
-
     \subsection{Future Work: Spatial Decomposition}{\label{ssec:Future Work:Spatial Decomposition}
       The spatial decomposition in MPACT has several avenues for future improvement.
       This most obvious is to improve the parallel efficiency of the \ac{CMFD} solvers; \ac{CMFD} begins to dominate run-time as large numbers of spatial domains are used.
+      The use of a multigrid \ac{CMFD} solver \cite{Yee2018}, may reduce the total run-time fraction of \ac{CMFD} relative to what was found in this work, but the multigrid solver does not address the poor parallel scaling.
       The next is that, the methods of this work created and partitioned a graph that only considered the computational expenses of \ac{MOC}.
       As \ac{CMFD} becomes a significant component of run-time in highly decomposed cases, it is warranted to investigate constructing a graph that considers both \ac{MOC} and \ac{CMFD} costs.
       Finally, it may be possible to modify the graph partitioning methods to avoid ``jagged'' domains, which negatively impact convergence, without negatively affecting load-balance.
@@ -210,13 +207,13 @@
     \subsection{Future Work: MacroRay}{\label{ssec:Future Work:MacroRay}
       While the macroray was shown to reduce the number of segments for some cases, it is generally still slower than the solvers using the traditional ray-tracing methods.
       This is not entirely surprising, as the traditional solvers have been heavily optimized over the past decade of the \ac{CASL} project, whereas the macroray solver was a first-pass implementation for this research.
-      Nonetheless, if the method is to be used the efficiency of the implementation must be improved; in particular, the MPI communication, and the cost of the interface approximations must be made more efficient.
-      One possibility to improve these, is to use a different approximation of the flux on the interfaces.
+      Nonetheless, if the method is to be used, the efficiency of the implementation must be improved; in particular, the MPI communication, and the cost of the interface approximations must be made more efficient.
+      One possibility to improve these is to use a different approximation of the flux on the interfaces.
       While this work has been initial research into the use of the macroray method, if the method is to be considered for use in production, it will need to be implemented efficiently on \acp{GPGPU}.
 
       Additionally, one of the primary difficulties in this work was due to the choice of rectangular rays in the 2D-2D ray-tracing approach.
-      The use of 2D-2D ray-tracing is common for \ac{MRT} method, but may not be the best choice for macroray methods.
-      Indeed, there is a good argument against its' use due to the fact that rays are guaranteed not to ``span'' the problem's surfaces.
+      The use of 2D-2D ray-tracing is common for \ac{MRT} method but may not be the best choice for macroray methods.
+      Indeed, there is a good argument against its use due to the fact that rays are guaranteed not to ``span'' the problem's surfaces.
       A reasonable next step for this work would be to investigate the use of non-rectangular rays, which eliminate the need for some of the fix-ups used in this work.
     }
     % 1. Spatial Decomposition
