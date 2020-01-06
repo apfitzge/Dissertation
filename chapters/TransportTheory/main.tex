@@ -63,7 +63,7 @@
     \end{figure}
 
     The transport equation, given by \cref{eq:NTT:Boltzmann Transport}, is an equation that represents the balance of neutrons.
-    The streaming term, $\dir\vdot\grad\aflux$, gives the rate at which neutrons are moving in or out of the of a point in phase-space due to motion.
+    The streaming term, $\dir\vdot\grad\aflux$, gives the rate at which neutrons are moving in or out of the of an infinitesimal volume in phase-space due to motion.
     The collision term, $\xst[\loc][E]\aflux$, gives the rate at which neutrons have interactions (collisions) with a nucleus of the surrounding material.
     The source terms make up the right-hand side of the equation, and are separated into three components: an external source, the scattering source, and the fission source.
     The scattering source, $\intl[0][\infty]\intl[\fourpi]\xss[][\loc][\dirprime\vdot\dir][\Eprime\to E]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}$, gives the rate at which neutrons are scattered into the given direction and energy at a set point in space.
@@ -182,12 +182,12 @@
         This approximation discretizes the energy variable into discrete energy groups.
         Generally, cross sections have strong dependence on the energy of incident neutrons; this dependence is typically not smooth, due to the presence of resonances.
         Around resonance energies, the cross sections increase significantly, as observed in \cref{fig:NTT:Cross Section plot}.
-        The data of this plot was provided by the ENDF-8.0 nuclear reaction data library \cite{ENDF8}.
+        The data of this plot was provided by the ENDF/B-VIII.0 nuclear reaction data library \cite{ENDF8}.
 
         \begin{figure}[h]
           \centering
           \includegraphics[width=0.85\linewidth]{\figpath/U235-8-XST}
-          \caption{Uranium 235 and 238 total microscopic cross sections as a function of energy. Data provided through the ENDF-8.0 nuclear reaction data library.}
+          \caption{Uranium 235 and 238 total microscopic cross sections as a function of energy. Data provided through the ENDF/B-VIII.0 nuclear reaction data library.}
           \label{fig:NTT:Cross Section plot}
         \end{figure}
 
@@ -642,6 +642,7 @@
     A transport ``sweep'' can be performed, in which updated boundary conditions and flux-moments are computed.
     Given these updated flux-moments a new estimate of the eigenvalue can be calculated.
     This process can be repeated until the eigenvalue and flux-moments are converged within some tolerance.
+    This procedure is referred to as either source iteration, or power iteration; typically, power iteration is used to refer to this procedure in problems with a fixed source.
     For simplicity, this process is shown for a isotropic mono-energetic, continuous-space, one-dimensional transport problem in \cref{alg:NTT:Source Iteration}.
 
     \begin{algorithm}[ht]
