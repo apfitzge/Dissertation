@@ -10,7 +10,7 @@
 
   The studies performed in this thesis have made extensive use of the \acf{LSA} introduced by \citet{Ferrer2016}.
   Through the use of the approximation, as presented in the original work, instabilities and inefficiencies were found.
-  This chapter aims to present two improvements made to this approximation that have been a focus of this research: improved exponential tabulation \cite{Fitzgerald2018}, and an improved formulation for multi-physics and 2D/1D applications \cite{Fitzgerald2019}.
+  This chapter aims to present two improvements made to this approximation that are a focus of this research: improved exponential tabulation \cite{Fitzgerald2018}, and an improved formulation for multi-physics and 2D/1D applications \cite{Fitzgerald2019}.
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Exponential Tabulation
@@ -45,7 +45,8 @@
         \caption{The exponential functions, \cref{eqs:LSMOC:ET:Exponential Functions}, from 0 to 10.\label{fig:Exponential Functions}}
     \end{figure}
 
-    These functions all involve an exponential, $e^{-\segopt}$; although this does not present a problem mathematically, the exponential function is a transcendental function that tends to be slow when evaluated computationally.
+    These functions all involve an exponential, $e^{-\segopt}$; although this does not present a problem mathematically, the exponential function is a transcendental function that tends to be slow when evaluated analytically on computers.
+    A single exponential evaluation may take more than 10 \acp{FLOP}.
     For transport codes to be efficient, this presents a challenge.
     Previous works have demonstrated that tabulation of the exponential and interpolation in the table can provide significant run-time reduction \cite{Yamamoto2004}, reducing exponential calculation times by up to a factor of 3.
     The original formulation \cite{Ferrer2016} suggested the use of tabulation for each the functions \cref{eqs:LSMOC:ET:Exponential Functions} (though no details were provided).
@@ -74,7 +75,7 @@
       \subsubsection{Interpolation Points}{\label{sssec:ET:Interpolation Points}
         Within each interval of an interpolation table, the function is computed at interpolation points and an approximation of the function is made as the polynomial passing through these points.
         The placement of these points within each interval can greatly affect the accuracy of the approximation.
-        Previous works \cite{Yamamoto2004,Kochunas2013} used evenly spaced interpolation points within each interval; however, this does not minimize the error in the approximation.
+        Previous works \cite{Yamamoto2004,Kochunas2013} used evenly-spaced interpolation points within each interval; however, this does not minimize the error in the approximation.
         An example is shown in \cref{fig:LSMOC:ET:Interpolation Example}.
 
         \begin{figure}
@@ -127,10 +128,10 @@
         However, since the widths are no longer constant, there is no longer a simple/direct conversion from $\segopt$ to $i$.
         Although there may be better ways to address this, for this work the smallest interval is used to divide the domain into a map that points to the correct interval for that range of values.
 
-        It was found that the use of non-uniform interval widths allowed for significantly fewer total intervals, reducing the memory usage, but incurring overhead for the additional mapping to index.
+        It was found that the use of non-uniform interval widths allowed for significantly fewer total intervals, reducing the memory usage, but it incurs overhead for the additional mapping to index.
         \Cref{fig:LSMOC:ET:Memory Analysis} shows the memory usage for a polar-independent interpolation table for $F_1(\segopt)$.
         Using a non-uniform table typically decreases the memory usage by nearly an order of magnitude.
-        For polar-dependent tables, the memory usage will be multiplied by the largest inverse sine of the polar angle, and the number of polar angles.
+        For polar-dependent tables, the memory usage is multiplied by the largest inverse sine of the polar angle, and the number of polar angles.
 
         \begin{figure}
           \centering
@@ -375,7 +376,7 @@
         \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments}
           \MOCIntegral{\SH\loc\aflux[][g][]}
             = &\frac{1}{V_i}\suml[m]\wt\SH\suml[k]\tA\nsegl\left[\locCent\srcF + \left(\locCent(\locCent)^T + \frac{\segl^2}{12}\dirm\dirm^T\right)\srcL\right]\\
-            + &\frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right]
+            + &\frac{\fourpi}{V_i\xst}\suml[m]\wt\SH\suml[k]\tA\left[\locIn\dflux + \dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right].
         \end{aequation}
       \end{subequations}
 
@@ -424,7 +425,7 @@
         \end{equation}
       \end{subequations}
 
-      Although the above form seems to be more computationally efficient, it would be negligent for this chapter to not include a more mathematically elegant form of \cref{eq:LSMOC:Region-Averaged Linear Flux Moments}.
+      Although the above form seems to be more computationally efficient, it would be negligent to not include a more mathematically elegant form of \cref{eq:LSMOC:Region-Averaged Linear Flux Moments}.
       The terms in the second summation may be rewritten as
       \begin{subequations}\label[subeqs]{eqs:LSMOC:Region-Averaged Linear Flux Moments Elegant}
         \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments Elegant}
@@ -442,7 +443,11 @@
     \subsection{Isotropic Simplifications}{\label{ssec:LSMOC:Isotropic Simplifications}
       If the so called \acf{LIFA} scheme is used, the spatially flat moment equations do not change, however, \cref{eq:LSMOC:Region-Averaged Linear Flux Moments} can be simplified to
       \begin{aequation}\label{eq:LSMOC:LIFA:Region-Averaged Linear Flux Moments}
-        \MOCIntegral{\SH\loc\aflux[][g][]} &= \M\frac{\srcL}{\xst}\\ &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA\left[\locIn\dflux+\dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right]
+        \MOCIntegral{\SH\loc\aflux[][g][]} &= \M\frac{\srcL}{\xst}\\ &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA\left[\locIn\dflux+\dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout+\frac{\tsrcF}{\xst}\right)\right].
+      \end{aequation}
+      If isotropic scattering is used, the the scalar flux moments can be found as
+      \begin{aequation}\label{eq:LSMOC:Region-Averaged Linear Flux Moments}
+        \MOCIntegral{\loc\aflux[][g][]} &= \M\frac{\srcL}{\xst}\\ &+ \frac{\fourpi}{V_i\xst}\suml[m]\wt\suml[k]\tA\left[\locIn\dflux+\dirm\segl\left(\frac{\dflux}{\segopt}-\afluxout\right)\right].
       \end{aequation}
     }
   }
@@ -479,7 +484,7 @@
       The coarse reflector cell mesh was divided into 0.42$\times$0.42 cm$^2$ cells.
 
       Three cases were run in this study: fine mesh with \ac{FSA}, coarse mesh with \ac{FSA}, and coarse mesh with \ac{LSA}.
-      To be consistent with \citet{Ferrer2016} results, it is expected that the \ac{LSA} on the coarse mesh should reduce run-time while maintaining accuracy compared to the finely mesh \ac{FSA} calculation.
+      To be consistent with the \citet{Ferrer2016} results, it is expected that the \ac{LSA} on the coarse mesh should reduce run-time while maintaining accuracy compared to the finely mesh \ac{FSA} calculation.
       Additionally, the coarse mesh \ac{FSA} calculation should have significantly worse accuracy, thus justifying the use of the \ac{LSA}.
 
       \Cref{tab:LSMOC:C5G7:Results} shows very clearly that the \ac{LSA} on the coarse mesh is more accurate than the \ac{FSA} on the fine mesh.
@@ -491,7 +496,7 @@
         this indicates that the mesh in the reflector was not sufficient.
       Errors in the interior of the assemblies are still larger for this case than the others.
 
-      \Cref{tab:LSMOC:C5G7:Performance} indicates that the \ac{LSA} on the coarse mesh significantly out performs the \ac{FSA} on the fine mesh;
+      \Cref{tab:LSMOC:C5G7:Performance} indicates that the \ac{LSA} on the coarse mesh significantly out-performs the \ac{FSA} on the fine mesh;
       \ac{MOC} run-time is reduced by approximately 50\%, and memory usage is reduced by 45\%.
       However, this also shows that for this problem the \ac{LSA} solver takes just under 2 times the time of the \ac{FSA} on the same mesh (coarse).
       It is also shown, that there is very little memory overhead from using the \ac{LSA} on the same mesh as the \ac{FSA}.
@@ -598,7 +603,7 @@
       In order to evaluate the benefits of this new formulation, the first multiphysics case studied was a typical \ac{UO2} fuel cell, as specified by \ac{VERA} progression problem 1A \cite{VERAProblems}.
       Isotopic depletion calculations were run up to 70 \ac{GWDMT} ($\sim$1820 \ac{EFPD}) at \ac{HFP} conditions.
       Using the current default meshing parameters in MPACT as a starting point, various mesh parameters were coarsened to study their affect when using the \ac{LSMOC}.
-      These cases were compared against a reference case which was very finely meshed with fine ray-spacing (0.001 cm), and a Tabuchi-Yamamoto \cite{Yamamoto2005} quadrature using 128 azimuthal angles and 4 polar angles over $\fourpi$
+      These cases were compared against a reference case, which was very finely meshed with fine ray-spacing (0.001 cm), and a Tabuchi-Yamamoto \cite{Yamamoto2005} quadrature using 128 azimuthal angles and 4 polar angles over $\fourpi$
       All other cases were run using a Tabuchi-Yamamoto quadrature with 64 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.05 cm.
       This case used the \ac{TCP0} approximation to scattering.
 
@@ -618,13 +623,13 @@
       }
       \paragraph{Fuel Radius}{
         During isotopic depletion, it is important to accurately capture the radial distribution of Plutonium, due to self-shielding effects.
-        Plutonium is primarily produced in the outer rim of the pin, this is well known as the rim-effect.
-        The default mesh uses three equal volume rings in the fuel region; however, we expect that two rings will be sufficient, when using the \ac{LSA}, if the extra ring is placed in such a way that it captures this rim-effect.
-        Experimental studies of the rim-effect \cite{Lassmann1994} have found that there is a sharp rise in Plutonium at around between 80-90\% of the outer radius of the fuel.
+        Plutonium is primarily produced in the outer rim of the pin (this is well known as the rim-effect).
+        The default mesh uses three equal-volume rings in the fuel region; however, we expect that two rings will be sufficient, when using the \ac{LSA}, if the extra ring is placed in such a way that it captures this rim-effect.
+        Experimental studies of the rim-effect \cite{Lassmann1994} have found that there is a sharp rise in Plutonium at about 80-90\% of the outer radius of the fuel.
 
         A series of calculations were run using two fuel rings with varying inner radius.
         The eigenvalue and Plutonium comparisons are shown in \cref{fig:LSMOC:1a:FuelRadius:Eigenvalue,fig:LSMOC:1a:FuelRadius:Pu239}.
-        Comparing eigenvalues, a fractional radius between 0.825 and 0.875 seem to have little effect on the mean or worst-case eigenvalue difference.
+        Comparing eigenvalues, a fractional radius between 0.825 and 0.875 seems to have little effect on the mean or worst-case eigenvalue difference.
         By comparing the concentration of Pu-239, these radii are again shown to be the most accurate; a fractional radius of 0.875 was chosen to be sufficient, and used in the remainder of the studies.
 
         \begin{figure}
@@ -641,7 +646,7 @@
       \paragraph{Moderator Ring and Azimuthal Divisions} {
         The remaining mesh parameters are the azimuthal divisions in the fuel, clad, gap, and moderator regions, and the presence of an additional surrounding ring of moderator.
         While it may be sufficient to use a single azimuthal division in some regions in larger cases, due to symmetry of this single pin case, using a single azimuthal region would cause the linear components of the source to be zero (i.e. it is equivalent to the \ac{FSA}).
-        It was found that the coarsening of these parameters have an insignificant affect on the resulting eigenvalue when using the \ac{LSA}, with less than 1 \ac{pcm} difference over the entire depletion.
+        It was found that the coarsening of these parameters has an insignificant affect on the resulting eigenvalue when using the \ac{LSA}, with less than 1 \ac{pcm} difference over the entire depletion.
         Thus, four azimuthal divisions in each material region, and no additional surrounding moderator ring was found to be sufficiently accurate in this case.
       }
       The coarse default and coarse meshes are displayed in \cref{figs:LSMOC:1A:Mesh}.
@@ -696,7 +701,7 @@
           For this problem, only the fractional radius found in \cref{ssec:LSMOC:Typical Pin Cell Depletion} is tested against the current default mesh.
           There was no significant affect in eigenvalue or pin powers by using the 2-ring model with an inner radius fraction of 0.875.
           Next, the varied azimuthal divisions in the fuel were tested; this time testing a single azimuthal division.
-          \Cref{fig:LSMOC:2A:Fuel Azimuthals:Eigenvalues} shows that there is noticeable affect moving to a single azimuthal division;
+          \Cref{fig:LSMOC:2A:Fuel Azimuthals:Eigenvalues} shows that there is a noticeable affect moving to a single azimuthal division;
             however, the mean difference is changed by less than 1 \ac{pcm}, and the max difference is actually improved by 3 \ac{pcm}.
           We acknowledge that this improvement is likely due to cancellation of errors. Regardless, the net effect of this change is small.
 
@@ -730,8 +735,8 @@
         \paragraph{2A - Guide-Tube Azimuthal Divisions}{
           In the 2A lattice, guide-tube pins are present; each guide-tube consists of three regions: inner moderator, cladding, and outer moderator.
           The effect of different azimuthal divisions in each of these regions was tested; the resulting eigenvalues are shown in \cref{fig:LSMOC:2A:Gtube:Inner Moderator Azimuthals:Eigenvalues,fig:LSMOC:2A:Gtube:Cladding Azimuthals:Eigenvalues,fig:LSMOC:2A:Gtube:Outer Moderator Azimuthals:Eigenvalues}.
-          A single azimuthal division in each of these regions seems to be sufficient, without any significant affect on eigenvalue accuracy.
-          However, 4 azimuthal divisions in the surrounding moderator was selected for moving forward due to compatibility issues with \ac{CTF}.
+          A single azimuthal division in each of these regions seems to be sufficient, with no significant affect on eigenvalue accuracy.
+          However, 4 azimuthal divisions in the surrounding moderator was selected for moving forward, due to compatibility issues with \ac{CTF}.
 
           \begin{figure}
             \centering
@@ -801,7 +806,7 @@
 
       \subsubsection{Problem 2P}{\label{sssec:LSMOC:Problem 2P}
         \paragraph{2P - Applying Coarse Mesh Parameters}{
-          \ac{VERA} problem 2P contains several gadolinia enriched fuel rods; as the lattice is depleted, these fuel rods ``burn'' the gadolinia.
+          \ac{VERA} problem 2P contains several gadolinia-enriched fuel rods; as the lattice is depleted, these fuel rods ``burn'' the gadolinia.
           The gadolinia is primarily burned away started at the outer radius and moving inwards as time progresses.
           This inward burning makes the pins difficult to model, and requires many radial divisions for accurate calculations; it is effectively a ``moving rim effect''.
           Additionally, because the presence of these small radial regions, a finer ray-spacing (0.01 cm) is necessary.
@@ -942,7 +947,7 @@
     }
 
     \subsection{2-D Lattices}{\label{ssec:LSMOC:2-D Lattices}
-      In order to evaluate these coarse mesh parameters, they were applied to the \ac{VERA} problem 2 lattice series.
+      To evaluate the effect on accuracy these these coarse mesh parameters result in, they were applied to the \ac{VERA} problem 2 lattice series.
       This series contains 17 common lattice configurations, and it is expected that if the meshing parameters are sufficient for these cases, they will be sufficient in most applications.
       The eigenvalue and pin-power results compared to a very finely meshed reference case are shown in \cref{tab:LSMOC:Lattice:Eigenvalue} and \cref{tab:LSMOC:Lattice:PinPower}, respectively.
 
@@ -1128,12 +1133,12 @@
         The rays can be spaced more coarsely, but this may cause some regions to not be integrated as accurately, thus degrading overall accuracy.
 
         In this section, the use of coarser ray-spacing is investigated for the \ac{VERA} problem 2 series.
-        Results were generated using a ray-spacing of 0.1 cm and 0.2 cm for the default mesh with the \ac{FS} solver, and for the coarse mesh with \ac{LS} solver.
+        Results were generated using a ray-spacing of 0.1 cm and 0.2 cm for the default mesh with the \ac{FS} solver, and for the coarse spatial mesh with \ac{LS} solver.
         Eigenvalue and pin power comparisons are shown in \cref{tab:LSMOC:Lattice:CR:Eigenvalue} and \cref{tab:LSMOC:Lattice:CR:PinPower}, respectively.
         In most of the cases, it is possible to use a reasonably coarser ray-spacing (0.10 cm) without incurring significant error.
         The original hypothesis of this work was that using a coarser mesh would allow for the use of coarser rays; however, \cref{tab:LSMOC:Lattice:CR:Eigenvalue,tab:LSMOC:Lattice:CR:PinPower} show that this is not the case.
         The determining factor for whether or not coarser rays can be used is the presence of fine material discretizations in some rods.
-        However, \cref{tab:LSMOC:Lattice:CR:Segments} shows that the use of a coarse mesh and coarse rays reduces the number of ray-segments (from the default parameters) by a much more significant fraction; meaning the expected run-time will be considerably lower.
+        However, \cref{tab:LSMOC:Lattice:CR:Segments} shows that the use of a coarse mesh and coarse rays reduces the number of ray-segments (from the default parameters) by a much more significant fraction than simply using a coarser spatial mesh; meaning the expected run-time will be considerably lower.
 
         \begin{table}[htbp]
           \centering
@@ -1251,6 +1256,7 @@
 
     \subsection{Assembly with Feedback}{\label{ssec:LSMOC:Assembly with Feedback}
       \ac{VERA} problem 6 is a single 3-D \ac{PWR} assembly with \ac{TH} feedback \cite{VERAProblems}, as visualized in \cref{fig:LSMOC:P6:Problem}.
+      \acf{CTF} \cite{CTF} is a \ac{TH} code that can be coupled to the neutronics solver in MPACT to perform multiphysics calculations.
       The coarse meshing parameters from the previous sections were applied to this problem;
         these results will help to determine whether or not the coarse mesh parameters are also sufficient when \ac{TH} feedback is present.
       As a 3-D assembly, this problem has lower and upper plates, and nozzles.
@@ -1281,7 +1287,7 @@
 
       Because \ac{CTF} takes far longer in the first several iterations, it is not fair to compare total run-time per iteration.
       Rather, we can look at the time that the \ac{FSA} solver cases took to complete the same number of iterations the \ac{LSA} solver cases needed.
-      The time to complete 9 iterations are shown in \cref{tab:LSMOC:P6:Performance}.
+      The times to complete 9 iterations are shown in \cref{tab:LSMOC:P6:Performance}.
       These results still show that the use of the \ac{LSA} on the coarse mesh is advantageous compared to the default mesh with \ac{FSA}.
       The coarse mesh \ac{LSA} case reduced the run-time for 9 iterations by 4.8\%, but reduced \ac{MOC} run-time per iteration by 9.3\%.
       By also using coarse rays the run-time is reduced by 8.4\% for total time, and 72.7\% for \ac{MOC} time per iteration.
@@ -1415,7 +1421,7 @@
       Transverse leakage splitting, sometimes used to help iteration stability (\cref{sssec:3T:Transverse Leakage Splitting}), was disabled for these simulations.
       In this problem, transverse leakage splitting was confirmed not to be necessary for convergence, and generally has negative impacts on accuracy.
       Additionally, the use of transverse leakage splitting caused instability when using the \ac{LSA}.
-      In MPACT, the splitting factor is determined by the average source in a region; however, when this is applied to the linear source this guarantees that half the region will till have a negative source.
+      In MPACT, the splitting factor is determined by the average source in a region; however, when this is applied to the linear source, it guarantees that half the region will still have a negative source.
 
       \Cref{fig:LSMOC:P9:Boron} shows the reference critical boron levels and the errors of the coarse mesh solutions over the cycle.
       The \ac{FSA} coarse mesh solution tends to over-predict the boron levels, while the \ac{LSA} coarse mesh solution tends to under-predict.
@@ -1591,7 +1597,7 @@
       For the calculations with 696 spatial domains, the coarse \ac{LSA} uses 20\% more core-hours than the default \ac{FSA} calculation.
       However, the use of the coarse mesh saves a considerable amount of memory: 249 GB.
       Additionally, it is not clear from these results that there is not an advantage from using the \ac{LSA}.
-      Each of the coarse mesh cases required nearly 10\% more iterations, likely because of iterative inefficiency from the spatial decomposition (see \cref{ch:Spatial Decomposition}) which is different for the different meshes.
+      Each of the coarse mesh cases required nearly 10\% more iterations, likely because of iterative inefficiency from the spatial decomposition (see \cref{ch:Spatial Decomposition}), which is different for the different meshes.
       In fact, even the \ac{FSA} coarse mesh calculation was slightly slower than the \ac{FSA} calculation on the default mesh.
 
       \begin{table}[htbp]
@@ -1609,8 +1615,8 @@
         \footnotetext[1]{Coarse fuel rods but default reflector mesh.}
       \end{table}
 
-      These results have shown that the mesh that was found in the previous mesh-convergence study are sufficient for this quarter-core cycle depletion with \ac{TH} feedback.
-      This along with the results of previous sections have shown that the coarse mesh parameters are sufficient for a large range of problems, and should be considered as new default parameters when using the \ac{LSA} in MPACT.
+      These results have shown that the mesh that was found in the previous mesh-convergence study is sufficient for this quarter-core cycle depletion with \ac{TH} feedback.
+      This, along with the results of previous sections, have shown that the coarse mesh parameters are sufficient for a large range of problems, and should be considered as new default parameters when using the \ac{LSA} in MPACT.
       The use of the coarse mesh with the \ac{LSA} was able to reduce the number of core-hours by 10.8\%, and total memory usage by 30.3\%.
       This represents significant advantage of the \ac{LSA} even in simulations with multiple physics.
 
@@ -1634,7 +1640,7 @@
 
     The improved \ac{LSMOC} formulation was used in calculations to generate results for a variety of steady-state single and multi-physics calculations.
     These cases were used to determine possible default meshing parameters for MPACT.
-    The determined coarse meshing parameters were shown to sufficient for a 3-D quarter core cycle depletion with \ac{TH} feedback.
+    The determined coarse meshing parameters were shown to be sufficient for a 3-D quarter core cycle depletion with \ac{TH} feedback.
     It was shown that the \ac{LSA} allowed for significant reduction in the number of source regions, memory usage, and reduced overall run-time in many of these cases.
 
     While it is known the use of the \ac{LSA} allows for a coarser mesh while maintaining accuracy and typically reducing run-times, this work has led to two additional conclusions.
