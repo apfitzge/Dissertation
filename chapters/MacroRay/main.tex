@@ -7,7 +7,7 @@
 
   The primary motivation of the three-dimensional macroray ray-tracing technique is to reduce the number of tracks generated for 3-D \ac{MOC} applications.
   The number of track-segments is very strongly correlated with the run-time of a \ac{MOC} calculation \footnote{if the \ac{MOC} calculation performs an entirely separate calculation (i.e does not use the chord-classification method) for each track-segment, this is expected to be directly proportional (ignoring overhead)}.
-  The 2-D macroband ray-tracing method had been shown to allow for coarser ray-spacing compared to traditional methods, but has never been extended for use in 3-D \ac{MOC} calculations.
+  The 2-D macroband ray-tracing method had been shown to allow for coarser ray-spacing compared to traditional methods, but it has never been extended for use in 3-D \ac{MOC} calculations.
   This work seeks to fill that gap, and perform an investigation into the extension from 2-D to 3-D macroband-like ray-tracing.
   The ray-tracing technique is referred to as the \emph{macroray}, because the 3-D ``macro''paths are no longer bands, but instead parallel-pipes.
 
@@ -19,17 +19,17 @@
   \section{MacroRay Technique}{\label{sec:MR:MacroRay Technique}
     The macroray ray-tracing technique is a 3-D extension of the macroband method; in order to describe this new ray-tracing technique it is first necessary to describe the macroband method.
     \Cref{ssec:RT:Macroband} gave a brief summary of the history of macroband, as well as some benefits of the method.
-    This section will serve to describe the macroband method in more detail, and show how the method is extended to 3-D.
+    This section will describes the macroband method in more detail, and shows how the method is extended to 3-D.
 
     \subsection{Macroband Technique}{\label{ssec:MR:Macroband Technique}
       The macroband was first used in the \acf{CP} code HELIOS, and was considered to be essential for the stability of the method \cite{Villarino1992}.
-      Unlike the traditional uniform/equidistant ray-tracing methods, the macroband method guarantees that each ray within a macroband will pass through the same regions, and not have any regions within its' bounds that are not crossed by the rays.
+      Unlike the traditional uniform/equidistant ray-tracing methods, the macroband method guarantees that each ray within a macroband will pass through the same regions, and not have any regions within its bounds that are not crossed by the rays.
       This means that the placement of rays, and their widths, are determined by the internal geometry of the pin or subdomain that is being traced.
       Because there are no material discontinuities within a macroband, the track-segment average values are expected to be smooth in the transverse direction.
       This allows for the use of more advanced transverse integration, such as Gauss-Legendre quadrature integration \cite{Yamamoto2005}.
 
       The macroband method ray-tracing is described in \cref{alg:Macroband:Ray-tracing}.
-      A downside of this method, is that each ray has a unique width which requires additional storage.
+      A downside of this method is that each ray has a unique width which requires additional storage.
       However, all rays within a macroband pass through the same segments, so the region index for each segment only needs to be stored once, reducing memory by a larger amount.
       The process is shown visually in \cref{fig:MR:Macroband Process}.
 
@@ -84,7 +84,7 @@
       As it is difficult to visualize 3-D ray-tracing data in a 2-D textual media, a quarter \ac{IFBA} fuel pin will be used as an example to demonstrate the differences between ray-tracing methods.
       \Cref{figs:MR:Macroband-Single-Visualization,figs:MR:Macroband-All-Visualization} compare the traditional \ac{MRT} ray-tracing technique with the macroband method with Gauss-Legendre spacing.
       The rays for a single direction make it clear that the \ac{MRT} in no way accounts for the internal geometry.
-      In the macroband method, there are clearly regions which have more rays passing through them; in this case, it is the boron layer coating the fuel.
+      In the macroband method, there are clearly regions that have more rays passing through them; in this case, it is the boron layer coating the fuel.
       When all directions are visualized, again the \ac{MRT} would use this same pattern of rays whether this was an \ac{IFBA} rods, or a rectangular reflector (of the same size).
       In the macroband methods, some of the geometry becomes very apparent, the outline of the pin can clearly be seen due to the methods forcing rays through the thin coating.
 
@@ -133,14 +133,14 @@
     Although previous works have investigated the 2-D macroband ray-tracing method \cite{Yamamoto2005,Fevotte2007,Yamamoto2008}, there have not been any studies in the extension of macroband to 3-D \ac{MOC} calculations.
     Here, the macroray ray-tracing technique uses the macroband method for both the 2-D radial track generation, and 2-D track generation within each characteristic plane.
     The setup procedure of the macrorays guarantee that their rays pass through the same regions, just as the macroband's did.
-    However, it is no longer guaranteed that any region which is contained within the volume of a macroband will be passed through.
-    This leads to some issues which will be discussed in \cref{ssec:MR:Interface Angular Flux Approximation}.
+    However, it is no longer guaranteed that any region contained within the volume of a macroray will be passed through.
+    This leads to some issues that are discussed in \cref{ssec:MR:Interface Angular Flux Approximation}.
 
     Similarly to the macroband method, the macroray method is fundamentally incompatible with the \ac{DNPL} ray-tracing technique.
     The \ac{MRMB} technique can be used to store tracking data for unique geometric subsystems (typically a pin cell), greatly reducing
     Although tracking data can be generated for unique geometry subsystems (\ac{MRMB} \cite{Yamamoto2005}), some approximation of the angular flux is necessary on interfaces.
     Generally, the macroray and macroband methods, which provide more accurate integration, exchange regional numerical dispersion for interface numerical dispersion \cite{Sanchez2012}.
-    It is the point of view of the author, that this is generally considered a favorable trade-off, as the engineering quantities of interest are primarily determined through regional integration.
+    It is the point of view of the author that this is generally a favorable trade-off, as the engineering quantities of interest are primarily determined through regional integration.
 
     \subsection{Chord-Classification}{\label{ssec:MR:Chord-Classification}
       The chord-classification ray-tracing method \cite{Sciannandrone2016} was described in detail in \cref{sssec:RT:Chord-Classification}.
@@ -171,10 +171,10 @@
       A ``fraction contribution'' sub-boundary averaging technique was described and chosen as the approach for this work.
       In this approach, each surface of the subsystems (pin cells) is divided into sub-boundaries based on the direction of flight.
       Each ray's width is considered, and partial intersections with each surface are computed and used to determine the ray's fractional contribution to each sub-boundary.
-      And in the reverse direction (going from sub-boundary to ray), each sub-boundaries fractional contribution to each ray is determined.
+      In the reverse direction (going from sub-boundary to ray), each sub-boundaries fractional contribution to each ray is determined.
       It was shown that this method conserved the total area-integrated angular flux on each surface.
 
-      However, in 3-D this approach becomes considerably more complicated due to the nature of 3-D geometries and the 2D/2D ray-tracing approach.
+      However, in 3-D this approach becomes considerably more complicated, due to the nature of 3-D geometries and the 2D/2D ray-tracing approach.
       This cause of the issues stems from the fact that each ray, as viewed in the direction of flight, is rectangular.
       Each ray is rectangular because in the radial ray-tracing step, the ray is considered within the bounds of the width in the radially transverse direction, and in the axial ray-tracing on the characteristic plane the ray is again constrained in a height in the axially transverse direction.
       The rectangular ray projection is demonstrated for a single ray in \cref{figs:MR:MacroRayProjections}.
@@ -211,12 +211,12 @@
         \label{fig:MR:MacroRayProjectionProblem}
       \end{figure}
 
-      The rays not ``spanning'' our system causes issues with the conservation of surface flux as described in \cref{sssec:RT:Interface Flux Approximations}.
+      The rays not ``spanning'' our system causes issues with the conservation of surface flux and leakages as described in \cref{sssec:RT:Interface Flux Approximations}.
       Previously, the average angular flux in a sub-boundary was determined by
       \begin{equation}\label{eq:MR:Old SubBoundary Flux}
         \psi_s^i = \suml[j] \frac{A(S_i\cap R_j)}{A(S_i)}\psi_r^j.
       \end{equation}
-      It was shown that by summing over all sub-boundaries, the total flux passing through the surface was conserved.
+      It was shown that by summing over all sub-boundaries, the leakage through the surface was conserved.
       However, because the rays are no longer guaranteed to span the system's surfaces, the summation of intersected ray areas is no longer equal to the sub-boundary areas:
       \begin{equation}\label{eq:MR:Area Imbalance}
         \suml[j] A(S_i\cap R_j) \leq A(S_i).
@@ -227,7 +227,7 @@
       \subsubsection{MacroRay Area Correction}{\label{sssec:MR:MacroRay Area Correction}
         Two ideas were investigated in order to address the issue of the rays not spanning the surface areas.
         Here, it should be emphasized that the first approach is \emph{incorrect}.
-        It will be described in this section because it seems like a reasonable choice for this correction; in fact, it was not realized for some time in this work that the first approach was incorrect.
+        It is described in this section because it seems like a reasonable choice for this correction; in fact, it was not realized for some time in this work that the first approach was incorrect.
 
         The sub-boundary averaging method of this work has been referred to as a ``fractional contribution'' approach.
         This comes from \cref{eq:MR:Old SubBoundary Flux} where $A(S_i \cap R_j) / A(S_i)$ is the fractional contribution of flux from ray $j$ into sub-boundary $i$.
@@ -264,16 +264,16 @@
         \end{subequations}
 
         While this may seem reasonable \footnote{at least at first to the author}, this is not actually the property we need to preserve for compatibility with \ac{CMFD} acceleration.
-        The surface-integrated angular flux needs to be preserved, but in this first approach this is not the case.
+        The leakage needs to be preserved, but in this first approach this is not the case.
         \begin{subequations}\label[subeqs]{eqs:MR:Flux Conservation A1}
           \begin{equation}\label{eq:MR:SubBoundary Flux Conservation A1}
-            \psi_t^s = \suml[i] A(S_i) \psi_s^i
-                     = \suml[i] A(S_i) \suml[j] \frac{A(S_i \cap R_j)}{A_p(S_i)}\psi_r^j
+            L^s = \dir\vdot\vec{\hat{n}}\suml[i] A(S_i) \psi_s^i
+                     = \dir\vdot\vec{\hat{n}} \suml[i] A(S_i) \suml[j] \frac{A(S_i \cap R_j)}{A_p(S_i)}\psi_r^j
                      \neq \psi_t^r,
           \end{equation}
           \begin{equation}\label{eq:MR:Ray Flux Conservation A1}
-            \psi_t^r = \suml[j] A(R_j) \psi_r^j
-                     = \suml[j] A(R_j) \suml[i] \frac{A(S_i \cap R_j)}{A_p(R_j)}\psi_s^i.
+            L^r = \dir\vdot\vec{\hat{n}} \suml[j] A(R_j) \psi_r^j
+                     = \dir\vdot\vec{\hat{n}} \suml[j] A(R_j) \suml[i] \frac{A(S_i \cap R_j)}{A_p(R_j)}\psi_s^i.
                      \neq \psi_t^s,
           \end{equation}
         \end{subequations}
@@ -284,21 +284,21 @@
         Nevertheless, compatibility with \ac{CMFD} acceleration, or other acceleration methods, is necessary if this method is ever to be used.
         This leads to the approach used for the remained of this work.
 
-        As this section has emphasized, the property that is important to conserve is the surface-integrated angular flux.
-        The surface-integrated angular flux can be found by integrating over sub-boundaries, or over rays; it is necessary for these to be equal:
+        As this section has emphasized, the property that is important to conserve is the leakage.
+        The leakage can be found by integrating over sub-boundaries, or over rays; it is necessary for these to be equal:
         \begin{equation}\label{eq:MR:Surface-Integrated Angular Flux}
-          \psi_t = \suml[i] A(S_i) \psi_s^i = \suml[j] A(R_j) \psi_r^j.
+          L = \dir\vdot\vec{\hat{n}} \suml[i] A(S_i) \psi_s^i = \suml[j] A(R_j) \psi_r^j.
         \end{equation}
         The sub-boundary flux, $\psi_s^i$, should be dependent on the ray fluxes, $\psi_r^j$, and should also follow a similar form as \cref{eq:MR:Old SubBoundary Flux}.
 
-        Let us examine the sub-boundary flux in order to show how the surface-integrated angular flux may be preserved.
+        Let us examine the sub-boundary flux in order to show how the leakage may be preserved.
         Insert a corrective multiplicative term into the summation of \cref{eq:MR:Old SubBoundary Flux},
         \begin{equation}\label{eq:MR:SubBoundary Flux:Derivation 1}
           \psi_s^i = \suml[j] k_s^{j} \frac{A(S_i \cap R_j)}{A(S_i)} \psi_r^j.
         \end{equation}
         Substituting this form into \cref{eq:MR:Surface-Integrated Angular Flux} yields,
         \begin{equation}\label{eq:MR:Surface-Integrated Angular Flux:Derivation 2}
-          \psi_t = \suml[i] A(S_i) \suml[j] k_s^{j} \frac{A(S_i \cap R_j)}{A(S_i)} \psi_r^j = \suml[j] A(R_j) \psi_r^j.
+          L = \dir\vdot\vec{\hat{n}} \suml[i] A(S_i) \suml[j] k_s^{j} \frac{A(S_i \cap R_j)}{A(S_i)} \psi_r^j = \dir\vdot\vec{\hat{n}} \suml[j] A(R_j) \psi_r^j.
         \end{equation}
         So, $k_s^{j}$ should be chosen such that
         \begin{equation}\label{eq:MR:ks factor condition}
@@ -318,7 +318,7 @@
             \psi_r^j = \suml[i] \frac{A(S_i)}{A_p(S_i)}\frac{A(S_i \cap R_j)}{A(R_j)}\psi_s^i.
           \end{equation}
         \end{subequations}
-        As this was derived from \cref{eq:MR:Surface-Integrated Angular Flux}, these forms guarantee that the surface-integrated angular flux is conserved.
+        As this was derived from \cref{eq:MR:Surface-Integrated Angular Flux}, these forms guarantee that the leakage is conserved.
         It should also be noted that if the surfaces are spanned by the rays the factors, $A(R_j)/A_p(R_j)$ and $A(S_i)/A_p(S_i)$, are one, giving back the original form of the equations.
 
         Another consequence of the rays not spanning the problems surfaces, is that larger sub-boundary sizes become necessary to ensure that each sub-boundary is intersected by at least one ray.
@@ -328,19 +328,19 @@
       \subsubsection{Alternative Approaches}{\label{sssec:MR:Alternative Approaches}
         The approach described in \cref{sssec:MR:MacroRay Area Correction} provided a correction to \cref{eq:MR:Old SubBoundary Flux} such that the surface-integrated angular flux is conserved.
         This approach seems to be valid when operating in the 2D/2D (rectangular) ray-tracing procedure, but there are alternative options.
-        The reason a correction was necessary is because due to the nature of 3-D geometry and 2D/2D ray-tracing, the ray are no longer guaranteed to span the system's surfaces.
-        It is possible to have an alternative ray-tracing approach (still based on the macroray) which does span the system's surfaces.
+        The reason a correction was necessary is because due to the nature of 3-D geometry and 2D/2D ray-tracing, the rays are no longer guaranteed to span the system's surfaces.
+        It is possible to have an alternative ray-tracing approach (still based on the macroray) that does span the system's surfaces.
 
         The choice of rectangular rays was arbitrary, but this choice may be exchanged for any shape, such as triangular, or even arbitrarily shaped rays.
         Non-rectangular rays were not investigated as part of this work, and to the best of our knowledge, have not been investigated by any works.
         As previously mentioned, 3-D \ac{MOC} codes up to this point have used the uniform ray-spacing assumption in order to comply with constraints of \ac{MRT} and \ac{DNPL}.
         When rays are uniformly spaced and have \ac{DNPL}, the shape of the ray is largely ignored because the procedures only care about the ray's centroid.
-        It only becomes important when you consider the integration volume of the ray, such as in the sub-boundary averaging method with fractional contributions.
+        It only becomes important when considering the integration volume of the ray, such as in the sub-boundary averaging method with fractional contributions.
 
         If rays are constructed so that they span the system's surfaces, there is no need to correct \cref{eq:MR:Old SubBoundary Flux}.
         It is not clear at this point whether or not this would have benefits for the accuracy of the method.
-        However, it is possible to also preserves some of the desirable features for general geometries of the macroband which were lost in the transition to 3-D (in the 2D/2D ray-tracing framework).
-        If the geometry is not locally extruded (in this work this was an assumption), then it is possible for macrorays to have some of their transverse area in a region that none of its' rays pass through.
+        However, it is possible to also preserve some of the desirable features for general geometries of the macroband which were lost in the transition to 3-D (in the 2D/2D ray-tracing framework).
+        If the geometry is not locally extruded (in this work this was an assumption), then it is possible for macrorays to have some of their transverse area in a region that none of its rays pass through.
         Examples of how non-rectangular rays might be used are shown in \cref{figs:MR:Alternatives}.
 
         \begin{figure}[h]
@@ -366,9 +366,9 @@
           \caption{
             Two alternative (non-rectangular) ray-tracing ideas.
             (a) shows the geometry for clarity.
-            (b) shows an example of rays which are generated to be axially aligned in a characteristic plane, but consider the full volume they pass through.
+            (b) shows an example of rays that are generated to be axially aligned in a characteristic plane, but consider the full volume they pass through.
             (c) shows an example of triangulated rays.
-            In both (b) and (c) the rays are formed by rhombuses or triangles, but if there were a cylinder in this pin, it is possible they could have curved boundaries as well.
+            In both (b) and (c) the rays are formed by rhombuses or triangles, but if there were a cylinder in this pin, they could have curved boundaries as well.
           }
           \label{figs:MR:Alternatives}
         \end{figure}
@@ -376,140 +376,11 @@
     }
   }
 
-  % \section{MacroMoC Transport Library}{\label{sec:MacroMOC Transport Library}
-  %   This work involved the implementation of a transport library based on the macroband and macroray ray-tracing techniques.
-  %   This library is a sub-package dependent on MPACT for geometry, data, and iteration; the library was responsible for performing the ray-tracing, storage of tracking data, and the transport sweep calculations.
-  %   The library was first implemented (without \ac{CMFD} support) for 2-D transport calculations using the macroband method.
-  %   The library was then extended for 3-D transport calculations using the macroray method, with chord-classification.
-
-  %   The library does not support the full range of geometries supported by MPACT; in particular, the graph-based geometry used for \acp{BWR} \cite{MPACTBWR2017} is not supported.
-  %   Additionally, the directional quadratures were assumed to be product quadratures.
-  % }
-
-
-
-  % \section{Results - 2-D}{\label{sec:MacroRay:Results2D}
-  %   This section will present 2-D macroband calculation results, which will help to give an estimate of what may be expected in 3-D.
-  %   Each of these calculations was run without \ac{CMFD} acceleration, and with a Tabuchi-Yamamoto quadrature \cite{TabuchiYamamotoQuad} 64 azimuthal and 4 polar angles over $\fourpi$.
-  %   Additionally, each case is run with the \ac{LSMOC} formulation described in \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}.
-  %   Previous results \cite{Yamamoto2005} have shown that the use of a Gauss-Legendre quadrature for placing the macroband rays has significant accuracy benefits compared to spacing them uniformly within each band.
-
-  %   % \subsection{C5G7 Pin-Cell}{\label{ssec:MB:C5G7 Pin-Cell}
-  %   %   A single \ac{UO2} C5G7 \cite{Smith2006} pin-cell was used as an initial starting point to test the macroband method implemented in this work.
-  %   %   This problem is relatively simple, and it is not expected to see significant difference between macroband and \ac{MRT} in this case.
-  %   %   However, it can be used to test the
-  %   % }
-
-  %   \subsection{VERA Problem 1E}{\label{ssec:MB:VERA Problem 1E}
-  %     VERA progression problem 1E \cite{VERAProblems} is a single \ac{IFBA} pin with a very thin coating of strong absorber.
-  %     This case was selected for a 2-D study, as the previous \ac{LSMOC} results indicated that such pins, when in a lattice, prevented the use of coarse ray-spacing in the lattice calculations.
-  %     If the macroband method can reduce the effective ray-spacing necessary for an accurate \ac{IFBA} pin calculation, this is a strong indication it will help in the lattice problems.
-  %     Two different approaches were tested to determine the number of rays within a macroband: first, the width of the band is divided by the ray-spacing and the ceiling is taken.
-  %     The second approach is to place a fixed number of rays within each band.
-
-  %     \Cref{fig:MB:1e:keff-vs-rayspacing,fig:MB:1e:dk-vs-nSegs} show the eigenvalue results for a variety of effective ray-spacing, and the eigenvalue errors for the the number of ray-segments.
-  %     Effective ray-spacing is computed by averaging the widths of all rays in the problem.
-  %     In this case, the eigenvalue error is taken as the difference from the converged \ac{MRT} result.
-  %     These figures show a clear advantages for the macroband ray-tracing method;
-  %       even for the coarsest macroband spacing, the resulting eigenvalue was within 150 pcm of the converged result.
-  %     The method using a fixed number of rays in each macroband seems to have an advantage when using coarse ray-spacings, and converges slightly faster than the width-determined number of rays per band.
-
-  %     The convergence of the eigenvalue as more rays (segments) are added is very close to monotonic for the macroband methods.
-  %     This is certainly not the case for the \ac{MRT} method, which sees very large swings in the eigenvalue from small changes in the ray-spacing, as shown by the large spikes in \cref{fig:MB:1e:pdk-vs-rayspacing}.
-  %     The large spikes on the right of this plot show that for small changes in the ray-spacing, a large ($>2000$ pcm) reactivity swing can occur when using \ac{MRT}, whereas both macroband approaches have low differences between cases with similar ray-spacing.
-  %     The lack of these large changes, allows the solver to act as more of a ``black box'', where the user does not need knowledge of the method to use it.
-  %     Additionally, because of the near monotonic convergence behavior, it may be possible to use Richardson extrapolation to further reduce costs.
-
-  %     \begin{figure}[htbp]
-  %       \centering
-  %       \includegraphics[width=0.95\linewidth]{\figpath/results/2D/1e/keff-vs-rayspacing}
-  %       \caption{VERA Problem 1E: Eigenvalue results for different ray-tracing methods. \label{fig:MB:1e:keff-vs-rayspacing}}
-  %     \end{figure}
-  %     \begin{figure}[htbp]
-  %       \centering
-  %       \includegraphics[width=0.95\linewidth]{\figpath/results/2D/1e/dk-vs-nSegs}
-  %       \caption{VERA Problem 1E: Eigenvalue errors for different ray-tracing methods. \label{fig:MB:1e:dk-vs-nSegs}}
-  %     \end{figure}
-  %     \begin{figure}[htbp]
-  %       \centering
-  %       \includegraphics[width=0.95\linewidth]{\figpath/results/2D/1e/pdk-vs-rayspacing}
-  %       \caption{VERA Problem 1E: Convergence of eigenvalue for different ray-tracing methods. \label{fig:MB:1e:pdk-vs-rayspacing}}
-  %     \end{figure}
-  %   }
-
-  %   \subsection{VERA Problem 2}{\label{ssec:MB:VERA Problem 2}
-  %     In \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}, the \ac{VERA} problem 2 lattices were tested with the improve \ac{LSA} formulation.
-  %     One hypothesis going in, was that the use of the coarser mesh may allow for the use of coarser rays, thus much less work.
-  %     However, it was found that the presence of any element with fine material discontinuities, such as control rods, or \acf{IFBA} rods, prevented the use of coarser rays while maintaining accuracy.
-  %     In \cref{ssec:MB:VERA Problem 1E}, the macroband method was shown to be very advantageous compared to \ac{MRT} for a single \ac{IFBA} rod.
-  %     In this section, the macroband method will be tested on two lattices from the \ac{VERA} problem 2 series that contain \ac{IFBA} rods: M, and N.
-
-  %     [Paste results]
-
-  %     % Two of the lattices, that presented issues for coarse ray spacing in \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}, were selected for study with the macroband: M and N.
-  %     % Each of these cases has several \ac{IFBA} pins within the lattice, which require finer ray-spacing for accurate results.
-  %   }
-  % }
-
-  % \section{Results}{\label{sec:MacroRay:Results3D}
-  %   \subsection{C5G7 Pin-Cell}{\label{ssec:MR:C5G7 Pin-Cell}
-  %     In this section, the results of 3-D \ac{MOC} calculations using the macroray ray-tracing method will be presented for a C5G7 \ac{UO2} pin-cell with different boundary conditions.
-  %     A Chebyshev-Gauss product quadrature was used in each calculation, but the different boundary conditions will require different orders.
-  %     For each case, a reference solution was generated using the openMC Monte Carlo code \cite{OpenMC}.
-  %     The reference solution was generated with 500 batches of 50000 particles, with 50 inactive batches.
-  %     2-D results have demonstrated that advantage of using fixed number of rays per macroband, thus a similar approach will be taken in these calculations.
-
-  %     \subsubsection{Reflective}{\label{sssec:MR:C5G7:Pin:Reflective}
-  %       First, a 1 cm tall pin-cell with reflective boundary conditions on all sides was used to verify that the 3-D macroray methods were generating correct results.
-  %       This problem is equivalent to a 2-D transport problem, but for these calculations it will be solved using 3-D \ac{MOC}.
-  %       This case used 16 azimuthal angles and varying numbers of polar angles from one to six.
-
-
-
-  %     }
-
-  %     \subsubsection{Vacuum-Top}{\label{sssec:MR:C5G7:Pin:Vacuum-Top}
-  %       The same pin-cell was then run using similar conditions but with a vacuum boundary condition on the top surface.
-  %       This case is meant to demonstrate that the macroray method is able to correctly handle an actual 3-D \ac{MOC} calculation.
-  %     }
-  %   }
-
-  %   \subsection{VERA Problem 1E}{\label{ssec:MR:VERA Problem 1E}
-  %     \ac{VERA} progression problem 1E is a relatively challenging pin-cell problem for transport methods due to the thin coating of boron on the fuel rod.
-  %     This problem demonstrated clear advantages for the 2-D macroband method; in this section the problem is used to demonstrate the same for the 3-D macroray method.
-
-  %     \subsubsection{Reflective}{\label{sssec:MR:1E:Reflective}
-
-  %     }
-
-  %     \subsubsection{Vacuum-Top}{\label{sssec:MR:1E:Vacuum-Top}
-
-  %     }
-  %   }
-
-  %   \subsection{Shielded Fuel-Box}{\label{ssec:MR:Shielded Fuel-Box}
-  %     The shielded fuel-box problem was created for this work to more clearly demonstrate the benefits of the macroray method for more general problems.
-  %     This problem consists of a 0.4$\times$0.4$\times$0.4 cm$^3$ fuel block surrounded on all sides by $0.1$ cm of a shielding material.
-  %     This entire shielded cube is surrounded by 0.5$\times$0.5$\times$0.5 cm$^3$ cubes of moderator (26 in total).
-  %     The calculation uses the C5G7 benchmark cross sections; the fuel is the 8.7\% \ac{MOX}, the shielding material uses the control rod cross sections.
-  %     A 2-D cross-sectional view of the problem is shown in [REF].
-
-  %     [PICTURE OF PROBLEM].
-
-  %   }
-  % }
-
   \section{Results}{\label{sec:MR:Results}
-    This section will present results using the macroray ray-tracing method, and comparing it against the \acf{MRT} method.
+    This section presents results using the macroray ray-tracing method, and comparing it against the \acf{MRT} method.
     All results presented use the \ac{LSA} approximation developed in \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}.
 
     \subsection{VERA Problem 1E}{\label{ssec:MR:VERA Problem 1E}
-        % VERA progression problem 1E \cite{VERAProblems} is a single \ac{IFBA} pin with a very thin coating of strong absorber.
-        % This case was selected for a 2-D study, as the previous \ac{LSMOC} results indicated that such pins, when in a lattice, prevented the use of coarse ray-spacing in the lattice calculations.
-        % If the macroband method can reduce the effective ray-spacing necessary for an accurate \ac{IFBA} pin calculation, this is a strong indication it will help in the lattice problems.
-        % Two different approaches were tested to determine the number of rays within a macroband: first, the width of the band is divided by the ray-spacing and the ceiling is taken.
-        % The second approach is to place a fixed number of rays within each band.
-
       \ac{VERA} progression problem 1E \cite{VERAProblems} is a single \ac{IFBA} pin with a very thin coating of boron on the fuel.
       The boron will shield the pin from incident thermal neutrons, significantly dampening the reactivity.
       These rods are used in reactor designs, and as the fuel cycle continues the boron will be depleted and the reactivity will increase.
@@ -590,7 +461,7 @@
     }
 
     \subsection{Shielded Fuel Box}{\label{ssec:MR:Shielded Fuel Box}
-      The shielded fuel-box problem was created for this work to more clearly demonstrate the benefits of the macroray method for problems which pose challenges to the traditional ray-tracing methods.
+      The shielded fuel-box problem was created for this work to more clearly demonstrate the benefits of the macroray method for problems that pose challenges to the traditional ray-tracing methods.
       This problem consists of a 0.4$\times$0.4$\times$0.4 cm$^3$ fuel block surrounded on all sides by $0.1$ cm of a shielding material.
       This entire shielded cube is surrounded by 0.5$\times$0.5$\times$0.5 cm$^3$ cubes of moderator (26 in total).
       The calculation uses the C5G7 benchmark cross sections; the fuel is the 8.7\% \ac{MOX}, the shielding material uses the control rod cross sections.
@@ -627,18 +498,18 @@
       \end{figure}
 
       The results of the ray-tracing methods are summarized in \cref{fig:MR:SB:keff-vs-nSegs,fig:MR:SB:dk-vs-nSegs}.
-      The traditional \ac{MRT} method is able to generate very large eigenvalue errors when a coarse ray-spacing is used;
+      The traditional \ac{MRT} method generates very large eigenvalue errors when a coarse ray-spacing is used;
         in fact, for the first several ray-spacing values used, the eigenvalue estimate was near critical even though the reference is very sub-critical.
-      This shows a major flaw in the \ac{MRT} methods, they don't consider the internal geometry and allow for such coarse spacings that the results can be entirely useless.
-      In contrast, the macroray method enforces a minimum number of rays which seems to give somewhat reasonable results.
+      This shows a major flaw in the \ac{MRT} methods, they do not consider the internal geometry and allow for such coarse spacings that the results can be entirely useless.
+      In contrast, the macroray method enforces a minimum number of rays, which seems to give somewhat reasonable results.
 
       \Cref{fig:MR:SB:pdk-vs-nSegs} shows the change in eigenvalue for each sequential calculation (a refinement in the number of rays/segments).
-      This figure shows that for the very coarse ray-spacings, that resulted in a near critical eigenvalue, don't have very large differences.
+      This figure also shows that for very coarse ray-spacings (resulting in near critical eigenvalues) do not have large differences in the resulting eigenvalues.
       An inexperienced user may believe that the solution is near convergence, which is certainly not the case.
-      Once the ray-spacing is smaller than the thickness of the shielding the results become reasonable, although still further off from the reference than the macroray method for the same number of segments.
+      Once the ray-spacing is smaller than the thickness of the shielding, the results become reasonable, although still further off from the reference than the macroray method for the same number of segments.
       However, a user without knowledge of the \ac{MOC} would likely not be aware that this is a requirement of the user input.
       Although this was demonstrated with very coarse ray-spacings, a similar effect would likely be present if the shielding were thinner than the default ray-spacing of MPACT.
-      This shows a clear advantage for the macroray method, in that it allows the user to use the method without detailed knowledge of the method.
+      This shows a clear advantage for the macroray method, in that it allows the user to more safely use the method without detailed knowledge of the method.
     }
 
     \subsection{C5G7}{\label{ssec:MR:C5G7}
@@ -699,7 +570,7 @@
 
         Eigenvalue and errors are listed in \cref{tab:MR:C5G7:Unrodded-Eigenvalues}, and pin-power results are summarized in \cref{tab:MR:C5G7:Unrodded-MRT,tab:MR:C5G7:Unrodded-MacroRay}.
         The eigenvalues for either ray-tracing method are within 100 pcm of the reference value.
-        Although there is a 8 pcm difference between the two methods, this is not a significant difference.
+        Although there is an 8 pcm difference between the two methods, this is not a significant difference.
 
         Overall, the macroray method results in better pin-power comparisons in each metric except for slightly higher error in the maximum pin-power.
         Additionally, the number of pins within the uncertainty levels of the reference is much higher for the macroray method, indicating better overall predictions in pin-power.
@@ -799,7 +670,7 @@
 
         Eigenvalue and errors are listed in \cref{tab:MR:C5G7:Rodded A-Eigenvalues}, and pin-power results are summarized in \cref{tab:MR:C5G7:Rodded A-MRT,tab:MR:C5G7:Rodded A-MacroRay}.
         Similarly to the unrodded case, the eigenvalues for each ray-tracing method are within 100 pcm; however, the error is 34 pcm higher for the macroray method.
-        Again, in overall pin-power comparisons, the macroray method out performs the MRT method in all except the error in the maximum pin-power.
+        Again, in overall pin-power comparisons, the macroray method outperforms the MRT method in all except the error in the maximum pin-power.
         Additionally, the number of pins predicted within the uncertainty levels of the reference are significantly higher for the macroray method.
         But, just like in the unrodded case, the macroray method performs significantly worse in the low-power upper third of the fuel.
 
@@ -896,11 +767,11 @@
 
         Eigenvalue and errors are listed in \cref{tab:MR:C5G7:Rodded B-Eigenvalues}, and pin-power results are summarized in \cref{tab:MR:C5G7:Rodded B-MRT,tab:MR:C5G7:Rodded B-MacroRay}.
         In this case, the macroray method yields eigenvalue error just over 100 pcm, while the \ac{MRT} method is well under 100.
-        The difference in eigenvalue error is likely primarily due to the fact that the \ac{MRT} benefits from cancellation of error while the macrorray generally does not.
+        The difference in eigenvalue error is likely primarily due to the fact that the \ac{MRT} benefits from cancellation of errors, while the macrorray generally does not.
 
         Interestingly, the overall pin-power comparisons are much closer in this case compared to the unrodded and rodded A configurations.
         The average, RMS and mean relative errors are all similar compared to the \ac{MRT} method; the error in the maximum power is higher for the macroray method, just as in the previous cases.
-        The macroray method also does not out perform the \ac{MRT} method in the number of pins within each uncertainty level of the reference.
+        The macroray method also does not outperform the \ac{MRT} method in the number of pins within each uncertainty level of the reference.
         Finally, the macroray method again shows the most significant errors in the upper 1/3 of the fuel, as in previous cases.
 
         \begin{figure}[htbp]
@@ -992,40 +863,38 @@
 
   \section{Discussion on the Performance of MacroRay}{\label{sec:Discussion one the Performance of MacroRay}
     While the macroray method was able to reduce the number of segments in some cases, macroray calculations generally took longer for the same number of segments compared to the \ac{MRT} method.
-    To determine where the performance was lacking, a miniaturized C5G7 unrodded case was profiled.
-    This case was profiled without using \ac{CMFD} acceleration, and with 18 spatial domains, using both the \ac{MRT} and macroray methods.
+    To determine where the performance was lacking, a miniaturized C5G7 unrodded case was profiled, without using \ac{CMFD} acceleration, and with 18 spatial domains, using both the \ac{MRT} and macroray methods.
     For each calculation, nearly all the time was spent in the transport routines ($>$95\%).
     The transmission calculations and moment accumulation are typically the largest run-time contributors in \ac{MRT} calculations, and the profiler revealed that 61.8\% of the time was spent in these loops.
     An additional 33\% was spent on waiting for messages from other domains.
 
-    However, in the macroray calculation, only 22\% of the total time was spent on these loops.
-    15.1 \% was spent on the conversion between ray fluxes and surface fluxes.
+    However, in the macroray calculation, only 22\% of the total time was spent on these loops and 15.1 \% was spent on the conversion between ray fluxes and surface fluxes.
     The largest contributor to run-time was waiting for MPI messages, at 57.4\%.
     In the current implementation, a MPI waitall command is used after sweeping each direction.
     The fractional run-time can be reduced to 26\% if the waitall is moved to after sweeping all directions.
     This is the same approach used by the \ac{MRT} sweepers in MPACT.
     However, the method of generating unique tags must be improved for the macrorray sweepers, because the current method results in a tag overflow on larger cases such as the C5G7 benchmarks.
 
-    While the conversion between ray and surface fluxes will never be zero, it is unlikely that the naive implementation of these routines in this work are near optimal.
+    While the conversion between ray and surface fluxes will never be zero, it is unlikely that the naive implementation of these routines in this work are nearly optimal.
     A better implementation of these routines may significantly cut down on run-time costs.
   }
 
 
   \section{Conclusions}{\label{sec:MR:Conclusions}
-    The macroray method is a novel method which was motivated by previous studies on the macroband method that claimed significantly reduced number of rays with maintained accuracy.
+    The macroray method was motivated by previous studies on the macroband method that claimed significantly reduced number of rays with maintained accuracy.
     It was expected that the method, if extended to 3-D, would allow for significantly fewer track-segments, and thus lead to less computational work.
     For some problems, this is certainly the case; for \ac{VERA} progression problem 1E, a single \ac{IFBA} rod, this method was able to significantly reduce the number of segments to reach a converged result.
-    Additionally, for the shielded-box problem, this method demonstrated that it is able to act as more of a ``black box'' solver, allowing for users without deep knowledge of the method to use it.
+    Additionally, for the shielded-box problem, this method is able to act as more of a ``black box'' solver, allowing for users without deep knowledge of the method to use it.
 
     The method was then tested on the extended 3-D C5G7 benchmarks, and proved it was able to handle larger calculations.
-    Compared to the \ac{MRT} method on the same mesh, the macroray method typically better predicted the pin-powers, even when eigenvalue errors were larger.
-    Additionally, the macrorray method consistently showed the highest errors in the upper 1/3 of the fuel in the C5G7 benchmark cases, where the pin-powers are lower.
+    Compared to the \ac{MRT} method on the same mesh, the macroray method typically better-predicted the pin-powers, even when eigenvalue errors were larger.
+    Additionally, the macroray method consistently showed the highest errors in the upper 1/3 of the fuel in the C5G7 benchmark cases, where the pin-powers are lower.
 
     In the C5G7 benchmark cases, which do not have small absorber regions, the method was unable to significantly reduce the number of segments for similar accuracy.
     It is expected that the macroray method may show more beneficial results in cases where there are small strong absorber regions present.
     Additionally, the macroray method may show significant benefits for more arbitrary geometries, such as the shielded-box.
 
-    This work was is the first implementation of the macroray method for 3-D \ac{MOC} calculations.
+    This work is the first implementation of the macroray method for 3-D \ac{MOC} calculations.
     Due to the significantly different ray-tracing data structure, and sweeping order, separate routines needed to be written for this work.
     It is not surprising that the initial performance of these routines is worse than that of the \ac{MRT}-based routines, for similar numbers of segments, given that the \ac{MRT} sweeping routines have been optimized over the past several years of the \ac{CASL} project.
     The original performance of the 3-D \ac{MOC} using \ac{MRT} in MPACT was significantly worse \cite{Kochunas2013}.
