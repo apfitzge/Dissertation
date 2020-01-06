@@ -9,7 +9,7 @@
   \NewDocumentCommand{\modFunc}{}{\widehat{F}_2(\segopt)}
 
   The studies performed in this thesis have made extensive use of the \acf{LSA} introduced by \citet{Ferrer2016}.
-  Through the use of the approximation, as presented in the original work, instabilities and inefficiencies were found.
+  Through the use of the approximation, as presented in the original work, instabilities (due to implementation) and inefficiencies were found.
   This chapter aims to present two improvements made to this approximation that are a focus of this research: improved exponential tabulation \cite{Fitzgerald2018}, and an improved formulation for multi-physics and 2D/1D applications \cite{Fitzgerald2019}.
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -162,6 +162,7 @@
       \end{equation}
       The $\modFunc$ function can be tabulated in place of $F_2(\segopt)$; however, this does require an additional multiplication by the segment length $\nsegl$.
       But, by using the modified $\modFunc$ function, the underlying cause of the numerical instability of the \ac{LSMOC} transport sweep with near-void regions is addressed, and the more accurate interpolation (e.g. larger interpolation tables) is no longer necessary.
+      This modification of the function is not presented in the original work \cite{Ferrer2016}, but a similar modification is made in the implementation of the method in CASMO5 \cite{FerrerPersonalCommunications2019}.
 
       Although one approach is to tabulate the $\modFunc$ function in place of the $F_2(\segopt)$ function, and multiply by $\nsegl$ during evaluation, it is possible to tabulate a single function and compute the others.
       As stated in the previous section, the $H(\segopt)$ function could be tabulated again; however, tabulating an intermediate function,
@@ -275,6 +276,7 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}{\label{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}
     As stated in \cref{sec:MOC:LSA}, the original derivation of the moment-based \acf{LSA} from \citet{Ferrer2016} faced inefficiencies in problems with non-constant cross sections.
+    Multiphysics applications were not of interest to the original authors \cite{Ferrer2016}.
     The inefficiencies arose from the use of pre-computed coefficients, \cref{eq:MOC:LSA:C Matrix}, that must be re-computed if the cross sections change.
     The computation of these coefficients was approximately 10-20\% the run-time cost of a \ac{MOC} sweep.
     In multiphysics calculations, such as with \ac{TH} feedback, cross sections typically change every iteration, leading to significant overhead from re-computing these terms.
@@ -454,7 +456,7 @@
 
   \section{Results}{\label{sec:LSMOC:Results}
     This section highlights several of the key results found using the \ac{LSA} solver implemented in MPACT.
-    Only results using 2-D transport or the 2D/1D method in MPACT are shown, as 3-D transport results will be discussed in [REF].
+    Only results using 2-D transport or the 2D/1D method in MPACT are shown, as 3-D transport results will be discussed in \cref{ch:MacroRay}.
     Isotopic depletion is performed using the ORIGEN code, and \ac{TH} feedback is performed using \ac{CTF}.
     Although \cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications} provides the derivation of a spatially linear anisotropic source, the initial implementation in MPACT was limited to the isotropic scattering approximation.
     With the use of the \ac{TCP0} approximation, problems of interest are able to be simulated with acceptable levels of error.
@@ -700,6 +702,8 @@
         \paragraph{2A - Fuel Radius and Azimuthal Divisions}{
           For this problem, only the fractional radius found in \cref{ssec:LSMOC:Typical Pin Cell Depletion} is tested against the current default mesh.
           There was no significant affect in eigenvalue or pin powers by using the 2-ring model with an inner radius fraction of 0.875.
+          Even at 0 \ac{EFPD} (before Plutonium production), the eigenvalue difference can be large for the 2-ring models; this is hypothesized to be due to self-shielding affects.
+
           Next, the varied azimuthal divisions in the fuel were tested; this time testing a single azimuthal division.
           \Cref{fig:LSMOC:2A:Fuel Azimuthals:Eigenvalues} shows that there is a noticeable affect moving to a single azimuthal division;
             however, the mean difference is changed by less than 1 \ac{pcm}, and the max difference is actually improved by 3 \ac{pcm}.
@@ -714,7 +718,7 @@
         \paragraph{2A - Moderator Azimuthal Divisions}{
           The azimuthal divisions of the surrounding moderator seems to have a more significant effect on the accuracy of the calculation.
           As shown by \cref{fig:LSMOC:2A:Moderator Azimuthal:Eigenvalues}, using 4 azimuthal divisions seems to be sufficient; but moving to a single division is not feasible.
-          A single division ore than doubles the mean eigenvalue difference, and shows a consistent positive bias.
+          A single division more than doubles the mean eigenvalue difference, and shows a consistent positive bias.
 
           \begin{figure}
             \centering
@@ -1596,9 +1600,8 @@
       Several performance metrics are listed in \cref{tab:LSMOC:P9:Performance}.
       For the calculations with 696 spatial domains, the coarse \ac{LSA} uses 20\% more core-hours than the default \ac{FSA} calculation.
       However, the use of the coarse mesh saves a considerable amount of memory: 249 GB.
-      Additionally, it is not clear from these results that there is not an advantage from using the \ac{LSA}.
       Each of the coarse mesh cases required nearly 10\% more iterations, likely because of iterative inefficiency from the spatial decomposition (see \cref{ch:Spatial Decomposition}), which is different for the different meshes.
-      In fact, even the \ac{FSA} coarse mesh calculation was slightly slower than the \ac{FSA} calculation on the default mesh.
+      In fact, even the \ac{FSA} coarse mesh calculation was slightly slower than the \ac{FSA} calculation on the default mesh even though the number of mesh elements had been significantly reduced.
 
       \begin{table}[htbp]
         \centering

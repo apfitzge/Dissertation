@@ -393,6 +393,7 @@
       \subsubsection{VERA Problem 1E: 2-D}{\label{sssec:MR:1E:2-D}
         Each calculation in this section used a Tabuchi-Yamamoto \cite{TabuchiYamamotoQuad} directional quadrature with 64 azimuthal angles and 4 polar angles over $\fourpi$.
         Additionally, a self-shielding calculation was run to compute macroscopic cross sections for the problem.
+        The reference case uses the same directional quadrature and mesh with a very fine ray-spacing; this was chosen as the reference as this study is intended to isolate effects due to ray-tracing discretizations.
         Two different approaches were tested to determine the number of rays within a macroband: first, the width of the band is divided by the ray-spacing and the ceiling is taken.
         The second approach is to place a fixed number of rays within each band.
 
@@ -649,7 +650,7 @@
         \Cref{tab:MR:C5G7:Unrodded-Performance} lists the total run-time of each calculation.
         The \ac{MRT} calculation took 911 iterations to converge (unaccelerated), while the macroray method took 30 to converge.
         This gives an estimate for the accelerated \ac{MRT} method at 240 core-hours.
-        Unfortunately, this is quite significantly better than how the macroray method performed.
+        Unfortunately, this is quite significantly better in terms of run-time than the macroray method.
         A further discussion of this will be presented in \cref{sec:Discussion one the Performance of MacroRay}.
 
         \begin{table}[htbp]
