@@ -3,23 +3,31 @@
   \def\figpath{chapters/TransportTheory/figures/}
   \graphicspath{ {\figpath} }
 
-  In this chapter, the basic theory behind the neutron transport equation, and the numerical methods used to solve it are introduced.
+  In this chapter, the basic theory behind the neutron transport equation, and the numerical methods used to solve it, are introduced.
 
   \section{Neutron Transport Equation}{\label{sec:NTT:Neutron Transport Equation}
-    The mean behavior of neutrons in a (steady-state) system are described by the Boltzmann transport equation:
-    \begin{aequation}\label{eq:NTT:Boltzmann Transport}
-      &\Big[\dir\vdot\grad + \xst[\loc][E]\Big]\aflux[\loc][\dir][E]
-        = \\&\qquad\qquad
-        \rfourpi\Bigg[
-          \source[\loc][\dir][E]\\&\qquad\qquad
-          + \intl[0][\infty]\intl[\fourpi]\xss[][\loc][\dirprime\vdot\dir][\Eprime\to E]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\&\qquad\qquad
-          + \spect\intl[0][\infty]\nufis[\loc][\Eprime]\intl[\fourpi]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}
-      \Bigg],
-    \end{aequation}
-    \begin{equation*}
-      \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),\quad \forall t\geq 0,
-    \end{equation*}
-    where $\loc$ is the position vector, $\dir$ is the direction vector, $E$ is the neutron energy, $\CrossSection$ quantities are the macroscopic cross sections, $\AngularFlux$ is the angular flux, $\nu$ is the average number of neutrons produced per fission, and $\Spectrum$ is the fission neutron energy spectrum.
+    The mean behavior of neutrons in a (steady-state) system is described by the Boltzmann transport equation:
+    \begin{subequations}\label[subeqs]{eqs:NTT:Boltzmann Transport}
+      \begin{aequation}\label{eq:NTT:Boltzmann Transport}
+        &\Big[\dir\vdot\grad + \xst[\loc][E]\Big]\aflux[\loc][\dir][E]
+          = \\&\qquad\qquad
+          \rfourpi\Bigg[
+            \source[\loc][\dir][E]\\&\qquad\qquad
+            + \intl[0][\infty]\intl[\fourpi]\xss[][\loc][\dirprime\vdot\dir][\Eprime\to E]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\&\qquad\qquad
+            + \spect\intl[0][\infty]\nufis[\loc][\Eprime]\intl[\fourpi]\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}
+        \Bigg],
+      \end{aequation}
+      \begin{equation*}
+        \forall\loc\in V, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),
+      \end{equation*}
+      \begin{equation}\label{eq:NTT:Boundary Conditions}
+        \aflux[\loc][\dir][E] = \psi^{b}(\loc,\dir,E),
+      \end{equation}
+      \begin{equation*}
+        \forall\loc\in \delta V, \quad \forall\dir\vdot\vec{\hat{n}}<0, \quad, \forall E \in [0,\infty),
+      \end{equation*}
+    \end{subequations}
+    where $\loc$ is the position vector, $\dir$ is the direction vector, $E$ is the neutron energy, $\CrossSection$ quantities are the macroscopic cross sections, $\AngularFlux$ is the angular flux, $\nu$ is the average number of neutrons produced per fission, $\Spectrum$ is the fission neutron energy spectrum, $\delta V$ is the problem boundary, and $\vec{\hat{n}}$ is the outward surface normal vector.
 
     The position vector, $\loc$, is a column vector of the spatial coordinates:
     \begin{equation}\label{eq:NTT:Location Vector}
@@ -44,7 +52,7 @@
         \PolarCos \defined \cos(\Polar).
       \end{equation}
     \end{subequations}
-    This spatial and angular coordinates system is depicted visually in \cref{fig:NTT:Transport Coordinate System}.
+    The spatial and angular coordinates systems are depicted visually in \cref{fig:NTT:Transport Coordinate System}.
 
     \begin{figure}[h]
       \centering
@@ -66,7 +74,10 @@
     The external source, $\source[\loc][\dir][E]$, is a generic term that accounts for neutrons produced by all other processes that are not dependent on the angular flux.
 
     Generally, reactor physicists are interested in reaction rates, that are useful for determining power production, rather than the angular flux.
-    A reaction rate at a specific point, direction, and energy can be computed as the product of the reaction cross section and the angular flux.
+    A reaction rate at a specific point, direction, and energy can be computed as the product of the reaction cross section and the angular flux,
+    \begin{equation}\label{eq:NTT:Reaction Rate}
+      R_r(\loc,\dir,E) = \Sigma_r(\loc,E)\aflux[\loc][\dir][E].
+    \end{equation}
     Integration over a volume, energy range, and direction gives a total reaction rate.
     These quantities are the primary figures of merit for engineering applications.
     For convenience, it is useful to define derived quantities that are used in these calculations.
@@ -107,18 +118,26 @@
     One of the most common calculations in reactor analysis is the simulation of reactor systems at operating conditions.
     A reactor operating at normal conditions is effectively unchanging in time.
     The common technique for solving this class of problems is to transform \cref{eq:NTT:Boltzmann Transport} into an eigenvalue problem, such that the fission source is scaled to preserve neutron balance:
-    \begin{aequation}\label{eq:NTT:Eigenvalue Transport Problem}
-      \Big[\dir\vdot\grad &+ \xst\Big]\aflux
-        =
-        \rfourpi\Bigg[
-          \source\\
-          &+ \intl[0][\infty]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\\qquad\qquad
-          &+ \frac{\spect}{\keff}\intl[0][\infty]\nufis\sflux[\loc][\Eprime]\dif{\Eprime}
-        \Bigg],
-    \end{aequation}
-    \begin{equation*}
-      \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),
-    \end{equation*}
+    \begin{subequations}\label[subeqs]{eqs:NTT:Eigenvalue Transport Problem}
+      \begin{aequation}\label{eq:NTT:Eigenvalue Transport Problem}
+        \Big[\dir\vdot\grad &+ \xst\Big]\aflux
+          =
+          \rfourpi\Bigg[
+            \source\\
+            &+ \intl[0][\infty]\intl[\fourpi]\xss\aflux[\loc][\dirprime][\Eprime]\ddirprime\dif{\Eprime}\\\qquad\qquad
+            &+ \frac{\spect}{\keff}\intl[0][\infty]\nufis\sflux[\loc][\Eprime]\dif{\Eprime}
+          \Bigg],
+      \end{aequation}
+      \begin{equation*}
+        \forall\loc\in V, \quad \forall\dir\in\fourpi,\quad \forall E\in[0,\infty),
+      \end{equation*}
+      \begin{equation}\label{eq:NTT:Boundary Conditions}
+        \aflux[\loc][\dir][E] = \psi^{b}(\loc,\dir,E),
+      \end{equation}
+      \begin{equation*}
+        \forall\loc\in \delta V, \quad \forall\dir\vdot\vec{\hat{n}}<0, \quad, \forall E \in [0,\infty),
+      \end{equation*}
+    \end{subequations}
     where $\keff$ is the inverse of the largest eigenvalue of the system $\Eigenvalue_1$.
     The multiplication factor, $\keff$, indicates the criticality of the system.
     If $\keff$ is one, then the system is \emph{critical} and will remain at the current conditions unless otherwise changed.
@@ -145,12 +164,12 @@
       This process is repeated until the neutron leaks out of the system or is absorbed, possibly inducing a fission event with other neutrons to simulate, for many different neutrons.
 
       Monte Carlo methods give a probabilistic estimate of the true solution as well as an associated uncertainty in that result.
-      This class of methods is generally considered to be the most accurate because they are capable of representing the phase-space continuously.
-      As more particles are simulated the uncertainty in the estimated solution is reduced.
+      This class of methods is generally considered to be the most accurate because it is capable of representing the phase-space continuously.
+      As more particles are simulated, the uncertainty in the estimated solution is reduced.
 
       For whole-core reactor analysis, the quantities of interest would typically require an extremely large number of individual neutron histories to be simulated, typically trillions.
       Variance reduction techniques are an area of active research that allow for quantities of interest to be estimated accurately with fewer histories. % [CITATION].
-      However, generally Monte Carlo methods remain too expensive for whole-core calculations, and have challenges with multiphysics and time-dependent problems.
+      However, Monte Carlo methods generally remain too expensive for whole-core calculations, and have challenges with multiphysics and time-dependent problems.
     }
 
     \subsection{Deterministic Methods}{\label{ssec:NTT:Deterministic Methods}
@@ -159,10 +178,10 @@
       In particular, spatial, directional, and energy discretization are common in these methods.
       \input{macros/multigroup.tex}
       \subsubsection{The Multigroup Approximation}{\label{sssec:NTT:The Multigroup Approximation}
-        The multigroup approximation is an approximation that is common in nearly every deterministic neutron transport method.
+        The multigroup approximation is common in nearly every deterministic neutron transport method.
         This approximation discretizes the energy variable into discrete energy groups.
-        Generally, cross sections have strong dependence on the energy of incident neutrons; this dependence is typically not smooth due to the presence of resonances.
-        Around resonance energies, the cross sections are increased significantly, as observed in \cref{fig:NTT:Cross Section plot}.
+        Generally, cross sections have strong dependence on the energy of incident neutrons; this dependence is typically not smooth, due to the presence of resonances.
+        Around resonance energies, the cross sections increase significantly, as observed in \cref{fig:NTT:Cross Section plot}.
         The data of this plot was provided by the ENDF-8.0 nuclear reaction data library \cite{ENDF8}.
 
         \begin{figure}[h]
@@ -178,7 +197,7 @@
         \begin{aequation}\label{eq:NTT:MGEV Transport Problem w/ Anisotropic XS}
           \left[\dir\vdot\grad + \xst[\loc,\dir]\right]\aflux
             = \rfourpi\Bigg[&\suml[\gprime=1][G]\intl[\fourpi]\xss[][\loc][\dir,\dirprime]\aflux[\loc][\dirprime][\gprime]\ddirprime \\
-            + &\frac{\spect}{\keff}\suml[\gprime=1][G]\nufis[\loc,\dir]\sflux[\loc]\Bigg]
+            + &\frac{\spect}{\keff}\suml[\gprime=1][G]\nufis[\loc,\dir]\sflux[\loc]\Bigg],
         \end{aequation}
         \begin{equation*}
           \forall\loc, \quad \forall\dir\in\fourpi,\quad \forall g\in\{1,2,\ldots,G\},
@@ -291,7 +310,7 @@
             \aflux \approx \suml[l=0][N]\suml[n=-l][l]\afluxmom\SH.
           \end{equation}
 
-          The \ac{PN} equations can be found by multiply the multi-group transport equation (\cref{eq:NTT:MGEV Transport Problem}) by $\SH$ for each valid $(l,n)$ pair under the specified order, and integrating over $\fourpi$.
+          The \ac{PN} equations can be obtained by multiplying the multi-group transport equation (\cref{eq:NTT:MGEV Transport Problem}) by $\SH$ for each valid $(l,n)$ pair under the specified order, and integrating over $\fourpi$.
           This yields a system of $(N+1)^2$ equations for each energy group; the number of equations increases quadratically with increasing orders, making \ac{PN} methods less feasible for large calculations.
         }
 
@@ -313,8 +332,8 @@
           \end{subequations}
 
           There are two common forms of quadrature sets that are commonly used in transport calculations: level-symmetric and product quadratures.
-          The level-symmetric quadratures include directions that are evenly distributed over the unit-sphere; this is optimal in situations where each direction has similar variation.
-          However, typical reactor designs have significantly less variation in the axial ($z$) direction which fuel rods are oriented along.
+          The level-symmetric quadratures include directions that are (roughly) evenly distributed over the unit-sphere; this is optimal in situations where each direction has similar variation.
+          However, typical reactor designs have significantly less variation in the axial ($z$) direction, along which fuel rods are oriented.
           In this situation, neutrons with directions close to the $z$-axis are modeled poorly because there are few azimuthal angles at these polar levels, as is demonstrated in \cref{fig:NTT:S8 Quadrature}.
           These steep polar angles are important in reactor analysis due to self-shielding effects, which are strongly dependent on polar angle. % [CITATION].
 
@@ -351,9 +370,9 @@
   \section{State-of-the-Art 3-D Computational Transport Methods}{\label{sec:NTT:3-D Transport Methods}
     Until recently, whole-core neutronics calculations were carried out primarily through a two-step procedure.
     First, a transport method was used to compute homogenized cross section data for assemblies, and then 3-D diffusion was used to solve the problem.
-    More recently, however, research has been focused on a one-step approach, so called direct whole-core transport.
-    In such an approach, the 3-D reactor is directly modeled using transport methods.
-    There are many different transport methods which are currently being researched; this section seeks to give an overview of several state-of-the-art 3-D transport methods.
+    More recently, research has focused on a one-step approach, so-called direct whole-core transport.
+    In this approach, the 3-D reactor is directly modeled using transport methods.
+    There are many different transport methods that are currently being researched; this section seeks to give an overview of several state-of-the-art 3-D transport methods.
 
     \subsection{S\texorpdfstring{$P_N$}{PN}}{\label{ssec:3T:SPN}
       \DeclareDocumentCommand{\xstr}{ m }{\CrossSection_{tr,#1}}
@@ -362,7 +381,7 @@
       \DeclareDocumentCommand{\xss}{ m }{\CrossSection_{s,#1}}
       \DeclareDocumentCommand{\fluxm}{ m }{ \phi_{#1} }
       \DeclareDocumentCommand{\Q}{}{Q}
-      \DeclareDocumentCommand{\D}{}{}
+      \DeclareDocumentCommand{\D}{}{D}
 
       The \acf{SPN} method was introduced by \citet{SPN} in 1961, and was seen as a middle ground between diffusion and transport \cite{Mcclarren2010}.
       The \ac{SPN} equations were first derived by examining the form of the 1-D \ac{PN} equations; in fact, the 1-D \ac{SPN} and \ac{PN} equations are equivalent.
@@ -397,7 +416,7 @@
       This simple relation between 1-D and 3-D equations only holds for the special $P_1$ case.
       The \ac{SPN} method uses a similar modification for higher-order $P_N$ equations.
       This results in some lost accuracy compared to \ac{PN}, but the \ac{SPN} equations are significantly simpler to solve \cite{SPN,Mcclarren2010}.
-      Unlike \ac{PN}, \ac{SPN} equations do not converge to the transport solution as $N\to\infty$, but do generally have higher accuracy than diffusion (for orders of $N > 1$).
+      Unlike \ac{PN}, \ac{SPN} equations do not converge to the transport solution as $N\to\infty$, but they do generally have higher accuracy than diffusion (for orders of $N > 1$).
       Generally, S$P_3$ or S$P_5$ are considered to have sufficient accuracy, and are generally less computationally intensive than transport methods.
 
       The mono-energetic \ac{SPN} equations can be written as
@@ -421,8 +440,8 @@
     }
 
     \subsection{Method of Characteristics}{\label{ssec:3T:Method of Characteristics}
-      The \acf{MOC} is a technique used in mathematics to solve \acp{PDE}, by transforming a \ac{PDE} into a system of \acp{ODE}.
-      The method was first applied to the neutron transport problem by \citeauthor{Askew1972} in 1972 \cite{Askew1972}, but only began to see real use in the 1980's \cite{Halsall1980}.
+      The \acf{MOC} is a technique used to solve first-order \acp{PDE}, by transforming the \ac{PDE} into a system of \acp{ODE}.
+      The method was first applied to the neutron transport problem by \citeauthor{Askew1972} in 1972 \cite{Askew1972}, but it only began to see real use in the 1980's \cite{Halsall1980}.
       The \ac{MOC} transforms the transport equation into the characteristic form, by examining the equation along straight neutron paths through the spatial domain.
       By examining the equation along one of these characteristic ``tracks'' or ``rays'', the average angular flux along the track within a cell can be calculated.
       The scalar flux can then be found by collecting the average angular flux along all tracks passing through this region, in a numerical integration over space and angle.
@@ -433,25 +452,25 @@
 
       The \ac{CDP} is a method similar to both \ac{CP} method and the \ac{MOC} \cite{Hong1999,Liu2014}.
       The \ac{CDP} uses ray-tracing to evaluate transmission probabilities between cells.
-      However, it only considers transmission probabilities between cells which are traversed by a shared characteristic ray, rather than considering the transmission probability between all cells as in the \ac{CP} methods.
-      This significantly cuts down on the computational resources required by traditional \ac{CP} methods.
+      However, it only considers transmission probabilities between cells that are traversed by a shared characteristic ray, rather than considering the transmission probability between all cells as in the \ac{CP} methods.
+      This significantly reduces the computational resources required by traditional \ac{CP} methods.
       This method has also shown improvements over \ac{MOC} in cases with few unique geometries and constant material properties throughout the simulation; however these conditions are not applicable in problems of interest to industry.
 
       \ac{MOC} has seen extensive use as a 2-D transport method in lattice codes \cite{CASMO-4,Ferrer2016}, and as a radial transport method in 2D/1D method \cite{MPACT2016,Collins2016,DeCART,Lee2006}.
       However, due to the large number of segments generated by 3-D ray-tracing, the \ac{MOC} has been viewed as too expensive for realistic applications \cite{Sanchez2012}.
-      Although expensive, the 3-D \ac{MOC} is typically seen as the ``gold-standard'' of transport methods due to its' general treatment of geometry, ability to handle anisotropic scattering, and accuracy.
+      Nonetheless, 3-D \ac{MOC} is typically seen as the ``gold-standard'' of transport methods due to its general treatment of geometry, ability to handle anisotropic scattering, and accuracy.
       For this reason, there has been active research on improving the 3-D \ac{MOC}.
 
       \citet{Kochunas2013} developed a hybrid shared/distributed parallel algorithm for 3-D \ac{MOC}.
       This contribution significantly increased the ability to parallelize 3-D \ac{MOC} on modern computer clusters, and showed good parallel scaling on thousands of cores.
-      Other works investigated the use of existing \acf{LSA} for 3-D \ac{MOC} applications \cite{Gunow2018}, which reduces the number of segments generated during ray-tracing.
+      Other works investigated the \acf{LSA} for 3-D \ac{MOC} applications \cite{Gunow2018}, which reduces the number of segments generated during ray-tracing.
       \citet{Sciannandrone2016} developed optimized tracking strategies (chord-classification) for locally extruded geometries for 3-D \ac{MOC} calculations.
-      These optimized strategies did not reduce the number of tracks or segments generated, but significantly reduced the memory required to store them.
+      These optimized strategies did not reduce the number of tracks or segments generated, but they significantly reduced the memory required to store them.
       Still, 3-D \ac{MOC} remains too expensive for usage outside work in academia or national laboratories.
 
       The \ac{MOC} is the primary subject of this thesis work.
-      As such, \cref{ch:The Method of Characteristics} has been devoted to the details of the method, and \cref{sec:MOC:Ray-Tracing} expands upon the details of current ray-tracing techniques used in \ac{MOC}.
-      \Cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications} details improvements made to the \ac{MOC} in this thesis work, and \cref{ch:MacroRay} details a newly investigated ray-tracing method.
+      \Cref{ch:The Method of Characteristics} is devoted to the details of the method, and \cref{sec:MOC:Ray-Tracing} expands upon the details of current ray-tracing techniques used in \ac{MOC}.
+      \Cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications} details improvements made to the \ac{MOC} in this thesis work, and \cref{ch:MacroRay} describes a newly investigated ray-tracing method.
     }
 
     % Here just to make sure previous macros didn't screw anything up
@@ -468,7 +487,7 @@
         \item{Couple the planes with transverse leakages.}
       \end{enumerate}
       These methods were based on the assumption that reactors may be very heterogeneous in the radial direction, but in the axial direction they are relatively homogeneous.
-      The primary difference between these two methods is in the transverse leakage terms; in CRX the transverse leakages are anisotropic, but in DeCART the leakages are isotropic.
+      The primary difference between the two methods is in the transverse leakage terms; in CRX the transverse leakages are anisotropic, but in DeCART the leakages are isotropic.
       To distinguish these methods, they will be referred to as anisotropic and isotropic 2D/1D methods.
 
       Following the relative success of these methods, other research groups have followed in their paths.
@@ -477,8 +496,8 @@
 
       \citet{Stimpson2015} implemented an anisotropic 2D/1D method in MPACT using a Fourier expansion of the azimuthal angles for the axial and radial transverse leakages.
       \citet{Jarrett2018} further improved upon \citetp{Stimpson2015} work by introducing a 2D/1D method using $P_3$ in the axial direction.
-      2D/1D methods are fundamentally based on the idea that heterogeneity in the axial direction is very low;
-      thus, in cases where this is not true these methods have been observed to break down, or yield incorrect solutions.
+      2D/1D methods are fundamentally based on the idea that heterogeneity in the axial direction is low;
+      in cases where this is not true these methods have been observed to break down, or yield solutions with larger errors.
 
       \DeclareDocumentCommand{\aflux}{}{\psi}
       \DeclareDocumentCommand{\xst}{ O{t} }{\Sigma_{#1}}
@@ -491,18 +510,18 @@
       \subsubsection{Derivation}{\label{sssec:3T:Derivation}
         The details of the 2D/1D equations have implications on results in \cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}.
         In this section, the 2D/1D equations are derived.
-        Begin with the mono-energetic transport equation
+        We begin with the mono-energetic transport equation
         \begin{equation}\label{eq:2D/1D:Transport}
           \dir\vdot\grad\aflux(\loc,\dir) + \xst(\loc)\aflux(\loc,\dir) = \frac{Q(\loc)}{\fourpi},
         \end{equation}
         where $Q(\loc)$ is the source.
 
-        The 2D/1D methods divide the transport equation into radial (2-D) and axial (1-D) equations.
+        2D/1D methods divide the transport equation into radial (2-D) and axial (1-D) equations.
         The streaming term, $\dir\vdot\grad\aflux$ can be divided into the radial and axial components:
         \begin{equation}\label{eq:2D/1D:Streaming Split}
           \dir\vdot\grad\aflux = (\dir\vdot\grad)_{xy}\aflux + \PolarCos\pderiv{\aflux}{z}.
         \end{equation}
-        The radial equation can be found by first separating the axial derivative from the streaming term:
+        The radial equation is obtained by first separating the axial derivative from the streaming term:
         \begin{equation}\label{eq:2D/1D:Radial Eqn. 1}
           \left[(\dir\vdot\grad)_{xy} + \xst\right]\aflux(\loc,\dir) = \frac{Q(\loc)}{\fourpi} - \PolarCos\pderiv{\aflux}{z}.
         \end{equation}
@@ -532,12 +551,13 @@
         \end{equation}
         and integrating over a radial area.
         This radial area can be a fine cell (transport cell), but is typically a coarser discretization such as a pin cell \cite{Jarrett2018}.
-        Operate on \cref{eq:2D/1D:Axial Eqn. 1} by
+        We operate on \cref{eq:2D/1D:Axial Eqn. 1} by
         \[
           \frac{1}{A_{ij}}\intl[x_{i-1/2}][x_{i+1/2}]\intl[y_{j-1/2}][y_{j+1/2}](\vdot)\dif{x}\dif{y}
           =
           \frac{1}{A_{ij}}\iint_{ij}(\vdot)\dif{x}\dif{y},
         \]
+        to obtain:
         \begin{subequations}\label[subeqs]{eqs:2D/1D:Axial}
           \begin{equation}\label{eq:2D/1D:Axial}
             \left[\PolarCos\pderiv{}{z}+\xst[t,k,ij](z,\dir)\right]\aflux_{ij}(z,\dir)
@@ -550,7 +570,7 @@
           where $s$ indicates a surface for the cardinal directions $\{N,S,E,W\}$.
           For hexagonal pins there would instead be six directions to loop over; for simplicity this work assumes cartesian pin cells.
         \end{subequations}
-        Typically the coarse cell cross sections are isotropic, but polar dependence has been investigated \cite{Jarrett2018}.
+        Typically the coarse cell cross sections are taken to be isotropic, but polar dependence has been investigated \cite{Jarrett2018}.
 
         The radial equations, \cref{eqs:2D/1D:Radial Eqn.}, are solved by a 2-D transport method, such as \ac{MOC}, while the axial equations, \cref{eqs:2D/1D:Axial}, are solved by either a transport method or approximate method such as diffusion \cite{Collins2016,Jarrett2018}.
         The radial equations yield surface fluxes on the pin faces, while the axial equations yield surface fluxes on the axial planar faces.
@@ -559,7 +579,7 @@
       }
 
       \subsubsection{Transverse Leakage Splitting}{\label{sssec:3T:Transverse Leakage Splitting}
-        \Cref{eqs:2D/1D:Radial Eqn.} gives no guarantee that the right-hand-side will be a positive source.
+        \Cref{eqs:2D/1D:Radial Eqn.} give no guarantee that the right-hand-sides are positive.
         Negative sources present considerable challenges to iteration stability when using non-linear acceleration methods such as \ac{CMFD} \cite{Jarrett2018}.
         The transverse leakage splitting method \cite{Stimpson2015,Kelley2015} was developed to ``split'' the transverse leakage term such that the total source ($Q+\TL$) is non-negative.
         A split term, $\L_{z}$, is defined
@@ -583,7 +603,7 @@
 
         Because splitting introduces an approximation, it generally decreases the accuracy of the solution.
         Thus, the transverse splitting method is typically use only in cells that have a negative source.
-        More recently, alternative methods have been investigated \cite{Zhao2018}, but will not be covered in this work.
+        More recently, alternative methods have been investigated \cite{Zhao2018}, but they will not be covered in this work.
       }
     }
 
@@ -594,13 +614,14 @@
 
     \subsection{Extruded 3-D Methods}{\label{ssec:3T:Extruded 3-D Methods}
       Due to the wide adoption of 2D/1D methods in recent years, some current research paths have turned towards \emph{extruded mesh} 3-D transport methods.
+      An axially extruded mesh is a mesh that uses the same radial discretization for all axial positions in the domain.
       These methods generally rely on the mesh of the problem to be an axially extruded mesh, and use 3-D transport methods that rely on that assumption.
       This an active area of research and while they usually rely on similar assumptions, many different approaches have been taken.
 
-      The PROTEUS \cite{Marin-Lafleche2013} code introduced a new transport methodology which combined 2-D \ac{MOC} with a discontinuous Galerkin method (finite-elements) for treatment of the axial variable.
-      Other groups have used similar approaches but with different axial basis functions; STREAM \cite{Zheng2017} uses linear orthogonal functions, and recent work at \ac{UM} \cite{HerringExtruded} has utilized the Legendre polynomials.
+      The PROTEUS \cite{Marin-Lafleche2013} code introduced a new transport methodology that combined 2-D \ac{MOC} with a discontinuous Galerkin method (finite-elements) for treatment of the axial variable.
+      Other groups have used similar approaches, but with different axial basis functions; STREAM \cite{Zheng2017} uses linear orthogonal functions, and recent work at \ac{UM} \cite{HerringExtruded} has utilized the Legendre polynomials.
       Recent work on STREAM has used a diamond-difference method for approximating axial behavior.% [CITATION].
-      Generally, these methods do not suffer from the same inaccuracies of 2D/1D methods, but do still rely on extruded meshes.
+      Generally, these methods do not suffer from the same inaccuracies of standard 2D/1D methods, but they do still assume the use of extruded meshes.
 
       The \acf{LEAF} method, developed by \citet{Yamamoto2017} in the GENESIS code, is an extruded method which is distinct from the PROTEUS-like methods.
       This method is the successor of the ASMOC3D method \cite{Giho2008}.
@@ -609,7 +630,7 @@
       A transport calculation is then carried out in each of these characteristic planes by the method of short characteristics.
 
       The extruded 3-D transport methods seem to have accuracy benefits over the more traditional 2D/1D methods;
-        however, are usually more computationally expensive, though reducing this cost is an active area of research.
+        however, they are usually more computationally expensive, though reducing this cost is an active area of research.
       Unlike general 3-D transport methods, such as 3-D \ac{MOC}, these extruded methods are unable to handle general geometries.
       This may be of concern in future reactor designs, but in most modern reactor designs this is an appropriate simplification to make.
     }
@@ -630,20 +651,28 @@
       \begin{algorithmic}[1]
         \State{Begin iteration $j$ with a known boundary conditions, scalar flux estimate, $\ScalarFlux^{(j)}(x)$, and a $k$-eigenvalue estimate, $\keff^{j}$.}
         \State{Perform a transport sweep:
-          \begin{equation}\label{eq:NTT:Source Iteration:Transport Sweep}
-            \left[\PolarCos\pderiv{}{x} + \CrossSection_t(x)\right]\AngularFlux^{(j+1)}(x,\PolarCos) = \frac{1}{2}\left[\CrossSection_s(x) + \frac{1}{\keff^{(j)}}\nu\CrossSection_f(x)\right]\ScalarFlux^{(j)}(x),
-          \end{equation}
-          \begin{equation*}
-            \forall x\in [0,X], \quad \forall\PolarCos \in [-1, 1].
-          \end{equation*}
+          \begin{subequations}\label[subeqs]{eqs:NTT:Source Iteration:Transport Sweep}
+            \begin{equation}\label{eq:NTT:Source Iteration:Transport Sweep}
+              \left[\PolarCos\pderiv{}{x} + \CrossSection_t(x)\right]\AngularFlux^{(j+1)}(x,\PolarCos) = \frac{1}{2}\left[\CrossSection_s(x) + \frac{1}{\keff^{(j)}}\nu\CrossSection_f(x)\right]\ScalarFlux^{(j)}(x),
+            \end{equation}
+            \begin{equation*}
+              \forall x\in [0,X], \quad \forall\PolarCos \in [-1, 1],
+            \end{equation*}
+            \begin{equation}\label{eq:NTT:Source Iteration:BC-Left}
+              \AngularFlux^{(j)}(0,\PolarCos) = \AngularFlux^b(\PolarCos), \quad \PolarCos\in[0,1],
+            \end{equation}
+            \begin{equation}\label{eq:NTT:Source Iteration:BC-Right}
+              \AngularFlux^{(j)}(X,\PolarCos) = \AngularFlux^b(\PolarCos), \quad \PolarCos\in[-1,0].
+            \end{equation}
+          \end{subequations}
         }
         \State{Update the scalar flux, and the eigenvalue for the next iteration:
           \begin{subequations}\label[subeqs]{eqs:NTT:Source Iteration:Update}
             \begin{equation}\label{eq:NTT:Source Iteration:Scalar Flux Update}
-              \ScalarFlux^{(j+1)}(x) = \intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
+              \ScalarFlux^{(j+1)}(x) = \left(\intl[-1][1]\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos}\right) \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
             \end{equation}
             \begin{equation}\label{eq:NTT:Source Iteration:Eigenvalue Update}
-              \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x}}.
+              \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x} + \intl[-1][0]\AngularFlux^{(j+1)}(0,\PolarCos)\dif{\PolarCos}  + \intl[0][1]\AngularFlux^{(j+1)}(X,\PolarCos)\dif{\PolarCos}}.
             \end{equation}
           \end{subequations}
         }
@@ -652,14 +681,14 @@
     \end{algorithm}
 
     \subsection{Transport Acceleration}{\label{ssec:NTT:Transport Acceleration}
-      While \cref{alg:NTT:Source Iteration} is valid, it typically converges very slowly, requiring many iterations to get reasonable results.
-      In full-core calculations, a single transport sweep is typically the most computationally expensive operation and using \cref{alg:NTT:Source Iteration} is not feasible.
-      There has been considerable effort in developing methods that accelerate transport calculations by using a lower-order calculation, typically based on the diffusion approximation.
+      While \cref{alg:NTT:Source Iteration} is valid, it typically converges very slowly, requiring many iterations to obtain reasonable results.
+      In full-core calculations, a single transport sweep is typically the most computationally expensive operation. For this reason, solving practical problems using \cref{alg:NTT:Source Iteration} is not feasible.
+      There has been considerable effort in developing methods that accelerate the convergence of transport calculations by using a lower-order calculation, typically based on the diffusion approximation.
       These methods often reduce the number of iterations from O(1000) to O(10) for thermal reactor systems.
 
       While other acceleration methods exist \cite{Hebert2017}, the most common for $k$-eigenvalue problems are \ac{NDA} methods \cite{Smith2002}, typically using the \ac{CMFD} method \cite{Smith1983}.
       \Cref{alg:NTT:NDA} lists the standard \ac{NDA} algorithm for a 1-D mono-energetic $k$-eigenvalue problem.
-      The primary difference between \ac{CMFD} and \ac{NDA} is that \ac{CMFD} introduces the concept of a second, coarser spatial grid, while \ac{NDA} uses the same mesh as the transport problem.
+      The primary difference between \ac{CMFD} and \ac{NDA} is that \ac{CMFD} introduces the concept of a second, coarser spatial grid, while \ac{NDA} uses the same spatial mesh as the transport problem.
 
       The \ac{CMFD} acceleration method has been shown to significantly reduce computational transport run-times \cite{Smith2002,Anistratov2011,Collins2016}.
       There have been several improvements upon the original \ac{CMFD} formulation \cite{Smith1983}, such as p\ac{CMFD} \cite{Cho2002} and od\ac{CMFD} \cite{Zhu2016}.
@@ -712,7 +741,7 @@
                 \Current^{(j+1)}(x) = \intl[-1][1]\PolarCos\AngularFlux^{(j+1)}(x,\PolarCos)\dif{\PolarCos} \frac{\Phi_0}{\frac{1}{X}\intl[0][X]\intl[-1][1]\AngularFlux^{(j+1)}(x',\PolarCos)\dif{\PolarCos}\dif{x'}},
               \end{equation}
               \begin{equation}\label{eq:NTT:NDA:Eigenvalue Update}
-                \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x}}.
+                \keff^{(j+1)} = \frac{\intl[0][X]\nu\CrossSection_f\ScalarFlux^{(j+1)}(x)\dif{x}}{\intl[0][X]\CrossSection_a\ScalarFlux^{(j+1)}(x)\dif{x} + \intl[-1][0]\AngularFlux^{(j+1)}(0,\PolarCos)\dif{\PolarCos}  + \intl[0][1]\AngularFlux^{(j+1)}(X,\PolarCos)\dif{\PolarCos}}.
               \end{equation}
             \end{subequations}
           }
