@@ -10,7 +10,7 @@
     Neutron diffusion codes can perform whole-core calculations, on a typical workstation, in relatively short run-times.
     However, with the recent shift towards higher fidelity methods such as \ac{SN}, and \ac{MOC} \cite{Askew1972}, more significant computational resources are necessary.
     These high fidelity methods allow for more detailed analysis, through finer resolution and use of fewer approximations, but typically take far more time to perform calculations.
-    Although processor clock-speeds have significantly improved, in the past several years computer cores have, for the most part, not gotten faster.
+    Although processor clock-speeds have significantly improved, in the past several years computer cores have, for the most part, not become faster.
     Instead, computers have adopted multi-core architectures to continue to improve performance through parallel computations.
     Therefore, to reduce the run-times (real-time) of high fidelity simulations, it is thus necessary to rely on parallelism.
 
@@ -23,7 +23,8 @@
     This model also requires communication between the processors/subdomains.
 
     In Monte-Carlo simulations, it is common that spatial decomposition involves duplication of some spatial locations.
-    However, in deterministic transport methods, each domain is typically \emph{partitioned}, that is the domain is split without any overlap between subdomains.
+    However, in deterministic transport methods, each domain is typically \emph{partitioned};
+    the spatial domain is split with no overlap between subdomains.
     The MPACT \cite{MPACT2016} code has the ability to decompose two domains: space and direction.
     In MPACT, each discrete direction has a calculable amount of work, and the decomposition can simply be performed by a greedy algorithm; in general, the same cannot be said of the spatial domain.
     This chapter focuses on improvements to the spatial decomposition techniques used in MPACT.
@@ -32,13 +33,13 @@
 
     As diffusion has been the method of choice for so long in the reactor physics field, spatial partitioning techniques common in other fields have, largely, not been applied.
     Transport codes such as MPACT \cite{MPACT2016}, or OpenMOC \cite{Gunow2018} used simple spatial partitioning methods that divided the core into uniformly sized blocks.
-    However, the spatial partitioning of a reactor can be abstracted to a graph partitioning problem \cite{Fitzgerald2017}, which has been well studied in computer science \cite{Elsner1997} and applied to other simulation fields such as computational fluid dynamics \cite{Yao1998}.
+    However, the spatial partitioning of a reactor can be abstracted to a graph partitioning problem \cite{Fitzgerald2017}, which has been well-studied in computer science \cite{Elsner1997} and applied to other simulation fields such as computational fluid dynamics \cite{Yao1998}.
     In general, the graph partitioning problem is \emph{NP-complete}, meaning that a partitioning cannot be easily verified as optimal; therefore, graph partitioning relies on approximate heuristic methods.
     Many different methods have been developed for graph partitioning, several of which are discussed in \cref{sec:Spatial Decomposition:Applied Graph Theory}.
 
     There are also existing libraries for graph partitioning, such as METIS\cite{METIS} and Zoltan \cite{Boman2012}.
     These libraries have been used by codes such as PROTEUS and Rattlesnake \cite{Marin-Lafleche2013,Rattlesnake}.
-    However, due to constraints on the spatial decomposition which may not be satisfied by these libraries, this work has opted not to use these libraries.
+    However, due to constraints on the spatial decomposition that may not be satisfied by these libraries, this work has opted not to use these libraries.
     This is discussed in detail in \cref{sec:Spatial Decomposition:Spatial Decomposition in MPACT}.
 
     The remainder of this chapter is structured as follows:
@@ -62,7 +63,7 @@
     In general, it is possible to use the computational cells as the smallest unit in the decomposition.
     However, this causes the decomposition problem to become an unstructured mesh partitioning problem.
     This has not been done in MPACT because communication would become significantly more complicated.
-    Additionally, there would be more re-entrant rays which would have negative impacts on the rate of convergence.
+    Additionally, there would be more re-entrant rays, which would negatively affect the rate of convergence.
 
     \begin{figure}
       \centering
@@ -81,15 +82,15 @@
     \end{figure}
 
     MPACT has had two spatial decomposition methods in the past: manual decomposition, and assembly-based decomposition.
-    A user may manually enter a decomposition \cite{StimpsonPartitioning2017}, but it is time consuming to construct a balanced decomposition and will likely still be suboptimal to some degree.
+    A user may manually enter a decomposition \cite{StimpsonPartitioning2017}, but it is time-consuming to construct a balanced decomposition, and the result will likely be suboptimal.
     An automated method exists that recursively bisects the core using Morton-ordering \cite{Morton1966} applied to the reactor assembly geometries.
-    While this method is automated, it often yields very imbalanced domains, and also restricts the number of subdomains that can be used.
+    While this method is automated, it often yields very imbalanced domains, and it also restricts the number of subdomains that can be used.
 
     Previous work has shown that spatial decomposition of reactors can be abstracted to a graph partitioning problem \cite{Fitzgerald2017}.
     The use of graph partitioning methods in MPACT is expected to solve the issues encountered in each of the two approaches described above.
     These methods can be used to decompose into an arbitrary number of domains with high quality results, without user input.
 
-    Existing graph partitioning libraries such as METIS \cite{METIS} partition graphs very efficiently and have very high quality results.
+    Existing graph partitioning libraries such as METIS \cite{METIS} partition graphs efficiently and have high quality results.
     To use all given processors, MPACT requires that each spatial subdomain contains at least one module, i.e. no partition can be empty.
     However, in some cases, particularly when the number of partitions is high, METIS may generate empty partitions.
     This means METIS cannot be used to decompose the core into an arbitrary number of subdomains without modifying the resulting partitions.
@@ -119,7 +120,7 @@
     In this work, methods were separated into two distinct categories: partitioning methods and partition refinement (improvement) methods.
     Partitioning methods give a near-balanced partitioning for a given graph.
     Refinement methods attempt to reduce communication between existing partitions in a graph.
-    As applied in MPACT, these refinement methods typically did not significantly reduce communication.
+    As applied in MPACT, refinement methods typically did not significantly reduce communication.
     These methods and results are presented in \cref{sec:Spatial Decomposition:Partition Refinement}.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Graph Partitioning Methods
@@ -204,7 +205,7 @@
         There are many different geometric partitioning methods in existence; in this study, the \ac{RIB} method \cite{Elsner1997,Floros1995} was investigated.
         This method uses only the geometry of the graph to construct a bisector and does not consider the connectivity (edges) in any way.
 
-        The \ac{RIB} method determines a bisector which cuts the graph into two approximately equally sized subdomains.
+        The \ac{RIB} method determines a bisector that cuts the graph into two approximately equally-sized subdomains.
         This is easily generalized for weighted graphs.
         The bisector should have approximately equal amounts of weight on each side.
         The \ac{RIB} makes no assumption of the orientation of the graph in space, unlike some other coordinate partitioning methods.
@@ -274,8 +275,8 @@
 
         This \ac{REB} method considers both the geometry and connectivity of the graph.
         The method begins by choosing a starting vertex for the subdomain and then expands based on a set of prioritized rules.
-        At each expansion step, the next vertex is chosen so that it is geometrically close to the vertices within the subdomain and to minimize edges between the subdomain and the remaining graph.
-        However, this method makes the assumptions that the mesh is structured, and that every mesh element is the same shape and size.
+        At each expansion step, the next vertex is chosen to be  geometrically close to the vertices within the subdomain, and to minimize edges between the subdomain and the remaining graph.
+        This method makes the assumes that the mesh is structured, and that every mesh element is the same shape and size.
         For the application in MPACT, this is always true.
 
         This \ac{REB} method uses the concept of a \emph{\ac{SOI}} around a vertex.
@@ -285,20 +286,20 @@
 
         The starting vertex in this \ac{REB} method is chosen using a set of prioritized rules:
         \begin{enumerate}
-            \item{must be on graph boundary, i.e. at least one direct neighbor is not present,}
-            \item{must have the lowest summed weight of edges, and}
-            \item{must be located furthest from weighted centroid (given by \cref{eq:Spatial Decomposition:Mean Coordinates}).}
+            \item{it must be on a graph boundary, i.e. at least one direct neighbor is not present,}
+            \item{it must have the lowest summed weight of edges, and}
+            \item{it must be located furthest from the weighted centroid (given by \cref{eq:Spatial Decomposition:Mean Coordinates}).}
         \end{enumerate}
-        These rules prioritize the domain beginning its' expansion in a ``corner'' of the graph; this helps to avoid the creation of disjoint subdomains.
+        These rules prioritize the domain beginning its expansion in a ``corner'' of the graph; this helps to avoid the creation of disjoint subdomains.
         Vertices within the expanding subdomain are considered internal vertices, and the remaining vertices are considered to be external vertices.
         During expansion, the next vertex is determined using a set of prioritized rules:
         \begin{enumerate}
-            \item{must be neighboring at least one internal vertex,}
-            \item{must have the highest summed weight of edges with internal vertices,}
-            \item{must have the lowest summed weight of edges with external vertices,}
-            \item{must have the largest number of internal SOI vertices,}
-            \item{must have the largest number of external SOI vertices, and}
-            \item{must have the smallest distance from reference vertex.}
+            \item{it must be neighboring at least one internal vertex,}
+            \item{it must have the highest summed weight of edges with internal vertices,}
+            \item{it must have the lowest summed weight of edges with external vertices,}
+            \item{it must have the largest number of internal SOI vertices,}
+            \item{it must have the largest number of external SOI vertices, and}
+            \item{it must have the smallest distance from reference vertex.}
         \end{enumerate}
         The reference vertex is in the expanding subdomain, which begins as the first vertex but changes during expansion; the reference vertex is the most recently added vertex with less external communication than the previously added vertex.
         An example of the expansion order is shown in \cref{fig:Spatial Decomposition:REB Expansion Order}.
@@ -351,7 +352,7 @@
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \section{Applications for MPACT}{\label{sec:Spatial Decomposition:Applications for MPACT}
     As described in \cref{sec:Spatial Decomposition:Spatial Decomposition in MPACT}, MPACT's spatial decomposition is performed on the ray-tracing module mesh.
-    However, there are a couple of restrictions on spatial subdomains in MPACT.
+    However, there are several restrictions on spatial subdomains in MPACT.
     Each spatial subdomain must be contiguous, and cannot wrap around other spatial subdomains.
     To account for these restrictions, adaptations are made to the graph partitioning process.
 
@@ -359,7 +360,7 @@
     If a partitioning method results in a noncontiguous subdomain, then each noncontiguous group of modules will be moved into the other subdomain except for the largest group.
     This fix is done at the expense of load-balance, but is necessary for these methods to be robust in MPACT.
     To ensure that no subdomain wraps around another, a fix is applied after the graph partitioning process.
-    If a subdomain wraps around another, then the concave subdomain will be given the modules it wraps around.
+    If a subdomain wraps around another (3 surrounding sides), the portion of the subdomain which is wrapped is moved into the wrapping subdomain.
 
     The ray-tracing modules that make up the core in MPACT can be abstracted into a weighted graph, where vertex weights are the number of computational cells in a module, and edges connecting neighboring modules.
     These edges represent the communication in MPACT's \ac{MOC} solver.
@@ -374,9 +375,9 @@
     For 2D-1D simulations, MPACT currently restricts spatial domains to be aligned in both the radial and axial directions; this is due to implementation, and is not a general requirement of the methods.
 
     To comply with MPACT's restrictions on 3-D spatial domains, the current approach is to axially average module weights (numbers of cells), perform a 2-D graph partitioning on a single plane, and apply the resulting partitioning to all axial planes.
-    This approach will restrict the number of spatial domains to be an integer multiple of the number of planes.
-    This axially and radially aligned scheme is expected to work well in many cases since reactor cores do not typically vary significantly in the axial direction.
-    However, for some designs, this may not be true, and planes near the top or bottom of the core have significantly fewer cells; in these cases, high load imbalance is to be expected.
+    This approach restricts the number of spatial domains to be an integer multiple of the number of planes.
+    This axially and radially aligned scheme is expected to work well in many cases, since reactor cores do not typically vary significantly in the axial direction.
+    However, for some designs, this may not be true, and planes near the top or bottom of the core may have significantly fewer cells; in these cases, high load imbalance is to be expected.
 
     It is possible to change MPACT's implementation to lift these alignment restrictions, but that is beyond the scope of this work.
     If spatial domains were aligned in only the radial direction, there may be some benefit to load-balance.
@@ -564,9 +565,9 @@
           \caption{The number of iterations used by each decomposition method as a function of the number of subdomains. \label{fig:Spatial Decomposition:Convergence}}
         \end{figure}
 
-        By examining the parallel efficiency of \emph{runtime per iteration} these spectral effects are eliminated and the scaling of the solvers in parallel can be determined.
+        By examining the parallel efficiency of \emph{runtime per iteration}, these spectral effects and the scaling of the solvers in parallel can be determined.
         As shown in \cref{fig:Spatial Decomposition:Scaled Parallel Efficiency}, the total parallel efficiency per iteration decreases as the core becomes more decomposed, limiting toward 25\%.
-        However, if only the \ac{MOC} solver time is being examined, the parallel efficiency per iteration decreases at a much slower rate as shown in \cref{fig:Spatial Decomposition:Scaled MOC Parallel Efficiency}.
+        If only the \ac{MOC} solver time is being examined, the parallel efficiency per iteration decreases at a much slower rate, as shown in \cref{fig:Spatial Decomposition:Scaled MOC Parallel Efficiency}.
         This indicates that the \ac{MOC} solver in MPACT is highly efficient in parallel, and that other components of MPACT are the bottleneck in parallel simulations.
         Furthermore, for both total and \ac{MOC} run-times, the graph partitioning methods give comparable parallel efficiencies.
         The assembly-based decomposition method still results in lower efficiency when using few subdomains, but for high numbers of subdomains, it is comparable with the graph partitioning methods.
@@ -582,7 +583,6 @@
           \includegraphics[width=\resultwidth]{results/2D/Scaled_MOC_Parallel_Efficiency}
           \caption{The \ac{MOC} parallel efficiency per iteration for each partitioning method as a function of the number of domains. \label{fig:Spatial Decomposition:Scaled MOC Parallel Efficiency}}
         \end{figure}
-
 
         Finally, the ratio of the optimal cell fraction to the maximum cell fraction is expected to be proportional to the parallel efficiency per iteration of the \ac{MOC} solver.
         As shown in \cref{fig:Spatial Decomposition:MOC Parallel Efficiency Correlation}, the parallel efficiency is correlated with the the ratio of optimal-to-maximum cell fractions, though it is not correlated as strongly as the runtime with the maximum cell fraction.
@@ -602,6 +602,7 @@
       \subsubsection{CMFD Acceleration}{\label{sssec:CMFD Acceleration}
         In MPACT, the two main solvers contributing to runtime of a steady-state eigenvalue calculation are the \ac{MOC} solver and \ac{CMFD} acceleration, each of which is parallelized using the same computational resources.
         From \cref{fig:Spatial Decomposition:Fractional Runtimes}, the \ac{MOC} and \ac{CMFD} solvers take similar amounts of time in serial; however, as more subdomains are used, the fractional runtime of \ac{CMFD} increases to almost 70\% of the total.
+        This may be partially alleviated by using a multigrid method \cite{Yee2018} to more efficiently solve the \ac{CMFD} system.
         This indicates that the parallel efficiency is quite low for MPACT's \ac{CMFD} linear system solvers, which heavily leverage PETSc \cite{Petsc} for parallelism.
 
         \begin{figure}
@@ -881,6 +882,11 @@
     For the 2-D VERA progression problem 5a, the overall parallel efficiency of MPACT dropped to nearly 20\%.
     The parallel efficiency of only the \ac{MOC} computations in MPACT drops to between 40--60\%, while the parallel efficiency of the \ac{CMFD} computation drops to $<\!\!20$\%.
     This causes the \ac{CMFD} computation to dominate runtime in spatially decomposed cases, and motivates the implementation of a more efficient parallel linear system operator in MPACT rather than using a third-party library.
+
+    The graph-based partitioning methods provide significant benefits in the quality of spatial decomposition (compared to the previous method), and user experience.
+    For a realistic 2-D quarter core calculation with a typical number of subdomains, the graph based methods were able to increase total parallel efficiency by more than 20\%, and \ac{MOC} efficiency by 35\%.
+    The graph-based methods also allow for the user to use any number of subdomains, rather than a small subset of choices with the previous method.
+    The methods also require no additional input from the user.
   }
 
   % References
