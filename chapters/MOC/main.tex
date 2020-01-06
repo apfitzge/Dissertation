@@ -6,7 +6,7 @@
     \graphicspath{ {\figpath} }
 
     \section{Fundamentals}{\label{sec:MOC:Fundamentals}
-        The \acf{MOC} is a technique used in mathematics to solve \acp{PDE}, by transforming a \ac{PDE} into a system of \acp{ODE}.
+        The \acf{MOC} is a technique used to solve first-order \acp{PDE}, by transforming the \ac{PDE} into a system of \acp{ODE}.
         The method was first applied to the neutron transport equation by \citeauthor{Askew1972} in 1972 \cite{Askew1972}, but only began to see real use in the 1980's \cite{Halsall1980}.
         The \ac{MOC} transforms the transport equation into the characteristic form, by following the equation along straight neutron paths through the spatial domain.
         For brevity, the derivation of this method will begin with the multigroup \ac{SN} $k$-eigenvalue transport equation with spatially discretized mesh with constant material properties within each cell.
@@ -84,7 +84,7 @@
         These procedures can be used to determine the scalar flux or other quantities necessary in \ac{MOC} calculations.
 
         \subsection{Track-Based Integration}{\label{ssec:MOC:Track-Based Integration}
-            Determining the angular flux along a single characteristic track is typically not very useful for reactor physics calculations.
+            Determining the angular flux along a single characteristic track is typically not the goal of reactor physics calculations.
             It is most often necessary to evaluate reaction rates, and therefore the scalar flux through integration of the angular flux.
             This section aims to provide a formal basis for the integration process used in the \ac{MOC} for transport calculations.
 
@@ -126,13 +126,14 @@
               \label{eq:MOC:Spatial Averaging Definition UnRenormalized 2D}
               \frac{1}{V_i}\intl[\loc\in\Region]f(\loc,\dirm)\dif^3{\loc} \approx \MOCSingleAngleIntegral{f(\loc,\dirm)} \defined \frac{\sin(\Polar_p)}{V_i}\suml[k]\tA[mki]\segl\MOCTrackIntegral{f(\loc,\dirm)}
             \end{equation}
-            The scaling factor is necessary (but not sufficient) for the integrated cell area to be preserved for each polar angle.
+            The scaling factor is necessary (but not sufficient) for the integrated cell area to be preserved for each polar angle;
+            if $\sin(\Polar_p)$ is factored into the summation, $s_{mki}$ becomes $s_{aki}$ (the 2-D track-length).
         }
         \subsection{Track-Length Renormalization}{\label{sec:MOC:Track-Length Renormalization}
             In general, the spatial integration described in \cref{ssec:MOC:Track-Based Integration} does not preserve the cell volume; this is visually apparent in \cref{fig:MOC:MOC Tracks}.
             In order to preserve spatial volumes within a cell, track-lengths are often ``renormalized''.
             As the area of each ray, $\tA[mki]$ approaches zero, the renormalization becomes irrelevant; thus it is only of consequence when rays have relatively coarse spacing between each other.
-            There are three renormalization methods which become obvious through the notation presented in \cref{ssec:MOC:Track-Based Integration}:
+            There are three renormalization methods that become obvious through the notation presented in \cref{ssec:MOC:Track-Based Integration}:
             \begin{enumerate}
                 \item{segment-volume preservation}
                 \item{direction-volume preservation}
@@ -201,7 +202,7 @@
             \begin{equation}\label{eq:MOC:FSA:Source Shape}
                 \source[mi][g][\loc] \approx \srcF[mi] = \srcF + \suml[\ell=0][L]\suml[n=-\ell][\ell]\SH[\ell][n][\dirm]\srcF[i,\ell][g,n]
             \end{equation}
-            Thus, to get a source in this form, \cref{eq:MOC:Source} requires that the region averaged scalar flux and higher-order angular moments (up to order $L$) be determined.
+            To obtain a source in this form, \cref{eq:MOC:Source} requires that the region averaged scalar flux and higher-order angular moments (up to order $L$) be determined.
             In mathematical terms, the flat-source can be determined as
             \begin{equation}\label{eq:MOC:FSA:Source Computation}
                 \srcF[mi] =
@@ -254,12 +255,12 @@
                 \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF[mi]}{\xst} - \left(\frac{\tsrcF[mi]}{\xst} - \afluxin\right)\frac{F_1(\segopt)}{\segopt}.
             \end{equation}
             This approach will be referred to as \emph{explicit}, as the moment's integral is explicitly evaluated.
-            Another, approach, which in the author's opinion is simpler, is use the track-averaging operator on the characteristic form of the transport equation, \cref{eq:MOC:FSA:Characteristic Form}, which simplifies to
+            Another, approach, which in the author's opinion is simpler, is to use the track-averaging operator on the characteristic form of the transport equation, \cref{eq:MOC:FSA:Characteristic Form}, which simplifies to
             \begin{equation}\label{eq:MOC:FSA:Track-Averaged Angular Flux Implicit}
                 \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF[mi]}{\xst} + \frac{\afluxin-\afluxout}{\segopt}.
             \end{equation}
             This approach will be referred to as \emph{implicit}, as the moment's integral is not explicitly evaluated.
-            Note, that the resulting forms of these two approaches are equivalent; by evaluating the outgoing flux in \cref{eq:MOC:FSA:Angular Flux Solution} at the outgoing position, \cref{eq:MOC:FSA:Track-Averaged Angular Flux Implicit} can be put into the form of \cref{eq:MOC:FSA:Track-Averaged Angular Flux Explicit}.
+            We note that the resulting forms of these two approaches are equivalent; by evaluating the outgoing flux in \cref{eq:MOC:FSA:Angular Flux Solution} at the outgoing position, \cref{eq:MOC:FSA:Track-Averaged Angular Flux Implicit} can be put into the form of \cref{eq:MOC:FSA:Track-Averaged Angular Flux Explicit}.
             By substituting the track-averaged angular flux in \cref{eqs:MOC:FSA:Region-Averaged Flux Moments Definition}, the flux moments can be evaluated, and used to compute the source.
             A transport calculation may be carried out using the source iteration algorithm defined by \cref{alg:NTT:Source Iteration}.
         }
@@ -284,7 +285,7 @@
             \Cref{eq:MOC:FSA:Quadrature Constraint} is a constraint on the directional quadrature, requiring orthogonality of the real spherical harmonics \cite{LeTellier2008}.
             \Cref{eq:MOC:FSA:Track Constraint} requires that \emph{at least} direction-dependent renormalization, \cref{eq:MOC:Direction-Dependent Renormalization}, be used.
 
-            If the constraints on directional quadrature, and characteristic tracks, are satisfied several simplifications to \cref{eqs:MOC:FSA:Region-Averaged Flux Moments Definition} are possible.
+            If the constraints on directional quadrature and characteristic tracks are satisfied, several simplifications to \cref{eqs:MOC:FSA:Region-Averaged Flux Moments Definition} are possible.
             \begin{subequations}\label[subeqs]{eqs:MOC:FSA:Region-Averaged Flux Moments}
                 \begin{equation}\label{eq:MOC:FSA:Region-Averaged Scalar Flux}
                     \sflux = \frac{\srcF}{\xst} + \frac{\fourpi}{V_i\xst}\suml[m]\wt[m]\suml[k]\tA[mki]\dflux,
@@ -313,7 +314,7 @@
         }
         \subsection{Applications}{\label{ssec:FSA:Applications}
             The \ac{FSMOC} has been utilized in many \ac{MOC} production codes \cite{Halsall1980,Hong1998,Saji2000,Smith2002,Sugimura2006,Masiello2008,Boyd2014,Collins2016}.
-            However, previous studies on the \ac{FSMOC} have found that a fine mesh must be used to obtain accurate results, particularly in the presence of control rods or blades, strong absorber rods, gadolinia poisoned fuel rods \cite{Petkov1999}, as well as in the presence of large reflector regions (such as in critical experiments) \cite{Ferrer2016}.
+            However, previous studies on the \ac{FSMOC} have found that a fine mesh must be used to obtain accurate results, particularly in the presence of control rods or blades, strong absorber rods, gadolinia poisoned fuel rods \cite{Petkov1999}, and large reflector regions (such as in critical experiments) \cite{Ferrer2016}.
             As the number of mesh elements increase, so does the number of track-segments (on which the \ac{MOC} computations are performed).
             This results in large run-times, and has motivated the development of \acfp{LSA} to the \ac{MOC}, that are discussed in detail in \cref{sec:MOC:LSA}.
         }
@@ -347,7 +348,7 @@
             The approximation uses track-based integration, defined in \cref{ssec:MOC:Track-Based Integration}, in order to compute spatial moments of the angular flux.
             This \ac{LSA} was shown to reduce memory and computation times in 3-D \ac{MOC} calculations \cite{Chai2009}.
             The general method was simplified in the case of the isotropic and anisotropic \ac{LS} by \citet{Ferrer2016}; this also introduced the ``LS-P0'' method in which the isotropic source is spatially linear, but the anisotropic source components are spatially uniform within each cell.
-            This \ac{LSA} was also shown to be consistent with particle conservation, under certain constraints, and shown to be compatible with \ac{CMFD} acceleration \cite{Ferrer2018}.
+            This \ac{LSA} was also shown to be consistent with particle conservation, under certain constraints, and to be compatible with \ac{CMFD} acceleration \cite{Ferrer2018}.
 
             This thesis work has made extensive use of this \ac{LSA}, and has made improvements upon the method.
             For this reason, in the following section the formulation prior to the work of this thesis is derived.
@@ -383,7 +384,7 @@
             \end{equation}
 
             In the spatial moment-base \ac{LSA}, it is convenient to define the spatially linear source (and flux) in terms of a cell-local coordinate system.
-            Allow $\Loc$ to be the position variable in the global coordinate system, the local coordinates are then defined as
+            We allow $\Loc$ to be the position variable in the global coordinate system, the local coordinates are then defined as
             \begin{equation}\label{eq:MOC:LSA:Global to Local Coordinates}
                 \loc = \Loc - \centroid[\Loc][mi],
             \end{equation}
@@ -542,7 +543,7 @@
             The $\FerrerAnisotropicFlatC$ and $\FerrerAnisotropicLinearC$ are dependent on both the energy group, $g$, and direction $m$, for each region, $i$.
             If these terms are stored, this leads to considerable memory usage, and will often use more memory than the flux moments that are of interest.
             If cross sections are constant in the problem (no feedback, or 2D/1D transverse leakage splitting), these coefficients can be pre-computed once at the outset of the simulation.
-            However, if this is not the case, these coefficients must be re-evaluated each time there is a change in cross sections.
+            If this is not the case, these coefficients must be re-evaluated each time there is a change in cross sections.
             The re-evaluation of these coefficients can lead to significant overhead.
             In cases with \ac{TH} feedback, cross sections typically change each iteration.
         }
@@ -586,14 +587,15 @@
                 + \frac{2}{V_i}\suml[m/2]wt\suml[k]\tA\loc\loc^T\nsegl.
             \end{equation}
 
-            These $\C$ coefficients are no longer dependent on the direction, but still require significant memory usage; using more than the memory requirements of the scalar flux coefficients.
-            However, these coefficients are still dependent on the energy group, and the same inefficiencies mentioned previously are present if cross sections are not constant through the simulation.
+            These $\C$ coefficients are no longer dependent on the direction, but still require significant memory usage.
+            They require more memory than the scalar flux coefficients.
+            If cross sections are not constant through the simulation, the previously mentioned inefficiencies are still present.
         }
         \subsection{Applications}{\label{ssec:MOC:LSA:Applications}
             Various different \acp{LSA} to the \ac{MOC} have been developed and implemented in transport codes \cite{Halsall1993,Petkov1999,Santandrea2002,Tang2009,Rabiti2009,Boyd2014,Ferrer2016,Fitzgerald2018}.
             Results have indicated that by using a \ac{LSA}, the spatial mesh discretization can be made coarser, relative to the \ac{FSA}, while maintaining transport accuracy.
             Although each segment calculation is more expensive when using a \ac{LSA}, the number of calculations (due to the coarser spatial mesh) can be significantly reduced, leading to reduced run-times.
-            Additionally, the reduction in spatial mesh elements generally reduces the amount of memory used by the calculation.
+            Additionally, the reduction in spatial mesh elements generally reduces the amount of memory required by the calculation.
         }
     }
 
@@ -604,7 +606,7 @@
       This section serves to give an overview of the current state-of-the-art ray-tracing methods used for \ac{MOC}-like transport calculations.
 
       \subsection{Fundamentals}{\label{ssec:MOC:RT:Fundamentals}
-        This section will cover the fundamentals of why ray-tracing is necessary for \ac{MOC} calculations, what data is necessary, and possible constraints.
+        This section covers the fundamentals of why ray-tracing is necessary for \ac{MOC} calculations, what data is necessary, and possible constraints.
         Unless a neutron has an interaction with surrounding media, it will travel in a straight line.
         This idea is represented in the characteristic form of the transport equation (\cref{eq:MOC:MOC Equation Generic}), which follows a generic characteristic through the problem domain.
         The \ac{MOC} is based on solving the \cref{eq:MOC:MOC Equation Generic} along many of these characteristic paths, performing spatial/directional integrations using \cref{eqs:MOC:Renormalized Spatial Integration Definition}.
@@ -619,13 +621,13 @@
       }
 
       \subsection{Modular Ray-Tracing}{\label{ssec:RT:Modular Ray-Tracing}
-        The most straight-forward approach to perform a \ac{MOC} calculation is to create rays which span the domain of the transport problem being solved.
+        The most straight-forward approach to perform a \ac{MOC} calculation is to create rays that span the domain of the transport problem being solved.
         However, in this approach, the information of each ray-segment must be stored, or computed on-the-fly.
         In large problems the number of ray-segments can become exceedingly large, and this approach is not feasible due to memory constraints.
 
         This led to the development of so-called ``modular'' ray-tracing methods \cite{Filippone1980,Saji2000,Wu2003,Kochunas2013}, in which the regularity of reactor designs is utilized to reduce memory requirements.
         In typical reactor designs, certain geometries (like assemblies) are repeated throughout the core.
-        Rather than laying tracks down for the global geometry, the transport problem is partitioned into ``modules'' which represent small often repeated geometries in the problem.
+        Rather than laying tracks down for the global geometry, the transport problem is partitioned into ``modules'' that represent small often-repeated geometries in the problem.
         The ray-tracing data is generated for each module, in such a way there is direct linking of tracks on module interfaces; this is the \ac{DNPL} technique devised by \citet{Saji2000}.
         This significantly reduces the amount of ray-tracing data that needs to be stored in \ac{MOC} calculations, and has been widely adopted in \ac{MOC} transport codes \cite{Hong1998,Jung2009,Tang2009,DeCART,APOLLO3,MPACT2016,Hebert2017a}.
         Tracks spanning the global domain are then constructed by connecting multiple modular rays, as is depicted in \cref{fig:MRT:Modular Ray Tracing}.
@@ -638,7 +640,7 @@
             \label{fig:MRT:Modular Ray Tracing}
         \end{figure}
 
-        The modular ray-tracing technique, with \ac{DNPL}, requires that the number of tracks on a modular boundary is an integer.
+        The modular ray-tracing technique, with \ac{DNPL}, requires that the number of tracks on a modular boundary be an integer.
         This additionally requires that all modules have the same spatial dimensions, given by the pitches $P_x$ and $P_y$, and that the spacing between all tracks in a direction are constant.
         Let $\tA[a0]$ be the desired ray-spacing for an azimuthal angle $a$, and $\Azimuthal_{a0}$ be the desired azimuthal angle.
         The number of rays on the $x$ and $y$ module boundaries can be determined as
@@ -680,6 +682,7 @@
         The mobile chord method was introduced by \citet{Villarino1992} in the HELIOS code for \ac{CP} calculations, and adapted to the \ac{MOC} by \citet{Yamamoto2008}.
         In the typical equidistant ray-tracing method, a ray is placed at the center of the ray-width.
         The mobile chord method offsets the ray from the center, with differing offsets in each direction.
+        The offset is typically a fraction of the ray width that increases linearly with the azimuthal angle index.
         This has generally shown to be more accurate than the typical equidistant ray-tracing method \cite{Yamamoto2008}, but is not directly compatible with the \ac{DNPL} technique.
         While ray widths are still linked, the ray-traces are not; though, this does not seem to introduce significant discretization errors \cite{Yamamoto2008}.
         An example illustration of mobile chords is given in \cref{figs:RT:MobileChords}.
@@ -711,7 +714,7 @@
 
         This also significantly increases the amount of work that needs to be done for each track, as intersection data needs to be recomputed for each track each iteration.
         There are claims that the cache benefits of not storing the rays out-weighs the increased computational work \cite{Tramm2018}.
-        Initial results for this method have been promising, but no \ac{CMFD} acceleration has been utilized at this time.
+        Initial results for this method have been promising, but no \ac{CMFD} acceleration for this method has been utilized at this time.
       }
 
       \subsection{Macroband}{\label{ssec:RT:Macroband}
@@ -804,17 +807,17 @@
           This figure will be used as an example for the equations of this sub-boundary averaging method.
           $\psi_s^1$ should be a linear combination of the ray fluxes $\psi_r^1$ and $\psi_r^2$, based on their fractional areas, $A_1^1$ and $A_2^1$, respectively.
           Let us denote a sub-boundary as $S_i$ where $i$ is some index, and a ray projection as $R_j$ where $j$ is some index.
-          We expect the surface flux to be a linear combination of the ray fluxes which intersect it; this can be expressed mathematically as
+          We expect the surface flux to be a linear combination of the ray fluxes that intersect it; this can be expressed mathematically as
           \begin{equation}\label{eq:RT:SubBoundary Flux}
             \psi_s^i = \suml[j] \frac{A(S_i\cap R_j)}{A(S_i)}\psi_r^j,
           \end{equation}
           where $A$ denotes a function returning the area of the argument, and $\cap$ indicates the intersection of two objects.
-          To show that this preserves the total neutron flux through the surface, consider the total flux through the surface
+          To show that this preserves the leakage through the surface, consider
           \begin{aequation}\label{eq:RT:SubBoundary Flux Total}
-            \psi_t &= \suml[i] A(S_i)\psi_s^i\\
-                    &= \suml[i]A(S_i)\suml[j]\frac{A(S_i\cap R_j)}{A(S_i)}\psi_r^j\\
-                    &= \suml[i]\suml[j]A(S_i\cap R_j)\psi_r^j\\
-                    &= \suml[j]A(R_j)\psi_r^j,
+            L &= \dir\vdot\vec{\hat{n}} \suml[i] A(S_i)\psi_s^i\\
+                    &= \dir\vdot\vec{\hat{n}} \suml[i]A(S_i)\suml[j]\frac{A(S_i\cap R_j)}{A(S_i)}\psi_r^j\\
+                    &= \dir\vdot\vec{\hat{n}} \suml[i]\suml[j]A(S_i\cap R_j)\psi_r^j\\
+                    &= \dir\vdot\vec{\hat{n}} \suml[j]A(R_j)\psi_r^j,
           \end{aequation}
           where this last line is simply the summation of all ray fluxes.
           The reverse problem, computing the ray fluxes from the sub-boundary fluxes, is found to be
@@ -823,11 +826,11 @@
           \end{equation}
           \Cref{fig:RT:2D SubBoundarySurfaceFlux} also highlights a problem with only considering the centroids of each ray.
           Ray 2 is split nearly evenly between sub-boundaries 1 and 2.
-          If only the centroids was considered, all ray 2's flux would be put into sub-boundary 2 and in the reverse direction all it's flux would come from sub-boundary 2.
+          If only the centroids are considered, all ray 2's flux would be put into sub-boundary 2.
           If the flux is relatively uniform along the surface direction, this is fine; however, if there are discontinuities in the flux then this can lead to considerable inaccuracies.
 
-          \citet{Liu2014} did introduce a very useful concept to sub-boundary averaging, with the direction-dependence in the number of sub-boundaries on each surface.
-          Rather than using a fixed number of sub-boundaries on each surface, it is expected that directions which are closer to being perpendicular to the surface will have larger variation, and thus need more sub-boundaries.
+          \citet{Liu2014} introduced a useful concept to sub-boundary averaging, with the direction-dependence in the number of sub-boundaries on each surface.
+          Rather than using a fixed number of sub-boundaries on each surface, it is expected that directions that are closer to being perpendicular to the surface will have larger variation, and thus need more sub-boundaries.
           The number of sub-boundaries on each surface can be computed using the dimensions of the surface, and the direction.
           Similarly to \ac{MRT}, the number of sub-boundaries on a surface is constrained to be an integer.
           The \ac{MRT} equations, \cref{eqs:MRT:Nx/y}, can be used to determine the number of sub-boundaries on the $x$ and $y$ surfaces.
@@ -853,8 +856,8 @@
 
         \subsubsection{3-D Modular Ray-Tracing}{\label{sssec:RT:3D Modular Ray-Tracing}
           In three-dimensional \ac{MOC} calculations, characteristic rays must be laid down through the three-dimensional domain;
-          Generally, three-dimensional tracks are generated by first creating a set to two-dimensional tracks, and generating three-dimensional tracks that project onto these two-dimensional tracks \cite{Kochunas2013,Shaner2015}.
-          The generation of these two-dimensional tracks can be simplified as viewing each of the two-dimensional tracks as a plane in the axial and characteristic directions, $z$ and $\len$ respectively.
+          Generally, three-dimensional tracks are generated by first creating a set of two-dimensional tracks, and generating three-dimensional tracks that project onto these two-dimensional tracks \cite{Kochunas2013,Shaner2015}.
+          The generation of the two-dimensional tracks can be simplified as viewing each of the two-dimensional tracks as a plane in the axial and characteristic directions, $z$ and $\len$ respectively.
           Three-dimensional tracks are then produced by performing two-dimensional ray-tracing on this characteristic plane \cite{Kochunas2013}, as is shown in \cref{fig:RT:3-D Ray-tracing}
 
           \begin{figure}[h]
@@ -868,12 +871,12 @@
           There are subtleties in the generation of three-dimensional tracks, which have led to the development of different 3-D modular ray-tracing techniques \cite{Kochunas2013,Shaner2015,3DMOCCasl}.
           Previous work had reported that direct use of the \ac{MRT} method in 3-D, required that tracks be stored separately for the forward and backward directions \cite{Kochunas2013};
           this has, however, been shown not to be the case \cite{Shaner2015}.
-          The simplified \ac{MRT} was developed to avoid this issue \cite{Kochunas2013}, but generates significantly more characteristic tracks \cite{Shaner2015}.
+          The simplified \ac{MRT} was developed to avoid this issue \cite{Kochunas2013}, but it generates significantly more characteristic tracks \cite{Shaner2015}.
 
           As discussed in \cref{ssec:RT:Modular Ray-Tracing}, 2-D \ac{MRT} perturbs the azimuthal angles in the directional quadrature to ensure \ac{DNPL}.
           For 3-D \ac{MRT}, this also perturbs the polar angles in the directional quadrature.
           \citet{Kochunas2013,3DMOCCasl} also found that modularization of the directional quadratures led to clustering of the discrete directions, which introduces significant error in the integration of spherical harmonics moments \cite{Kochunas2013}, and has implications on particle conservation in anisotropic calculations (\cref{ssec:MOC:FSA:Particle Conservation}).
-          In order to avoid this issue, the axial ray-spacing can be reduced until the modularized polar angle is only perturbed within some error criteria \cite{Kochunas2013}; however, this leads to significant increases in the number of tracks (and thus increases computational costs).
+          In order to avoid this issue, the axial ray-spacing can be reduced until the modularized polar angle is only perturbed within some error criteria \cite{Kochunas2013}; however, this leads to significant increases in the number of tracks (and thus increases the computational costs).
         }
 
         \subsubsection{Chord-Classification}{\label{sssec:RT:Chord-Classification}
@@ -882,7 +885,7 @@
           This led to the development of a technique called \emph{chord-classification} for locally axially extruded geometries \cite{Sciannandrone2016}.
           Chord-classification recognizes that reactors typically have regularities in the 3-D geometries; this allows for characteristic track-segments to be classified into sets which share the same length.
           As shown in \cref{fig:RT:Chord-Classification}, rays on the same characteristic plane that intersect two vertical mesh boundaries will have the same lengths.
-          Similarly for rays which intersect horizontal planes (though, as axial meshes are usually tall, this is not as common).
+          Similarly for rays that intersect horizontal planes (though, as axial meshes are usually tall, this is not as common).
 
           \begin{figure}[h]
             \centering
@@ -894,8 +897,9 @@
 
           By classifying chords of the same length, the length can be stored only once.
           Additionally, this means that the exponential functions ($F_1(\segopt)$ for \ac{FSMOC}), only need to be calculated once as well.
-          This adds irregularity to the data accessing, which is generally not optimal for computation, and thus is only expected to improve calculation speeds if a large number of chords can be classified \cite{Sciannandrone2016}.
-          Indeed, it was observed that most rays (96\%) could be categorized as ``V-chords'' which intersect two vertical surfaces, which led to a 40\% reduction in transport sweep time \cite{Sciannandrone2016}.
+          This adds irregularity to the data accessing, that is generally not optimal for computation, and thus is only expected to improve calculation speeds if a large number of chords can be classified \cite{Sciannandrone2016}.
+          Indeed, it was observed that most rays (96\%) could be categorized as ``V-chords'', which that intersect two vertical surfaces.
+          This led to a 40\% reduction in transport sweep time \cite{Sciannandrone2016}.
           Additionally, chord-classification allows for reduced track-storage, reducing memory by up to 93\%.
         }
 
@@ -909,21 +913,21 @@
       }
 
       \subsection{Transport Sweeping with the Method of Characteristics}{\label{ssec:RT:Transport Sweeping with the Method of Characteristics}
-        The \ac{MOC} is used to iteratively solve the transport equation, the iterations are generally referred to as \emph{transport sweeps}.
+        The \ac{MOC} is solved iteratively, each iteration is typically referred to as a \emph{transport sweep}.
         For given boundary conditions and a source, a transport sweep is used to compute estimates of the scalar flux and other moments using equations in the form \cref{eqs:MOC:FSA:Region-Averaged Flux Moments} for \ac{FSMOC} and \cref{eqs:MOC:LSA:Region-Averaged Flux Moments} for \ac{LSMOC}.
         This is an overly generalized description of a transport sweep, and there are considerations that arise from the different ray-tracing techniques discussed.
 
         In global ray-tracking procedures, calculations are most often carried out by examining a ray from end to end.
-        The angular flux at the ends can be found from the boundary conditions.
+        The angular flux at the incident end can be found from the boundary conditions.
         Along each segment, a transmission calculation can be carried out (\cref{eqs:MOC:FSA:Angular Flux Solution,eqs:MOC:LSA:Angular Flux Solution}), and flux moments can be accumulated.
-        This procedure is shared by the \ac{MRT} which constructs global rays (long rays) by linking modular rays, as shown in \cref{fig:MRT:Modular Ray Tracing}.
+        This procedure is shared by the \ac{MRT}, which constructs global rays (long rays) by linking modular rays, as shown in \cref{fig:MRT:Modular Ray Tracing}.
         This allows for each ray calculation to be carried out in parallel, since each ray calculation is effectively independent \cite{Kochunas2013}; though special considerations must be taken to avoid race-conditions in the accumulation of moments.
 
         However, in the macroband method, transport sweeping is carried out in a different manner.
         It is not possible to generate a continuous characteristic track spanning the global domain when using \ac{MRMB} techniques.
         Thus, transport calculations are carried out in a pin-by-pin (assuming pins are the subsystems on which track data is generated) basis.
         For each pin calculation, boundary or interface angular fluxes can be computed as described in \cref{sssec:RT:Interface Flux Approximations}, and transmission/accumulation calculations are carried out by sweeping over the tracks.
-        This can be done by considering each track separately, or by considering each macroband that is are guaranteed to pass through the same regions.
+        This can be done by considering each track separately, or by considering each ray with a macroband that is guaranteed to pass through the same regions.
         The resulting angular flux on the exiting interface must be then approximated, this can be done as described in \cref{sssec:RT:Interface Flux Approximations}.
 
         Pin-by-pin transport calculations must be carried out in a specific order, by considering the dependencies of the angular flux.
@@ -950,7 +954,7 @@
         \citet{Kochunas2013} developed a hybrid-parallel algorithm for the \ac{MOC} that included thread-based parallelism over characteristic tracks, as well as spatial and angular decomposition.
         This work showed that the \ac{MOC} was able to scale well up to 10000's of processors.
         While this work is important, and has led to significant advancement, the use of 1000's of processors is not feasible for industrial use.
-        It is thus the author's opinion that the primary focus of research on 3-D \ac{MOC} techniques should be on serial efficiency, such as the \acf{LSA} (\cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}), and macroray (\cref{ch:MacroRay});
+        It is the author's opinion that the primary focus of research on 3-D \ac{MOC} techniques should be on serial efficiency, such as the \acf{LSA} (\cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}), and macroray (\cref{ch:MacroRay});
         however, moderate levels of parallelism are feasible for industry, and so more efficient use of parallel resources should also be a focus of research (\cref{ch:Spatial Decomposition}).
 
         In \ac{MOC} calculations, each characteristic track calculation is nearly independent from others; previous works have indicated that loops over characteristic tracks can be parallelized efficiently by using threads on traditional \acp{CPU} \cite{Kochunas2013} or on \acp{GPGPU} \cite{Boyd2014}.
