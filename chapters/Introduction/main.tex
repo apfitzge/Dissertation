@@ -10,15 +10,15 @@
         Programs such as \ac{CASL} and \ac{NEAMS} have focused on development of modern advanced simulation tools to address certain challenge problems.
         Large computing clusters are generally unavailable to reactor analysts in industry, and so using direct whole-core 3-D transport methods is not common outside academia or national laboratories.
 
-        The ``gold standard'' of deterministic methods has been the 3-D \ac{MOC} \cite{Askew1972} due to its' ability to exactly model complicated geometries.
-        At the time of writing, whole-core 3-D \ac{MOC} calculations are generally not possible without use of large computing clusters.
+        The ``gold standard'' of deterministic methods has been the 3-D \ac{MOC} \cite{Askew1972} due to its' ability to accurately model complicated geometries.
+        At the time of writing, whole-core 3-D \ac{MOC} calculations are generally not possible without the use of large computing clusters.
         This is due to the large discretizations that are necessary for the neutron transport equation, which has a 6-dimensional phase space for steady-state eigenvalue problems.
         In the past decade, there has been renewed interest in making 3-D \ac{MOC} more efficient and performant by using parallelism \cite{Kochunas2013}, modern \ac{GPU} architectures \cite{Boyd2014}, and ray-tracing storage techniques \cite{Sciannandrone2016, Gunow2016}.
-        There has also been work done to make \ac{MOC} faster by improving the efficiency of the calculations by using higher-order approximations \cite{Ferrer2016,Gunow2018}.
+        Work has also been done to make \ac{MOC} faster by improving the efficiency of the calculations, using higher-order approximations \cite{Ferrer2016,Gunow2018}.
 
         The bulk of this thesis work is comprised of three distinct, yet connected, topics, all with a focus on improving the feasibility of 3-D \ac{MOC} calculations.
         The first topic is related to improving the parallel efficiency of \ac{MOC} calculations.
-        However, it is the author's opinion, that improving efficiency of 3-D \ac{MOC} calculations should be the primary focus of current/future research, as it is not feasible for industry to use thousands of processors.
+        It is the author's opinion that improving the efficiency of 3-D \ac{MOC} calculations should be the primary focus of current/future research, as it is not currently feasible for industry to use thousands of processors.
         Thus, two techniques are utilized as part of this thesis work: the \acf{LSA}, and the macroray.
 
         The first contribution of this thesis is work in improving parallel efficiency.
@@ -30,8 +30,8 @@
         The \ac{LSA} is an approximation that is used to improve \ac{MOC} efficiency by reducing the number of computational cells required for accurate results.
 
         The macroray is a novel ray-tracing technique developed as part of this thesis work; this technique is an extension of the two-dimensional macroband \cite{Villarino1992} ray-tracing technique.
-        This technique has been shown to reduce the number of characteristic rays required for accurate results in two-dimensional flat-source calculations \cite{Yamamoto2005,Fevotte2007}.
-        However, prior to this work, there have been no efforts for extending this method to 3-D \ac{MOC} calculations.
+        The macroband technique has been shown to reduce the number of characteristic rays required for accurate results in two-dimensional flat-source calculations \cite{Yamamoto2005,Fevotte2007}.
+        However, prior to this work, there has been no effort to extend this method to 3-D \ac{MOC} calculations.
         The author seeks to fill this gap, as the number of rays in 3-D \ac{MOC} calculations is generally much higher than in 2-D, so the possible benefits of the method are larger.
         Additionally, the method is expected to be even more efficient when using a coarse mesh with the \ac{LSA}.
     }
