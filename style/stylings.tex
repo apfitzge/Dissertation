@@ -21,3 +21,8 @@
 \Crefname{subeqs}{Eqs.}{Eqs.}
 \crefformat{subeqs}{#2Eqs.~(#1)#3}
 \Crefformat{subeqs}{#2Eqs.~(#1)#3}
+
+% Center bibliography heading
+\defbibheading{bibliography}[\bibname]{%
+  \chapter*{\centering #1}%
+  \markboth{#1}{#1}}

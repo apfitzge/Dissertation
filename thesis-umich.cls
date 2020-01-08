@@ -195,6 +195,22 @@
  \RequirePackage{multicol}
 \fi
 
+% Lists stylings
+\RequirePackage[chapter]{algorithm}
+\RequirePackage{algcompatible}
+\RequirePackage{algpseudocode}
+\RequirePackage{etoolbox}
+\RequirePackage{tocloft}
+
+\begingroup
+  \let\newcounter\@gobble
+  \let\setcounter\@gobbletwo
+  \globaldefs\@ne
+  \let\c@loadepth\@ne
+  \newlistof{algorithms}{loa}{\listalgorithmname}
+\endgroup
+\let\l@algorithm\l@algorithms
+\renewcommand{\cftdotsep}{0}
 
 %% ---- FORMATTING -----------------------------------------------------
 % Set the page style to fancy.
@@ -400,7 +416,7 @@
 	apfitzge@umich.edu  \\[1ex]
 	ORCID ID: 0000-0002-4066-0949\\[1ex] %
   % Horizontal line
-  \rule[0.5ex]{5in}{1pt} \\[1ex] %
+  % \rule[0.5ex]{5in}{1pt} \\[1ex] %
   % The year of publication
   \number\year %
   % Vertical rubber space
@@ -816,103 +832,126 @@
 
 %% ---- TABLE OF CONTENTS ----------------------------------------------
 % This sets the formatting for chapter entries in the table of contents.
-\renewcommand*\l@chapter[2]{ %
- % First add some vertical space.
- \vskip 1ex plus 1pt minus 1pt
- % Format the spacing and use dots between title and number.
- \@dottedtocline{1}{0em}{1.0em} %
- % This sets the formatting for the chapter name and page number.
- {\textbf{#1}}{\textbf{#2}} %
- % Add some space below, too.
- \vskip 1ex}
+% \renewcommand*\l@chapter[2]{ %
+%  % First add some vertical space.
+%  \vskip 1ex plus 1pt minus 1pt
+%  % Format the spacing and use dots between title and number.
+% %  \@dottedtocline{1}{0em}{1.0em} %
+%  % This sets the formatting for the chapter name and page number.
+%  {\textbf{Chapter~#1}}{\textbf{#2}} %
+%  % Add some space below, too.
+%  \vskip 1ex}
 
-% These lines set the spacing for other table of contents entries.
-\renewcommand*{\l@section}{\@dottedtocline{2}{2.5em}{2em}}
-\renewcommand*{\l@subsection}{\@dottedtocline{3}{5.0em}{2.8em}}
-\renewcommand*{\l@subsubsection}{\@dottedtocline{4}{7.5em}{3.5em}}
+% % These lines set the spacing for other table of contents entries.
+% % \renewcommand*{\l@section}{\@dottedtocline{2}{2.5em}{2em}}
+% % \renewcommand*{\l@subsection}{\@dottedtocline{3}{5.0em}{2.8em}}
+% % \renewcommand*{\l@subsubsection}{\@dottedtocline{4}{7.5em}{3.5em}}
+% % Number of section layers to show in table of contents
+% \setcounter{tocdepth}{3}
+% % Number of subsection layers to allow in document
+% \setcounter{secnumdepth}{3}
 
-% Number of section layers to show in table of contents
-\setcounter{tocdepth}{3}
-% Number of subsection layers to allow in document
-\setcounter{secnumdepth}{3}
+% % This sets the formatting of the table of contents.
+% \renewcommand*{\tableofcontents}{%
+%  % Move to new page.
+%  \newpage %
+%  % Add a pdf anchor.
+%  \phantomsection %
+%  % Add a bookmark manually for the table of contents.
+%  \pdfbookmark[0]{Table of Contents}{\thepage} %
+%  % Use front page styling.
+%  \frntpg %
+%  % Larger upper margin for first page of table
+%  \if@umich@thesis %
+%   \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
+%  \fi %
+%  % Add the title
+%  \centerline{\large\bf TABLE OF CONTENTS} %
+%  % Add some space after the title.
+%  \vspace{2ex} %
+%  % Start the automatic table of contents features.
+%  \begin{singlespace} %
+%   \@starttoc{toc}\if@restonecol\twocolumn\fi %
+%  \end{singlespace} %
+% }
 
-% This sets the formatting of the table of contents.
-\renewcommand*{\tableofcontents}{%
- % Move to new page.
- \newpage %
- % Add a pdf anchor.
- \phantomsection %
- % Add a bookmark manually for the table of contents.
- \pdfbookmark[0]{Table of Contents}{\thepage} %
- % Use front page styling.
- \frntpg %
- % Larger upper margin for first page of table
- \if@umich@thesis %
-  \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
- \fi %
- % Add the title
- \centerline{\large\bf TABLE OF CONTENTS} %
- % Add some space after the title.
- \vspace{2ex} %
- % Start the automatic table of contents features.
- \begin{singlespace} %
-  \@starttoc{toc}\if@restonecol\twocolumn\fi %
- \end{singlespace} %
-}
-
+\renewcommand{\cftbeforechapskip}{\baselineskip}      % allow spacing after each chapter/section entry
+\renewcommand{\contentsname}{\hfill\MakeUppercase{Table of Contents}\hfill}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\renewcommand{\cfttoctitlefont}{\hfill\Large\bfseries} %!some command to make the heading huge and bold
+\renewcommand{\cftchapfont}{\bfseries}                         % Can make it bold faced here; don't put a space in the {}
+\renewcommand{\cftchappagefont}{\bfseries}                         % Can make it bold faced here; don't put a space in the {}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftchapdotsep}}
+\renewcommand{\cftchapdotsep}{\cftdotsep}             % Puts dots after chapter entries
+\renewcommand{\cftchappresnum}{Chapter\ }             %
+\renewcommand{\cftchapaftersnum}{}                    % Don't put a space in the {}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftsecdotsep}}%
+\renewcommand{\cftchappagefont}{}                      %
+\renewcommand{\cftchapnumwidth}{2cm}
 
 %% ---- LIST OF FIGURES ------------------------------------------------
-% This sets the formatting for the various entry types.
-\renewcommand*{\l@figure}{\@dottedtocline{1}{0em}{2.5em}}
+\renewcommand{\cftloftitlefont}{\hfill\Large\bfseries\MakeUppercase}
+\renewcommand{\cftafterloftitle}{\hfill}
+\renewcommand{\cftfigfont}{Figure~}
 
-% This sets the formatting of the list of figures page.
-\renewcommand*{\listoffigures}{%
- % Move to new page.
- \newpage %
- % Add this page to the table of contents.
- \phantomsection\addcontentsline{toc}{chapter}{List of Figures} %
- % Use front page styling.
- \frntpg %
- % Larger upper margin for first page of table (thesis only)
- \if@umich@thesis %
-  \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
- \fi %
- % Add the title
- \centerline{\large\bf LIST OF FIGURES} %
- % Add some space after the title.
- \vspace{1ex} %
- % Start the automatic table of contents features.
- \begin{singlespace} %
-  \@starttoc{lof}\if@restonecol\twocolumn\fi %
- \end{singlespace} %
-}
+% % This sets the formatting for the various entry types.
+% \renewcommand*{\l@figure}{\@dottedtocline{1}{0em}{2.5em}}
+
+% % This sets the formatting of the list of figures page.
+% \renewcommand*{\listoffigures}{%
+%  % Move to new page.
+%  \newpage %
+%  % Add this page to the table of contents.
+%  \phantomsection\addcontentsline{toc}{chapter}{List of Figures} %
+%  % Use front page styling.
+%  \frntpg %
+%  % Larger upper margin for first page of table (thesis only)
+%  \if@umich@thesis %
+%   \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
+%  \fi %
+%  % Add the title
+%  \centerline{\large\bf LIST OF FIGURES} %
+%  % Add some space after the title.
+%  \vspace{1ex} %
+%  % Start the automatic table of contents features.
+%  \begin{singlespace} %
+%   \let\oldnumberline\numberline%
+%   \renewcommand{\numberline}{\figurename~\oldnumberline}%
+%   \@starttoc{lof}\if@restonecol\twocolumn\fi %
+%  \end{singlespace} %
+% }
 
 
 %% ---- LIST OF TABLES -------------------------------------------------
-% This sets the format for the table entries.
-\renewcommand*{\l@table}{\@dottedtocline{1}{0em}{2.5em}}
+\renewcommand{\cftlottitlefont}{\hfill\Large\bfseries\MakeUppercase}
+\renewcommand{\cftafterlottitle}{\hfill}
+\renewcommand{\cfttabfont}{Table~}
+% % This sets the format for the table entries.
+% \renewcommand*{\l@table}{\@dottedtocline{1}{0em}{2.5em}}
 
-% This sets the formatting of the list of tables page.
-\renewcommand*{\listoftables}{%
- % Move to new page.
- \newpage %
- % Add this page to the table of contents.
- \phantomsection\addcontentsline{toc}{chapter}{List of Tables} %
- % Use front page styling.
- \frntpg %
- % Larger upper margin for first page of table (thesis only)
- \if@umich@thesis %
-  \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
- \fi %
- % Add the title
- \centerline{\large\bf LIST OF TABLES} %
- % Add some space after the title.
- \vspace{1ex} %
- % Start the automatic table of contents features.
- \begin{singlespace} %
-  \@starttoc{lot}\if@restonecol\twocolumn\fi %
- \end{singlespace} %
-}
+% % This sets the formatting of the list of tables page.
+% \renewcommand*{\listoftables}{%
+%  % Move to new page.
+%  \newpage %
+%  % Add this page to the table of contents.
+%  \phantomsection\addcontentsline{toc}{chapter}{List of Tables} %
+%  % Use front page styling.
+%  \frntpg %
+%  % Larger upper margin for first page of table (thesis only)
+%  \if@umich@thesis %
+%   \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
+%  \fi %
+%  % Add the title
+%  \centerline{\large\bf LIST OF TABLES} %
+%  % Add some space after the title.
+%  \vspace{1ex} %
+%  % Start the automatic table of contents features.
+%  \begin{singlespace} %
+%   \let\oldnumberline\numberline%
+%   \renewcommand{\numberline}{\tablename~\oldnumberline}%
+%   \@starttoc{lot}\if@restonecol\twocolumn\fi %
+%  \end{singlespace} %
+% }
 
 
 %% ---- LIST OF MAPS ---------------------------------------------------
@@ -979,9 +1018,20 @@
 }
 
 %% ---- LIST OF ALGORITHMS -----------------------------------------------
-
+\let\oldlistofalgorithms\listofalgorithms
+\renewcommand{\listofalgorithms}{%
+  \begingroup%
+  \let\oldnumberline\numberline%
+  \renewcommand{\numberline}{Algorithm~\oldnumberline}%
+  \oldlistofalgorithms%
+  \endgroup}
+\renewcommand{\cftloatitlefont}{\hfill\Large\bfseries\MakeUppercase}
+\renewcommand{\cftafterloatitle}{\hfill}
+% \renewcommand{\cftalgfont}{Algorithm~}
+% \renewcommand{\cftalgaftersnum}{:}
+% \cftsetindents{alg}{0em}{2em}
 % This sets the formatting for map entries in the list of maps.
-\newcommand*{\l@algorithm}{\@dottedtocline{1}{0em}{2.5em}}
+% \newcommand*{\l@algorithm}{\@dottedtocline{1}{0em}{2.5em}}
 
 % % This sets the formatting of the list of maps page.
 % \newcommand*{\listofalgorithms}{%
@@ -1003,11 +1053,11 @@
 %  \vspace{1ex} %
 %  % Start the automatic table of contents features.
 %  \begin{singlespace} %
+%   \let\oldnumberline\numberline%
+%   \renewcommand{\numberline}{\algorithmname~\oldnumberline}%
 %   \@starttoc{loalg}\if@restonecol\twocolumn\fi %
 %  \end{singlespace} %
 % }
-
-
 
 %% ---- LIST OF PROGRAMS -----------------------------------------------
 % Command to generate the 'map' environment.
@@ -1046,29 +1096,31 @@
 % This sets the formatting for appendices in the list.
 \newcommand*{\l@appendix}{\@dottedtocline{1}{0em}{2.5em}}
 
-% This sets the formatting of the list of appendices page.
-\newcommand*{\listofappendices}{%
- % Move to new page.
- \newpage %
- % Add this page to the table of contents.
- \phantomsection\addcontentsline{toc}{chapter}{List of Appendices} %
- % Anchor for pdf
- \phantomsection %
- % Use front page styling.
- \frntpg %
- % Larger upper margin for first page of table (thesis only)
- \if@umich@thesis %
-  \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
- \fi %
- % Add the title
- \centerline{\large\bf LIST OF APPENDICES} %
- % Add some space after the title.
- \vspace{1ex} %
- % Start the automatic table of contents features.
- \begin{singlespace} %
-  \@starttoc{loa}\if@restonecol\twocolumn\fi %
- \end{singlespace} %
-}
+% % This sets the formatting of the list of appendices page.
+% \newcommand*{\listofappendices}{%
+%  % Move to new page.
+%  \newpage %
+%  % Add this page to the table of contents.
+%  \phantomsection\addcontentsline{toc}{chapter}{List of Appendices} %
+%  % Anchor for pdf
+%  \phantomsection %
+%  % Use front page styling.
+%  \frntpg %
+%  % Larger upper margin for first page of table (thesis only)
+%  \if@umich@thesis %
+%   \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
+%  \fi %
+%  % Add the title
+%  \centerline{\large\bf LIST OF APPENDICES} %
+%  % Add some space after the title.
+%  \vspace{1ex} %
+%  % Start the automatic table of contents features.
+%  \begin{singlespace} %
+%   \let\oldnumberline\numberline%
+%   \renewcommand{\numberline}{\appendixname~\oldnumberline}%
+%   \@starttoc{loa}\if@restonecol\twocolumn\fi %
+%  \end{singlespace} %
+% }
 
 % Renew the command that starts the appendices.
 \renewcommand{\appendix}{ %
@@ -1461,13 +1513,14 @@
  % Insert the prologue if there is one.
  \if@umich@prologue\prologuepage\fi %
  % Insert the table of contents.
- \tableofcontents %
+ \setcounter{page}{1}
+ \phantomsection\tableofcontents\clearpage %
  % Insert the list of tables.
- \if@umich@listoftables\listoftables\fi %
+ \if@umich@listoftables\phantomsection\addcontentsline{toc}{chapter}{List of Tables}\listoftables\clearpage\fi %
  % Insert the list of figures.
- \if@umich@listoffigures\listoffigures\fi %
+ \if@umich@listoffigures\phantomsection\addcontentsline{toc}{chapter}{List of Figures}\listoffigures\clearpage\fi %
  % Insert the list of algorithms.
- \if@umich@listofalgorithms\listofalgorithms\fi %
+ \if@umich@listofalgorithms\phantomsection\addcontentsline{toc}{chapter}{List of Algorithms}\listofalgorithms\clearpage\fi %
  % Insert the list of maps.
  \if@umich@listofmaps\listofmaps\fi %
  % Insert the list of illustrations.
@@ -1504,4 +1557,3 @@
   \twocolumn %
  \fi %
 }
-

@@ -14,11 +14,9 @@
 \usepackage{caption}                            % Allows for \caption*
 \usepackage{subcaption}                         % Subfigures
 \usepackage{siunitx}                            % Column type S in tables
-% \usepackage[ruled]{algorithm2e}                 % Fancy algorithms
+% \usepackage[chapter]{algorithm}
 % \usepackage{algcompatible}
-\usepackage{algorithm}
-\usepackage{algcompatible}
-\usepackage{algpseudocode}
+% \usepackage{algpseudocode}
 \usepackage{booktabs}                           % Better table formatting
 \usepackage{microtype}                          % Better line breaking and formatting
 \usepackage{breakcites}                         % Better line breaking with cites?
@@ -28,14 +26,9 @@
             sorting=none,
             style=numeric-comp,
             maxcitenames=2]{biblatex}       % Biblatex - Reference management. Citations in-order
-% \usepackage[backend=bibtex,                     % Use bibtex backend
-%             natbib=true,                        % Use natbib
-%             sorting=none,
-%             style=numeric-comp,
-%             maxcitenames=2]{biblatex}       % Biblatex - Reference management. Citations in-order
 \usepackage{etoolbox}                           % Command definitions
 \usepackage{tikz}                               % TikZ figures
-\usepackage{titletoc}                           % Chapter TOC
+% \usepackage{titletoc}                           % Chapter TOC
 \usepackage{xstring}                            % String processing stuff
 \usepackage[nameinlink,capitalize]{cleveref}    % Clever references (\cref, \Cref)
 \usepackage[final]{pdfpages}                    % \includepdf
@@ -50,9 +43,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \addbibresource{library}
 \title{Parallel 3-D Method of Characteristics with Linear Source and Advanced Transverse Integration}
-\author{Andrew P. Fitzgerald}
+\author{Andrew Fitzgerald}
 \department{Nuclear Engineering and Radiological Sciences}
-\year=2019
+\year=2020
 
 % \frontispiece{
 %   \includegraphics[width=0.75\linewidth]{Preface/front-comic.jpg}
@@ -67,17 +60,13 @@
 
 % \input{Dedications.tex}
 
-% % Preface
-%  \preface[2]{ %
-%  I may add a preface here later.} %ZZZZ
-
 % Committee
 \committee{ %
-    Professor Brendan Kochunas, Chair,\\
-    Professor Thomas Downar,\\
-    Professor Edward Larsen,\\
-    Professor Venkat Raman,\\
-    Dr. Rodolfo Ferrer,
+    Assistant Professor Brendan Kochunas, Chair\\
+    Professor Thomas Downar\\
+    Dr. Rodolfo Ferrer\\
+    Professor Emeritus Edward Larsen\\
+    Professor Venkat Raman
 }
 
 % Commands to hide or show lists of figures, tables, etc.
@@ -86,7 +75,7 @@
 \showlistoftables
 \showlistoffigures %ZZZ check captions
 \showlistofalgorithms
-\showlistofappendices
+\hidelistofappendices
 
 % Definition of any abbreviations used.
 \input{Preface/abbr.tex}
@@ -132,7 +121,5 @@
     \input{chapters/SpatialDecomposition/main.tex}
     \input{chapters/LSMOC/main.tex}
     \input{chapters/MacroRay/main.tex}
-    % \input{chapters/Results/main.tex}
     \input{chapters/Conclusions/main.tex}
-    % \printbibliography
 \end{document}
