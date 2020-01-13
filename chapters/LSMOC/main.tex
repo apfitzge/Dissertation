@@ -203,21 +203,21 @@
           \label{tab:LSMOC:ET:Naive Results}
           \footnotesize
           \begin{tabular}{@{}ccrrrrrrrrr@{}}\toprule
-            Method & Table Type & Order & \multicolumn{2}{c}{\shortstack[c]{Exponential\\Time (s)}} & & \multicolumn{2}{c}{\ac{MOC} Time (s)} && \multicolumn{2}{c}{Intervals (Memory)}\\\cmidrule{4-5}\cmidrule{7-8}\cmidrule{10-11}
+            Method & Table Type & Order & \multicolumn{2}{c}{\shortstack[c]{Exponential\\Time (s)}} & & \multicolumn{2}{c}{\ac{MOC} Time (s)} && \multicolumn{2}{c}{Memory}\\\cmidrule{4-5}\cmidrule{7-8}\cmidrule{10-11}
                   &            &       & w/ pol & w/o pol & \phantom{}                           & w/ pol & w/o pol & \phantom{}  &  \multicolumn{1}{c}{w/ pol} & \multicolumn{1}{c}{w/o pol}\\\midrule
             Analytic & N/A & N/A & \multicolumn{2}{c}{432.5} && \multicolumn{2}{c}{654.7} && \multicolumn{2}{c}{N/A}\\\midrule
-            \multirow{6}{*}{3-Functions}     & \multirow{3}{*}{Uniform}        & 1 & 382.6 & 360.3 && 622.5 & 591.0 && 6.00E7 (8.04 GB) & 1.00E7 (458 MB) \\\addlinespace[-0.2em]
-                                                                              && 2 & 121.3 & 151.7 && 343.2 & 372.1 && 416080 (85.7 MB) & 69360  (4.8 MB) \\\addlinespace[-0.2em]
-                                                                              && 3 & 124.1 & 169.0 && 347.5 & 388.7 && 32280  (9079 KB) & 5400   (506 KB) \\\cmidrule{2-11}\addlinespace[-0.2em]
-                                                & \multirow{3}{*}{Non-Uniform} & 1 & 592.9 & 559.2 && 825.8 & 800.6 && 4.07E6  (878 MB) & 840658 (76.6 MB)\\\addlinespace[-0.2em]
-                                                                              && 2 & 144.6 & 178.5 && 364.3 & 397.8 && 45265  (10.9 MB) & 8020    (835 KB)\\\addlinespace[-0.2em]
-                                                                              && 3 & 139.6 & 199.8 && 358.5 & 420.0 && 4491    (1.4 MB) & 796    (85.2 KB)\\\midrule
-            \multirow{6}{*}{1-Function}       & \multirow{3}{*}{Uniform}       & 1 & 296.2 & 259.3 && 523.9 & 484.5 && 6.00E7 (2.68 GB) & 1.00E7  (153 MB)\\\addlinespace[-0.2em]
-                                                                              && 2 &  91.4 & 123.2 && 310.2 & 345.7 && 416080 (28.6 MB) & 69360  (1.59 MB)\\\addlinespace[-0.2em]
-                                                                              && 3 &  87.2 & 133.2 && 305.4 & 353.6 && 32280  (2.96 MB) & 5400    (169 KB)\\\cmidrule{2-11}\addlinespace[-0.2em]
-                                                & \multirow{3}{*}{Non-Uniform} & 1 & 474.6 & 424.0 && 714.6 & 653.9 && 4.07E6  (415 MB) & 722899 (49.2 MB)\\\addlinespace[-0.2em]
-                                                                              && 2 & 105.8 & 146.4 && 326.6 & 367.7 && 41444   (4.4 MB) & 7338   (443  KB)\\\addlinespace[-0.2em]
-                                                                              && 3 &  98.9 & 153.3 && 318.8 & 373.2 && 4152    (515 KB) & 735    (33.5 KB)\\\bottomrule
+            \multirow{6}{*}{3-Functions}     & \multirow{3}{*}{Uniform}        & 1 & 382.6 & 360.3 && 622.5 & 591.0 && 8.04 GB & 458 MB \\\addlinespace[-0.2em]
+                                                                              && 2 & 121.3 & 151.7 && 343.2 & 372.1 && 85.7 MB & 4.8 MB \\\addlinespace[-0.2em]
+                                                                              && 3 & 124.1 & 169.0 && 347.5 & 388.7 && 9079 KB & 506 KB \\\cmidrule{2-11}\addlinespace[-0.2em]
+                                                & \multirow{3}{*}{Non-Uniform} & 1 & 592.9 & 559.2 && 825.8 & 800.6 && 878 MB & 76.6 MB\\\addlinespace[-0.2em]
+                                                                              && 2 & 144.6 & 178.5 && 364.3 & 397.8 && 10.9 MB & 835 KB\\\addlinespace[-0.2em]
+                                                                              && 3 & 139.6 & 199.8 && 358.5 & 420.0 && 1.4 MB & 85.2 KB\\\midrule
+            \multirow{6}{*}{1-Function}       & \multirow{3}{*}{Uniform}       & 1 & 296.2 & 259.3 && 523.9 & 484.5 && 2.68 GB & 153 MB\\\addlinespace[-0.2em]
+                                                                              && 2 &  91.4 & 123.2 && 310.2 & 345.7 && 28.6 MB & 1.59 MB\\\addlinespace[-0.2em]
+                                                                              && 3 &  87.2 & 133.2 && 305.4 & 353.6 && 2.96 MB & 169 KB\\\cmidrule{2-11}\addlinespace[-0.2em]
+                                                & \multirow{3}{*}{Non-Uniform} & 1 & 474.6 & 424.0 && 714.6 & 653.9 && 415 MB & 49.2 MB\\\addlinespace[-0.2em]
+                                                                              && 2 & 105.8 & 146.4 && 326.6 & 367.7 && 4.4 MB & 443  KB\\\addlinespace[-0.2em]
+                                                                              && 3 &  98.9 & 153.3 && 318.8 & 373.2 && 515 KB & 33.5 KB\\\bottomrule
           \end{tabular}
         \end{table}
       }
@@ -457,7 +457,7 @@
   \section{Results}{\label{sec:LSMOC:Results}
     This section highlights several of the key results found using the \ac{LSA} solver implemented in MPACT.
     Only results using 2-D transport or the 2D/1D method in MPACT are shown, as 3-D transport results will be discussed in \cref{ch:MacroRay}.
-    Isotopic depletion is performed using the ORIGEN code, and \ac{TH} feedback is performed using \ac{CTF}.
+    Isotopic depletion is performed using the ORIGEN code \cite{ORIGEN}, and \ac{TH} feedback is performed using \ac{CTF} \cite{CTF}.
     Although \cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications} provides the derivation of a spatially linear anisotropic source, the initial implementation in MPACT was limited to the isotropic scattering approximation.
     With the use of the \ac{TCP0} approximation, problems of interest are able to be simulated with acceptable levels of error.
     However, one of our recent works \cite{Herring2020} has implemented the \ac{LIFA} approximation in MPACT, but these results are not presented here.
@@ -467,7 +467,7 @@
       A 7-group cross section library of macroscopic cross sections is provided by the benchmark.
       The benchmark consists of two \ac{UO2} assemblies and two \ac{MOX} assemblies surrounded by a large radial reflector, as shown in \cref{fig:LSMOC:C5G7:CoreGeom}.
       Reflective boundary conditions are used on the north and west faces, while vacuum conditions are used on the south and east faces.
-      The benchmark provides reference MCNP calculation results, which can be used to determine the accuracy of the methods used to solve the benchmark cases.
+      The benchmark provides reference MCNP calculation results, that can be used to determine the accuracy of the methods used to solve the benchmark cases.
 
       \begin{figure}[htbp]
         \centering
@@ -478,7 +478,7 @@
       This problem was studied in order to verify that the implementation of the \ac{LSA} derived in this chapter yields similar results to those found by \citet{Ferrer2016}.
       Similar meshing, ray, and direction parameters were used in this study as were used in the original study \cite{Ferrer2016}; some parameters could not be replicated exactly due to differences in the MPACT and CASMO5 codes.
       All cases used a uniform ray-spacing of 0.05 cm, and directional quadrature using 128 azimuthal angles and 6 polar angles in $\fourpi$.
-      Each case was run using od\ac{CMFD} \cite{Zhu2016}.
+      Each case was run using od\ac{CMFD} \cite{Zhu2016}, and converged to within 1.0$\cdot 10^{-5}$ for the eigenvalue, and 1.0$\cdot 10^{-4}$ for flux 2-norm.
 
       The fine pin cell mesh used 5 rings in the fuel region, 10 in the moderator region, and 16 azimuthal divisions in all regions.
       The fine reflector cell mesh was divided into 0.105$\times$0.105 cm$^2$ cells.
@@ -503,7 +503,7 @@
       However, this also shows that for this problem the \ac{LSA} solver takes just under 2 times the time of the \ac{FSA} on the same mesh (coarse).
       It is also shown, that there is very little memory overhead from using the \ac{LSA} on the same mesh as the \ac{FSA}.
       The number of iterations is quite different of that reported by \citet{Ferrer2016}; however, the iteration scheme in CASMO5 is different than that of MPACT \cite{FerrerPersoanlCommunications2018}.
-      In MPACT, each iteration loops over all energy groups a single time, but in CASMO5 the thermal energy groups are iterated over multiple times.
+      In MPACT, each iteration (transport sweep) loops over all energy groups a single time, but in CASMO5 the thermal energy groups are iterated over multiple times within a single transport sweep.
 
       \begin{table}[htbp]
         \centering
@@ -601,19 +601,19 @@
       \end{figure}
     }
 
-    \subsection{Typical Pin Cell Depletion}{\label{ssec:LSMOC:Typical Pin Cell Depletion}
-      In order to evaluate the benefits of this new formulation, the first multiphysics case studied was a typical \ac{UO2} fuel cell, as specified by \ac{VERA} progression problem 1A \cite{VERAProblems}.
+    \subsection{PWR Pin Cell Depletion}{\label{ssec:LSMOC:PWR Pin Cell Depletion}
+      In order to evaluate the benefits of this new formulation, the first multiphysics case studied was a typical \ac{UO2} pin cell, as specified by the \ac{VERA} progression problem 1A \cite{VERAProblems}.
       Isotopic depletion calculations were run up to 70 \ac{GWDMT} ($\sim$1820 \ac{EFPD}) at \ac{HFP} conditions.
       Using the current default meshing parameters in MPACT as a starting point, various mesh parameters were coarsened to study their affect when using the \ac{LSMOC}.
       These cases were compared against a reference case, which was very finely meshed with fine ray-spacing (0.001 cm), and a Tabuchi-Yamamoto \cite{Yamamoto2005} quadrature using 128 azimuthal angles and 4 polar angles over $\fourpi$
       All other cases were run using a Tabuchi-Yamamoto quadrature with 64 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.05 cm.
-      This case used the \ac{TCP0} approximation to scattering.
+      This case used the \ac{TCP0} scattering approximation.
 
       \paragraph{Default Mesh}{
         MPACT's current default meshing parameters were used as a starting point.
         Flat and linear source calculations were run on this mesh, to set a baseline for ``acceptable'' levels of error in the eigenvalue.
-        Compared to the reference case, the \ac{LS} calculation had a larger maximum error in eigenvalue of 89.2 \ac{pcm}, whereas the \ac{FS} calculation had a maximum error of 65.5 \ac{pcm}.
-        However, the average errors over the depletion were approximately the same: 31.6 and 33.7 \ac{pcm}, for the \ac{FS} and \ac{LS} calculations, respectively.
+        Compared to the reference case, the \ac{LS} calculation had a larger maximum error in eigenvalue of 89 \ac{pcm}, whereas the \ac{FS} calculation had a maximum error of 66 \ac{pcm}.
+        However, the average errors over the depletion were approximately the same: 32and 34 \ac{pcm}, for the \ac{FS} and \ac{LS} calculations, respectively.
         The eigenvalue differences over the depletion calculation are shown in \cref{fig:LSMOC:1a:DefaultMesh:Eigenvalue}.
         The goal in this mesh refinement study is to determine acceptable meshing parameters without worse maximum or average eigenvalue errors.
 
@@ -624,10 +624,10 @@
         \end{figure}
       }
       \paragraph{Fuel Radius}{
-        During isotopic depletion, it is important to accurately capture the radial distribution of Plutonium, due to self-shielding effects.
+        During isotopic depletion, it is important to accurately capture the radial distribution of plutonium, due to self-shielding effects.
         Plutonium is primarily produced in the outer rim of the pin (this is well known as the rim-effect).
         The default mesh uses three equal-volume rings in the fuel region; however, we expect that two rings will be sufficient, when using the \ac{LSA}, if the extra ring is placed in such a way that it captures this rim-effect.
-        Experimental studies of the rim-effect \cite{Lassmann1994} have found that there is a sharp rise in Plutonium at about 80-90\% of the outer radius of the fuel.
+        Experimental studies of the rim-effect \cite{Lassmann1994} have found that there is a sharp rise in plutonium at about 80-90\% of the outer radius of the fuel.
 
         A series of calculations were run using two fuel rings with varying inner radius.
         The eigenvalue and Plutonium comparisons are shown in \cref{fig:LSMOC:1a:FuelRadius:Eigenvalue,fig:LSMOC:1a:FuelRadius:Pu239}.
@@ -675,17 +675,19 @@
       This was done to verify that the meshing parameters previously found were valid for larger problems, and determine if even coarser parameters were sufficient.
       First, problem 2A was studied; the meshing parameters of the fuel cell and guide-tube cells were studied independently.
       Both problems were simulated using the \ac{TCP0} scattering approximation.
+      This study was performed to determine whether or not coarse meshing parameters with the \ac{LSA} yield similar accuracy in a case with non-constant cross sections.
+
       \subsubsection{Problem 2A}{\label{sssec:LSMOC:Problem 2A}
         \paragraph{2A - Default Mesh}{
           For this problem, a reference calculation was carried out on the lattice with a very fine mesh.
           This reference calclation also used a finer directional quadrature of 128 azimuthal angles and 4 polar angles, with a uniform ray-spacing of 0.001 cm.
-          Again, the MPACT's current default mesh was used a starting point for the mesh study; the results of the \ac{FS} and \ac{LS} calculations on this default mesh are used as a baseline.
+          Again, MPACT's current default mesh was used as a starting point for the mesh study; the results of the \ac{FS} and \ac{LS} calculations on this default mesh are used as a baseline.
           Eigenvalue and pin-power comparisons are provided in \cref{fig:LSMOC:2A:Default Mesh:Eigenvalues,fig:LSMOC:2A:Default Mesh:PinPowers}.
 
           The trend in eigenvalue is similar to that found for problem 1A with the default mesh;
             the \ac{LS} calculation has a higher absolute eigenvalue difference of 51 \ac{pcm} compared to the \ac{FS} calculation with 43 \ac{pcm}.
           However, the average eigenvalue differences are similar at 24 and 21 \ac{pcm} for the \ac{FS} and \ac{LS} calculations, respectively.
-          Additionally, \cref{fig:LSMOC:2A:Default Mesh:PinPowers} shows that maximum pin power differences are consistently lower for the linear source calculation.
+          Additionally, \cref{fig:LSMOC:2A:Default Mesh:PinPowers} shows that the maximum pin power differences are consistently lower for the linear source calculation.
           This indicates that local effects are predicted better by the linear source, and there is some cancellation of errors occurring in the eigenvalue.
 
           \begin{figure}
@@ -707,7 +709,8 @@
           Next, the varied azimuthal divisions in the fuel were tested; this time testing a single azimuthal division.
           \Cref{fig:LSMOC:2A:Fuel Azimuthals:Eigenvalues} shows that there is a noticeable affect moving to a single azimuthal division;
             however, the mean difference is changed by less than 1 \ac{pcm}, and the max difference is actually improved by 3 \ac{pcm}.
-          We acknowledge that this improvement is likely due to cancellation of errors. Regardless, the net effect of this change is small.
+          We acknowledge that this improvement is likely due to cancellation of errors.
+          Regardless, the net effect of this change is small, and a single azimuthal sector is used moving forward in this work.
 
           \begin{figure}
             \centering
@@ -727,8 +730,7 @@
           \end{figure}
         }
         \paragraph{2A - Cladding and Gap Azimuthal Divisions}{
-          The azimuthal divisions of the cladding and gap regions do not seem to play a significant role.
-          The difference is not even visually apparent in a graph of the eigenvalue, as seen in \cref{fig:LSMOC:2A:Clad Azimuthal:Eigenvalues}.
+          The azimuthal divisions of the cladding and gap regions do not seem to play a significant role, as seen in \cref{fig:LSMOC:2A:Clad Azimuthal:Eigenvalues}.
 
           \begin{figure}
             \centering
@@ -740,7 +742,7 @@
           In the 2A lattice, guide-tube pins are present; each guide-tube consists of three regions: inner moderator, cladding, and outer moderator.
           The effect of different azimuthal divisions in each of these regions was tested; the resulting eigenvalues are shown in \cref{fig:LSMOC:2A:Gtube:Inner Moderator Azimuthals:Eigenvalues,fig:LSMOC:2A:Gtube:Cladding Azimuthals:Eigenvalues,fig:LSMOC:2A:Gtube:Outer Moderator Azimuthals:Eigenvalues}.
           A single azimuthal division in each of these regions seems to be sufficient, with no significant affect on eigenvalue accuracy.
-          However, 4 azimuthal divisions in the surrounding moderator was selected for moving forward, due to compatibility issues with \ac{CTF}.
+          However, 4 azimuthal divisions in the surrounding moderator was selected for moving forward, due to limitations in the mesh mapping with \ac{CTF}.
 
           \begin{figure}
             \centering
@@ -764,14 +766,14 @@
           \begin{itemize}
             \item{has 2 fuel rings, with the inner radius being 0.875 fraction of the outer,}
             \item{no additional moderator ring in the surrounding moderator,}
-            \item{a single azimuthal division in the fuel, clad, and gap regions,}
-            \item{and four azimuthal divisions in the surrounding moderator.}
+            \item{a single azimuthal sector in the fuel, clad, and gap regions,}
+            \item{and four azimuthal sectors in the surrounding moderator.}
           \end{itemize}
           The guide-tube cell
           \begin{itemize}
             \item{has no additional moderator ring in the surrounding moderator,}
-            \item{has a single azimuthal division for the inner moderator, and cladding,}
-            \item{and four azimuthal divisions for the surrounding moderator.}
+            \item{has a single azimuthal sector for the inner moderator, and cladding,}
+            \item{and four azimuthal sectors for the surrounding moderator.}
           \end{itemize}
           The lattice meshes are shown in \cref{figs:LSMOC:2a:Meshes}.
 
@@ -793,7 +795,8 @@
 
           Eigenvalue comparisons are shown in \cref{fig:LSMOC:2A:Coarse Mesh:Eigenvalues}, and pin power comparisons are made in \cref{fig:LSMOC:2A:Coarse Mesh:PinPowers}.
           While it is visually apparent that the accuracy is made slightly worse than the default mesh \ac{LS} calculation, the entire goal of the this mesh study was to maintain error with the \ac{FS} calculation.
-          This goal has been met, while reducing the number of cells from 3946 to 579.
+          This goal has been met, while reducing the number of fine mesh source regions from 3946 to 579.
+          A discussion and comparison of computational performance is presented in \cref{sssec:Performance}.
 
           \begin{figure}
             \centering
@@ -811,11 +814,13 @@
       \subsubsection{Problem 2P}{\label{sssec:LSMOC:Problem 2P}
         \paragraph{2P - Applying Coarse Mesh Parameters}{
           \ac{VERA} problem 2P contains several gadolinia-enriched fuel rods; as the lattice is depleted, these fuel rods ``burn'' the gadolinia.
-          The gadolinia is primarily burned away started at the outer radius and moving inwards as time progresses.
-          This inward burning makes the pins difficult to model, and requires many radial divisions for accurate calculations; it is effectively a ``moving rim effect''.
-          Additionally, because the presence of these small radial regions, a finer ray-spacing (0.01 cm) is necessary.
+          The gadolinia is primarily burned away starting at the outer radius and moving inwards as time progresses.
+          This is called the ``onion skin'' effect; it is analogous to a moving boundary layer.
+          This inward burning makes the pins difficult to model, and requires many radial divisions for accurate calculations.
+          Additionally, because of the presence of these small radial regions, a finer ray-spacing (0.01 cm) is necessary.
 
           To evaluate if the previously determined coarse mesh parameters are sufficient in this problem, they are applied to the regular fuel and guide-tube cells, while the gadolinia rods use the default meshing parameters.
+          The default mesh parameters for gadolinia rods are the same as for the fuel rods except that 10 equal-volume rings are used in the fuel region.
           \Cref{fig:LSMOC:2P:Default Mesh:Eigenvalues,fig:LSMOC:2P:Default Mesh:PinPowers} show that applying the coarse mesh parameters to the fuel and guide-tube cells does not significantly worsen the eigenvalue or pin power results.
           It is worth observing that errors in this cases are significantly higher than in the problem 2A; this is likely due to the complicated radial dependence of the gadolinia rods during depletion.
 
@@ -863,9 +868,9 @@
           For the gadolinia rods, it was found to be sufficient to
           \begin{itemize}
             \item{have no additional moderator ring,}
-            \item{use 8 equal volume fuel radial fuel divisions,}
-            \item{a single azimuthal division in the fuel, clad, and gap regions,}
-            \item{and four azimuthal divisions in the surrounding moderator.}
+            \item{use 8 equal volume radial fuel divisions,}
+            \item{a single azimuthal sector in the fuel, clad, and gap regions,}
+            \item{and four azimuthal sectors in the surrounding moderator.}
           \end{itemize}
 
           Eigenvalue comparisons are shown in \cref{fig:LSMOC:2P:Coarse Mesh:Eigenvalues}, and pin power comparisons are made in \cref{fig:LSMOC:2P:Coarse Mesh:PinPowers}.
@@ -903,6 +908,7 @@
 
       \subsubsection{Performance}{\label{sssec:Performance}
         Several performance metrics for the 2A and 2P lattice depletion calculations are listed in \cref{tab:LSMOC:LatticeDepletion:Performance}.
+        All calculations were performed on a Intel E3-1241 v3 (3.50 GHz) processor with 4 threads (ray parallelism).
         For these two cases, compared to the default \ac{FSA} calculation, the coarse mesh \ac{LSA} calculation reduced total run-time by 17\% and 11\%.
         Total memory requirements were reduced by 14\% and 9.3\%, and also shows there is very little memory overhead from the use of the \ac{LSA}.
         Interestingly, the \ac{MOC} calculations seem to be slowed in these cases with run-times increased by 7\% and 6\%.
@@ -954,6 +960,7 @@
       To evaluate the effect on accuracy these these coarse mesh parameters result in, they were applied to the \ac{VERA} problem 2 lattice series.
       This series contains 17 common lattice configurations, and it is expected that if the meshing parameters are sufficient for these cases, they will be sufficient in most applications.
       The eigenvalue and pin-power results compared to a very finely meshed reference case are shown in \cref{tab:LSMOC:Lattice:Eigenvalue} and \cref{tab:LSMOC:Lattice:PinPower}, respectively.
+      A finely meshed reference case is used, rather than a Monte Carlo reference, as the sole focus of this study is on the error due to spatial discretization.
 
       On average, the \ac{LS} on the coarse mesh, using the parameters found in the previous sections, had accuracy comparable to the \ac{FS} on the default mesh.
       Additionally, the worst case errors were lower for the \ac{LS} on the coarse mesh.
@@ -1137,11 +1144,12 @@
         The rays can be spaced more coarsely, but this may cause some regions to not be integrated as accurately, thus degrading overall accuracy.
 
         In this section, the use of coarser ray-spacing is investigated for the \ac{VERA} problem 2 series.
-        Results were generated using a ray-spacing of 0.1 cm and 0.2 cm for the default mesh with the \ac{FS} solver, and for the coarse spatial mesh with \ac{LS} solver.
+        Results were generated using ray-spacings of 0.1 and 0.2 cm for the default mesh with the \ac{FS} solver, and the coarse mesh with the \ac{LS} solver.
         Eigenvalue and pin power comparisons are shown in \cref{tab:LSMOC:Lattice:CR:Eigenvalue} and \cref{tab:LSMOC:Lattice:CR:PinPower}, respectively.
-        In most of the cases, it is possible to use a reasonably coarser ray-spacing (0.10 cm) without incurring significant error.
-        The original hypothesis of this work was that using a coarser mesh would allow for the use of coarser rays; however, \cref{tab:LSMOC:Lattice:CR:Eigenvalue,tab:LSMOC:Lattice:CR:PinPower} show that this is not the case.
-        The determining factor for whether or not coarser rays can be used is the presence of fine material discretizations in some rods.
+        The original hypothesis was that by using a coarser mesh, it would also be possible to use coarser ray-spacing with maintained accuracy.
+        This hypothesis turned out to be incorrect.
+        Most of the cases it was possible to use a coarser ray-spacing while maintaining similar accuracy with both the default and coarse meshes; however, some cases showed significant errors when using coarse rays.
+        The determining factor for whether or not coarse rays can be used, while maintaining accuracy, is the presence of the fine material discretizations in some rods.
         However, \cref{tab:LSMOC:Lattice:CR:Segments} shows that the use of a coarse mesh and coarse rays reduces the number of ray-segments (from the default parameters) by a much more significant fraction than simply using a coarser spatial mesh; meaning the expected run-time will be considerably lower.
 
         \begin{table}[htbp]
@@ -1288,6 +1296,7 @@
       This is not the case, as the \ac{LSA} cases required fewer iterations to converge.
       The iterations may differ due to non-uniform iterative convergence \footnote{due to complex eigenvalues in the spectral radius} that has previously been observed in problems with \ac{CMFD} acceleration and feedback \cite{Kochunas2017}.
       If the \ac{MOC} run-time per iteration is compared, the \ac{LSA} solver takes 79\% longer than the \ac{FSA} solver on the default mesh, but only 35\% longer on the coarse mesh.
+      Compared to the \ac{FSA} on the default mesh, the \ac{LSA} on the coarse mesh \ac{MOC} calculation is actually slower (1.62 vs 1.46 s/iteration), but the time is reduced in other routines such as depletion.
 
       Because \ac{CTF} takes far longer in the first several iterations, it is not fair to compare total run-time per iteration.
       Rather, we can look at the time that the \ac{FSA} solver cases took to complete the same number of iterations the \ac{LSA} solver cases needed.
@@ -1395,10 +1404,10 @@
     \subsection{Core Depletion with Feedback}{\label{ssec:LSMOC:Core Depletion with Feedback}
       The \ac{VERA} progression problem 9 is based on the Watts Bar reactor and models a typical 18-month power cycle, though with simplified power changes \cite{VERA,VERAProblems}.
       Simplified changes in power are used such that transient calculations are not necessary.
-      The power levels, inlet coolant temperature, and bank D position over the cycle depletion and are shown in \cref{fig:LSMOC:P9:Operation}.
+      The power levels, inlet coolant temperature, and bank D position over the cycle depletion are shown in \cref{fig:LSMOC:P9:Operation}.
       The radial materials are shown in \cref{fig:LSMOC:P9:Radial Core}.
       This problem models a 3-D quarter core with isotopic depletion and \ac{TH} feedback, and performs a critical boron search at each state.
-      As with \cref{ssec:LSMOC:Assembly with Feedback}, this calculations performed in this section use the 2D/1D method \cite{Collins2016,VERA}.
+      As with \cref{ssec:LSMOC:Assembly with Feedback}, the calculations performed in this section use the 2D/1D method \cite{Collins2016,VERA}.
       The \ac{VERA-CS} has previously been used to simulate problem 9 using the traditional \ac{FSA} on the default mesh in MPACT, and compared well against Watts Bar plant data \cite{VERA}.
       In this section, the use of the coarse mesh with \ac{LSA} solver will be compared against the previous results.
 
@@ -1417,15 +1426,16 @@
       The simulation used the graph partitioning spatial decomposition methods described in \cref{ch:Spatial Decomposition} with 692 spatial domains.
       A Tabuchi-Yamamoto quadrature set with 32 azimuthal and 4 polar angles over $\fourpi$ was used with 0.05 cm ray-spacing.
       The TCP0 scattering approximation was also used in this case.
-      These parameters are the same as those which were previously shown to yield results which agree closely with plant data \cite{VERA}.
-      The default mesh contains a total of 51513673 source-regions, while the coarse mesh contains a total of 14932511 source-regions. %19743263
+      These parameters are the same as those which were previously shown to yield results that agree closely with plant data \cite{VERA}.
+      The default mesh contains a total of 51,513,673 source-regions, while the coarse mesh contains a total of 14,932,511 source-regions. %19743263
       The initial coarse mesh results were generated using a fine reflector region, with coarse fuel rod meshes; this mesh had a total of 19743263 source-regions.
       These initial coarse mesh results were generated due to a mistake by the author, but these show close agreement in terms of accuracy with the actual coarse mesh results.
 
-      Transverse leakage splitting, sometimes used to help iteration stability (\cref{sssec:3T:Transverse Leakage Splitting}), was disabled for these simulations.
+      Transverse leakage splitting, sometimes used to help iteration stability (\cref{sssec:3T:Transverse Leakage Splitting}) \cite{Stimpson2015,Kelley2015}, was disabled for these simulations.
       In this problem, transverse leakage splitting was confirmed not to be necessary for convergence, and generally has negative impacts on accuracy.
       Additionally, the use of transverse leakage splitting caused instability when using the \ac{LSA}.
       In MPACT, the splitting factor is determined by the average source in a region; however, when this is applied to the linear source, it guarantees that half the region will still have a negative source.
+      This appears to be sufficient to destroy the already tenuous stability of the 2D/1D iterations.
 
       \Cref{fig:LSMOC:P9:Boron} shows the reference critical boron levels and the errors of the coarse mesh solutions over the cycle.
       The \ac{FSA} coarse mesh solution tends to over-predict the boron levels, while the \ac{LSA} coarse mesh solution tends to under-predict.
@@ -1440,9 +1450,9 @@
       Generally, the temperatures are within 2 K of the reference maximum.
 
       Detailed profiles of the pin-powers are provided for the beginning, middle, and end of cycles in \cref{figs:LSMOC:P9:Default-FS:PinPowers:BOC,figs:LSMOC:P9:Default-FS:PinPowers:MOC,figs:LSMOC:P9:Default-FS:PinPowers:EOC}, respectively.
-      A radial profile is shown for the mid-plane, and an axial profile is shown for the assembly which was hottest at the beginning of the cycle.
+      A radial profile is shown for the mid-plane, and an axial profile is shown for the assembly that was hottest at the beginning of the cycle.
       The pin-power difference profiles for the coarse mesh solutions are shown in \cref{figs:LSMOC:P9:Coarse-FS:PinPowers:BOC,figs:LSMOC:P9:Coarse-FS:PinPowers:MOC,figs:LSMOC:P9:Coarse-FS:PinPowers:EOC} for the \ac{FSA} solver, and \cref{figs:LSMOC:P9:Coarse-LS:PinPowers:BOC,figs:LSMOC:P9:Coarse-LS:PinPowers:MOC,figs:LSMOC:P9:Coarse-LS:PinPowers:EOC} for the \ac{LSA} solver.
-      At the beginning of the cycle, the \ac{FSA} solver tends to over-predict power near the center of the core and under predict near the peripherals, while the \ac{LSA} solver shows the opposite trend.
+      At the beginning of the cycle, the \ac{FSA} solver tends to over-predict power near the center of the core and under predict near the periphery, while the \ac{LSA} solver shows the opposite trend.
       These figures, along with \cref{figs:LSMOC:P9:AxialPowerShape}, also show that using the radial \ac{LSA} is able to better capture the power-shape axially.
 
       \begin{figure}[htbp]
@@ -1633,26 +1643,26 @@
     Previously, due to the tabulation error, the exponential functions in \ac{LSMOC} could cause problems to become unstable when they contained near-void regions, such as the fuel-clad gap.
     This could be solved by using more accurate tables, but at the expense of performance.
     Instead, a different function, that is not scaled by the inverse transport cross section in the transmission calculation, can be tabulated and used to calculate the other exponential functions.
-    This solved the issue which caused the instability and reduced the cost of exponential computations in \ac{LSMOC} calculations by 10\% and total \ac{MOC} time by 3\%.
+    This solved the issue that caused the instability and reduced the cost of exponential computations in \ac{LSMOC} calculations by 10\% and total \ac{MOC} time by 3\%.
 
     The improved formulation is equivalent to the previous formulation, but is found in such a way that the group-dependent coefficients, $\C$, can be eliminated.
-    This reduces memory usage, as the $\C$ terms are no longer need to be stored, which was at least as expensive as storing an additional current term on the fine mesh.
-    Additionally, the $\C$ terms no longer need to be computed (previous results have indicated this takes around 15-20\% of the time a transport sweep take \cite{Fitzgerald2019}).
+    This reduces memory usage, as the $\C$ terms no longer need to be stored, which was at least as expensive as storing an additional current term on the fine mesh.
+    Additionally, the $\C$ terms no longer need to be computed (previous results have indicated this takes around 15-20\% of the time a transport sweep \cite{Fitzgerald2019}).
     This is particularly advantageous in cases with non-constant cross sections, such as multi-physics calculations.
-    In calculations with \ac{TH} feedback, the cross sections can change each iteration, meaning the new formulation removes a 15-20\% \ac{MOC} overhead.
+    In calculations with \ac{TH} feedback, the cross sections essentially change each iteration, meaning the new formulation removes a 15-20\% \ac{MOC} overhead.
 
     The improved \ac{LSMOC} formulation was used in calculations to generate results for a variety of steady-state single and multi-physics calculations.
     These cases were used to determine possible default meshing parameters for MPACT.
     The determined coarse meshing parameters were shown to be sufficient for a 3-D quarter core cycle depletion with \ac{TH} feedback.
-    It was shown that the \ac{LSA} allowed for significant reduction in the number of source regions, memory usage, and reduced overall run-time in many of these cases.
+    It was also shown that the \ac{LSA} allowed for a significant reduction in the number of source regions, memory usage, and reduced overall run-time in many of these cases.
 
     While it is known the use of the \ac{LSA} allows for a coarser mesh while maintaining accuracy and typically reducing run-times, this work has led to two additional conclusions.
-    First, the maintained accuracy and reduced run-times seem to hold even in the presence of additional physics such as isotropic depletion, and \ac{TH} feedback.
+    First, the maintained accuracy and reduced run-times seem to hold even in the presence of additional physics such as isotopic depletion, and \ac{TH} feedback.
     Additionally, it was hypothesized that the use of a coarser mesh may allow for coarser ray-spacing.
-    However, this work has demonstrated that this is not the case; the determining factor for whether or not coarse rays are possible, without negatively impacting accuracy, is the presence of fine material discretizations such as control rods, or other strong absorbing elements.
-    In reactors, these problematic elements only make up a small fraction of the total number of pins, and is is expected, that the additional detail provided by using finer ray-spacing is need only locally within the elements.
-    This motivates the use of a ray-tracing technique that allows for finer \emph{effective} ray-spacing to be used in these elements, while coarser ray-spacing is used elsewhere.
-    The macroband method seems to fit this bill for 2-D calculations, but there exists no similar ray-tracing technique for 3-D calculations.
+    However, this work has demonstrated that this is not the case; the determining factor for whether or not coarse rays are possible, without negatively impacting accuracy, is the presence of fine material discretizations such as control rods, or other strong absorbing elements (e.g. \ac{IFBA}).
+    In reactors, these challenging geometric features only make up a small fraction of the total number of pins, and it is expected that the additional detail provided by using finer ray-spacing is needed only locally within these features.
+    This motivates the use of a ray-tracing technique that allows for finer \emph{effective} ray-spacing to be used locally where necessary, while coarser ray-spacing is used elsewhere.
+    The macroband method previously developed for 2-D calculations, is suitable in this regard; however, there exists no similar ray-tracing technique for 3-D calculations.
     \Cref{ch:MacroRay} will provide details on the extension of the macroband method for 3-D calculations.
   }
 
