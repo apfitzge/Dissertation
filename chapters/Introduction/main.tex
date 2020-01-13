@@ -1,5 +1,5 @@
 \chapter{Introduction}{\label{ch:Introduction}
-  \section{Motivation}{\label{sec:Introduction:Motivation}
+  \section{Motivation and Historical Review}{\label{sec:Introduction:Motivation}
     Computer simulations have played an important role in the design and analysis of nuclear reactor systems over the past 60 years \cite{FewGroupDiffusion}.
     The methods used by these simulations have always been limited by the available computational resources; as such, in the 1950's two-group diffusion theory was used as a basis for simulation tools \cite{FewGroupDiffusion}.
     As computers became more powerful, multigroup diffusion calculations became the method of choice for \ac{LWR} design calculations.
@@ -14,7 +14,7 @@
     At the time of writing, whole-core 3-D \ac{MOC} calculations are generally not possible without the use of large computing clusters.
     This is due to the large discretizations that are necessary for the neutron transport equation, which has a 6-dimensional phase space for steady-state eigenvalue problems.
     In the past decade, there has been renewed interest in making 3-D \ac{MOC} more efficient and performant by using parallelism \cite{Kochunas2013}, modern \ac{GPU} architectures \cite{Boyd2014}, and ray-tracing storage techniques \cite{Sciannandrone2016, Gunow2016}.
-    Work has also been done to make \ac{MOC} faster by improving the efficiency of the calculations, using higher-order approximations \cite{Ferrer2016,Gunow2018}.
+    Work has also been done to make \ac{MOC} faster by improving the efficiency of the calculations, using higher-order (primarily linear) source approximations \cite{Ferrer2016,Gunow2018}.
 
     The bulk of this thesis work is comprised of three distinct, yet connected, topics, all with a focus on improving the feasibility of 3-D \ac{MOC} calculations.
     The first topic is related to improving the parallel efficiency of \ac{MOC} calculations.
@@ -24,25 +24,73 @@
     The first contribution of this thesis is work in improving parallel efficiency.
     While large scale parallelism on thousands of processors may not be feasible for industry, some degree of parallelism is necessary for whole-core calculations due to memory constraints.
     An automated spatial decomposition scheme based on graph theory, is developed leading to significantly improved parallel efficiency \cite{Fitzgerald2017,Fitzgerald2019a}.
+    While graph partitioning libraries such as METIS \cite{METIS} exist, due to restrictions on the spatial decomposition in MPACT (see \cref{ch:Spatial Decomposition}), these libraries could not be directly used for this work.
+    The spatial decomposition scheme developed utilizes existing methods such as the \acf{RSB} and \acf{RIB} methods, as well as introduces new methods.
 
     The second contribution focuses on improvements to a method previously researched by other groups, the \acf{LSA} \cite{Ferrer2016,Ferrer2018,Gunow2018}.
     Specifically, this work has led to improvements of the method for stability in near-void regions \cite{Fitzgerald2018}, and efficiency in multi-physics simulations \cite{Fitzgerald2019}.
     The \ac{LSA} is an approximation that is used to improve \ac{MOC} efficiency by reducing the number of computational cells required for accurate results.
 
+    The first instance of the \ac{LSA} was the \emph{gradient source approximation} introduced by \citet{Halsall1993}.
+    This early \ac{LSMOC} was based on the averaging of the angular flux gradient along tracks, and was implemented in the WIMS \cite{Halsall1993}, and PEACH \cite{Tang2009} \ac{MOC} transport codes.
+    These averaged gradients were then used as estimates to the gradient of the scalar flux, which were used to compute the source shape as spatially linear.
+
+    \citeauthor{Petkov1998} devised a \ac{LSA} that estimated the gradient of the scalar flux based on the $P_1$ approximation in the MARIKO code \cite{Petkov1998,Petkov1999}.
+    In this approximation, the gradient of the scalar flux is computed from the neutron current, the total cross section, and the linearly anisotropic scattering matrix.
+    A similar approach, using the diffusion approximation to compute the scalar flux gradient, was used in the so called ``quasi-linear'' source implemented by \citet{Rabiti2009}.
+    In this approach, the $\Sigma_{s1}$ matrix is diagonalized, turning the $P_1$ approximation into the diffusion approximation.
+    Due to their basis on the $P_1$ and diffusion approximations, these early \acp{LSA} are inaccurate in situations where more transport-like effects are present.
+    It can be shown, even in simple cases, that this approximation can be predict the opposite direction for the scalar flux gradient.
+
+    \citet{Santandrea2002} introduced the positive linear and nonlinear surface characteristics scheme, which constructed a linear source by interpolating between source values on the surfaces of cell regions.
+    Various improvements have been made to this surface characteristics scheme for conservation \cite{Santandrea2002}, as well as coupling in APOLLO2 \cite{Santandrea2008}.
+    \citet{LeTellier2006} introduced a simplification to the linear characteristics scheme for conservation, by using a diamond-differencing scheme.
+    This work was extended by \citet{Hebert2016}, to include higher-order diamond difference schemes, as well as allowing for acceleration \cite{Hebert2017}.
+
+    The most recent \ac{LSA} examined in this work was introduced as a 2-D general high-order method for unstructured meshes by \citet{Masiello2009}.
+    The approximation uses track-based integration, defined in \cref{ssec:MOC:Track-Based Integration}, in order to compute spatial moments of the angular flux.
+    This \ac{LSA} was shown to reduce memory and computation times in 3-D \ac{MOC} calculations \cite{Chai2009}.
+    The general method was simplified in the case of the isotropic and anisotropic \ac{LS} by \citet{Ferrer2016}; this also introduced the ``LS-P0'' method in which the isotropic source is spatially linear, but the anisotropic source components are spatially uniform within each cell.
+    This \ac{LSA} was also shown to be consistent with particle conservation, under certain constraints, and to be compatible with \ac{CMFD} acceleration \cite{Ferrer2018}.
+
     The macroray is a novel ray-tracing technique developed as part of this thesis work; this technique is an extension of the two-dimensional macroband \cite{Villarino1992} ray-tracing technique.
-    The macroband technique has been shown to reduce the number of characteristic rays required for accurate results in two-dimensional flat-source calculations \cite{Yamamoto2005,Fevotte2007}.
-    However, prior to this work, there has been no effort to extend this method to 3-D \ac{MOC} calculations.
+    The macroband was first used in the \acf{CP} code HELIOS, and was considered to be essential for the stability of the method \cite{Villarino1992}.
+    Unlike the traditional uniform/equidistant ray-tracing methods, the macroband method guarantees that each ray within a macroband will pass through the same regions in the same sequence, and not have any regions within its bounds that are not crossed by the rays.
+    This means that the placement of rays, and their widths, are determined by the internal geometry of the pin or subdomain that is being traced.
+    Each ray within a macroband passes through the same regions albeit with different lengths; if the incident flux for the macroband is smooth, this means that the track-segment average flux will also be smooth.
+    This allows for the use of more advanced transverse integration, such as Gauss-Legendre quadrature integration \cite{Yamamoto2005}.
+    A similar method was also developed by \citet{Fevotte2007} where coarse equidistant ray calculations were performed by using a macroband approach within the ray's transverse area (with a single ray per band).
+
+    However, prior to this work, there has been no effort to extend the macroband method to 3-D \ac{MOC} calculations.
     The author seeks to fill this gap, as the number of rays in 3-D \ac{MOC} calculations is generally much higher than in 2-D, so the possible benefits of the method are larger.
     Additionally, the method is expected to be even more efficient when using a coarse mesh with the \ac{LSA}.
   }
   \section{Outline}{\label{sec:Introduction:Outline}
     The remainder of this dissertation is structured as follows.
-    \Cref{ch:Neutron Transport Theory} gives an overview of neutron transport theory, with a focus on what is relevant to this work.
-    This chapter also gives an overview of the current state-of-the-art 3-D transport methods.
+    \Cref{ch:Neutron Transport Theory} introduces the neutron transport equation, and the forms of it that this work is interested in.
+    The key approximations and discretization techniques for deterministic transport methods are listed.
+    A brief overview of the current state-of-the-art methods used to solve the 3-D transport equation is given.
+    Finally, \cref{ch:Neutron Transport Theory} provides a description of iterative methods for applying these transport methods for solving the transport equation.
+
     The focus of this work, the \ac{MOC}, is derived in full detail in \cref{ch:The Method of Characteristics}.
-    Techniques for making more efficient use of the available computational resources in \ac{MOC} calculations, by improving spatial decomposition, are given in \cref{ch:Spatial Decomposition}.
+    The chapter provides the fundamental mathematics of the \ac{MOC}, as well as full derivations of the \acf{FSA} equations and the \acf{LSA} equations before the improvements of this work.
+    Additionally, a section describing current state-of-the-art ray-tracing methods necessary for \ac{MOC} calculations is present.
+    A brief overview of possible approaches to parallel \ac{MOC} calculations is also given, which motivates the work of the next chapter.
+
+    \Cref{ch:Spatial Decomposition} details the use of graph partitioning methods for the spatial decomposition of nuclear reactor simulations in MPACT.
+    A historical review and description of several graph partitioning methods are listed.
+    The application of these methods for decomposing the spatial domain in MPACT simulations is provided, including a description of how these methods can be forced to conform with restrictions imposed by MPACT.
+    Results are presented for a 2-D and 3-D reactor problem, and comparisons are made between the original decomposition method and the new graph methods.
+
     \Cref{ch:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications} lists significant improvements to the moment-based \acf{LSA} made by this work.
+    Exponential tabulation has been shown to significantly improve computational performance of \ac{FSA} \ac{MOC} calculations \cite{Yamamoto2004}.
+    However, applied to the \ac{LSA} the tabulation may cause instabilities; this work details techniques for addressing the numerical instability while maintaining performance.
+    Next, a change in the formulation of the \ac{LSA} is provided which significantly improves the calculation efficiency in multiphysics problems.
+    Results are presented for a wide range of realistic lattice calculations, and a cycle depletion for a realistic quarter core.
+
     A novel ray-tracing technique, using advanced transverse integration, intended to decrease the amount of computational work while maintaining accuracy is presented in \cref{ch:MacroRay}.
+    The ray-tracing method is applied to several different test problems.
+    Studies are performed on the convergence behavior of the method as the number of rays increases.
     Finally, \cref{ch:Conclusions} gives a summary of the work done as part of this dissertation, the conclusions that can be made from these studies, and possible paths for future research on related topics.
   }
   % References
