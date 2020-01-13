@@ -311,7 +311,7 @@
         \end{equation}
         where
         \begin{equation}\label{eq:LSMOC:Geometric Moments}
-            \M \defined \MOCIntegral{\loc^T\loc}.
+            \M \defined \MOCIntegral{\loc\loc^T}.
         \end{equation}
         The spatial-angular flux moments, $\MOCIntegral{\SH\loc\aflux[][g][]}$, are then defined as
         \begin{equation}\label{eq:LSMOC:Region-Averaged Spatial Angular Flux Moments Definition}
@@ -671,7 +671,7 @@
     }
 
     \subsection{VERA Problem 2A and 2P Depletion}{\label{ssec:LSMOC:VERA Problem 2A and 2P Depletion}
-      A mesh study similar to that done in \cref{ssec:LSMOC:Typical Pin Cell Depletion} was performed on modified \ac{VERA} problems 2A and 2P \cite{VERAProblems} with isotopic depletion up to 70 \ac{GWDMT}.
+      A mesh study similar to that done in \cref{ssec:LSMOC:PWR Pin Cell Depletion} was performed on modified \ac{VERA} problems 2A and 2P \cite{VERAProblems} with isotopic depletion up to 70 \ac{GWDMT}.
       This was done to verify that the meshing parameters previously found were valid for larger problems, and determine if even coarser parameters were sufficient.
       First, problem 2A was studied; the meshing parameters of the fuel cell and guide-tube cells were studied independently.
       Both problems were simulated using the \ac{TCP0} scattering approximation.
@@ -702,7 +702,7 @@
           \end{figure}
         }
         \paragraph{2A - Fuel Radius and Azimuthal Divisions}{
-          For this problem, only the fractional radius found in \cref{ssec:LSMOC:Typical Pin Cell Depletion} is tested against the current default mesh.
+          For this problem, only the fractional radius found in \cref{ssec:LSMOC:PWR Pin Cell Depletion} is tested against the current default mesh.
           There was no significant affect in eigenvalue or pin powers by using the 2-ring model with an inner radius fraction of 0.875.
           Even at 0 \ac{EFPD} (before Plutonium production), the eigenvalue difference can be large for the 2-ring models; this is hypothesized to be due to self-shielding affects.
 
