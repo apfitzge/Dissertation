@@ -1198,7 +1198,7 @@
   \begin{minipage}{0.8\textwidth} \vspace{1in} \end{minipage} \\ %
  \fi %
  % Add the title
- \centerline{\large\bf LIST OF ABBREVIATIONS} %
+ \centerline{\Large\bf LIST OF ABBREVIATIONS} %
  % Add some space after the title.
  \vspace{1ex} %
  % Start the automatic abbreviations feature.
@@ -1513,7 +1513,6 @@
  % Insert the prologue if there is one.
  \if@umich@prologue\prologuepage\fi %
  % Insert the table of contents.
- \setcounter{page}{1}
  \phantomsection\tableofcontents\clearpage %
  % Insert the list of tables.
  \if@umich@listoftables\phantomsection\addcontentsline{toc}{chapter}{List of Tables}\listoftables\clearpage\fi %
