@@ -84,7 +84,7 @@
     \subsection{Summary of MacroRay}{\label{ssec:Summary:MacroRay}
       Three-dimensional \ac{MOC} calculations are generally considered to be too expensive for use in routine design calculations or even reference solutions; the methods rarely see use outside academia or national laboratories.
       The primary factor in determining \ac{MOC} run-time is the number of track segments.
-      By using a coarser ray-spacing, far fewer track-segments are generated, which can significantly improve run-times (\cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}).
+      By using a coarser ray-spacing, far fewer track-segments are generated; this can significantly improve run-times (\cref{sec:Improved Linear Source Formulation for Multi-physics and 2D/1D Applications}).
       However, the presence of small strong absorber regions anywhere in a problem can prevent the use of coarser rays.
       This motivates the use of a ray-tracing method that is able to use different effective ray-spacings in different regions with different requirements.
 
@@ -161,7 +161,7 @@
       The elimination of the group-dependence in these coefficients was able to reduce run-times in multiphysics calculations by up to 15\%, as the recomputation of these coefficients was no longer necessary.
 
       Mesh sensitivity studies were performed on several \ac{VERA} progression problems \cite{VERAProblems}.
-      Coarse mesh parameters were found, which maintained accuracy, while reducing the number of source regions in realistic calculations by up to 85\%.
+      Coarse mesh parameters were found, that maintained accuracy, while reducing the number of source regions in realistic calculations by up to 85\%.
       On \ac{VERA} problem 9, a 3-D cycle depletion of a quarter core with \ac{TH} feedback showed 10\% improvement in total run-time, and 30\% reduction in memory.
       Previous studies have shown that the \ac{LSA} was able to improve run-times in neutronics only calculations \cite{Ferrer2016,Gunow2018};
       this work has shown that the use of the improved formulation allows for advantages over the \ac{FSA} even in cases with multiple physics.

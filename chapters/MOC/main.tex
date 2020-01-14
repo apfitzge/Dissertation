@@ -161,7 +161,7 @@
                 where $\locIn$ is the starting point of the track-segment.
             \end{subequations}
 
-            Segment-volume preservation is a renormalization method in which the track-length is adjusted such that the analytic volume within the cross-sectional area of each track-segment is preserved.
+            Segment-volume preservation is a renormalization method that adjusts the track-length such that the analytic volume within the cross-sectional area of each track-segment is preserved.
             This renormalization technique is the most ``correct'' method of renormalization, but is very expensive as each track is renormalized separately.
             It is also more difficult to implement, as the analytic area of each track-segment must be found.
             To the best of our knowledge, this method is not implemented in any production-level \ac{MOC} code.
@@ -255,7 +255,7 @@
                 \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF[mi]}{\xst} - \left(\frac{\tsrcF[mi]}{\xst} - \afluxin\right)\frac{F_1(\segopt)}{\segopt}.
             \end{equation}
             This approach will be referred to as \emph{explicit}, as the moment's integral is explicitly evaluated.
-            Another, approach, which in the author's opinion is simpler, is to use the track-averaging operator on the characteristic form of the transport equation, \cref{eq:MOC:FSA:Characteristic Form}, which simplifies to
+            Another approach, which in the author's opinion is simpler, is to use the track-averaging operator on the characteristic form of the transport equation, \cref{eq:MOC:FSA:Characteristic Form}, that simplifies to
             \begin{equation}\label{eq:MOC:FSA:Track-Averaged Angular Flux Implicit}
                 \MOCTrackIntegral{\aflux[][g][]} = \frac{\tsrcF[mi]}{\xst} + \frac{\afluxin-\afluxout}{\segopt}.
             \end{equation}
@@ -326,7 +326,7 @@
             There have been many different variants of this approximation.
             The first instance of the \ac{LSA} was the \emph{gradient source approximation} introduced by \citet{Halsall1993}.
             This early \ac{LSMOC} was based on the averaging of the angular flux gradient along tracks, and was implemented in the WIMS \cite{Halsall1993}, and PEACH \cite{Tang2009} \ac{MOC} transport codes.
-            These averaged gradients were then used as estimates to the gradient of the scalar flux, which were used to compute the source shape as spatially linear.
+            These averaged gradients were then used as estimates to the gradient of the scalar flux, that were used to compute the source shape as spatially linear.
 
             \citeauthor{Petkov1998} devised a \ac{LSA} that estimated the gradient of the scalar flux based on the $P_1$ approximation in the MARIKO code \cite{Petkov1998,Petkov1999}.
             In this approximation, the gradient of the scalar flux is computed from the neutron current, the total cross section, and the linearly anisotropic scattering matrix:
@@ -746,7 +746,7 @@
         For a specified ray-spacing and module size, the tracks are the same regardless of the internal mesh.
         The macroband takes an entirely different approach, and the internal mesh is the primary guide for laying down the tracks.
 
-        Macrobands are determined by the computational mesh; for large heterogeneous assemblies, this results in very thin macrobands, which would result in significantly increased computation time.
+        Macrobands are determined by the computational mesh; for large heterogeneous assemblies, this results in very thin macrobands, that would result in significantly increased computation time.
         In the related \acf{CDP} \citet{Hong1999} proposed that macroband ray-tracing data only be generated on unique subsystems.
         Similarly, \citet{Yamamoto2005} proposed the \ac{MRMB} in which macroband ray-tracing data is only generated for unit-cells.
         These techniques are similar to the modular ray-tracing technique in that ray-tracing data is only generated for unique subsystems, which significantly reduces the amount of ray-tracing data.
@@ -799,7 +799,7 @@
           However, because only the centroids of each ray are considered using ray-spacing that is coarse compared to the sub-boundary size it not feasible.
 
           An earlier work \cite{Hong1999} used a similar 2-D sub-boundary averaging (though not directionally dependent); but rather than only considering the ray centroids, it considered the ``projection'' of rays.
-          The ``projection'' being the area on the surface which would be intersected by the ray if it were infinite in length.
+          The ``projection'' being the area on the surface that would be intersected by the ray if it were infinite in length.
           Then, partial intersections of the projection and sub-boundaries are considered.
           This allows for coarse ray-spacing to be used without as much accuracy on the interfaces as the previously mentioned method.
 

@@ -360,7 +360,7 @@
     If a partitioning method results in a noncontiguous subdomain, then each noncontiguous group of modules will be moved into the other subdomain except for the largest group.
     This fix is done at the expense of load-balance, but is necessary for these methods to be robust in MPACT.
     To ensure that no subdomain wraps around another, a fix is applied after the graph partitioning process.
-    If a subdomain wraps around another (3 surrounding sides), the portion of the subdomain which is wrapped is moved into the wrapping subdomain.
+    If a subdomain wraps around another (3 surrounding sides), the portion of the subdomain that is wrapped is moved into the wrapping subdomain.
 
     The ray-tracing modules that make up the core in MPACT can be abstracted into a weighted graph, where vertex weights are the number of computational cells in a module, and edges connecting neighboring modules.
     These edges represent the communication in MPACT's \ac{MOC} solver.
@@ -739,7 +739,7 @@
 
       The Spatial Kernighan-Lin algorithm, given in \cref{alg:Spatial Kernighan-Lin}, is an adaptation of the Kernighan-Lin algorithm that accounts for the multiple pairs with maximal gain.
       This algorithm was developed as part of this work, in an attempt to improve the original Kernighan-Lin algorithm for this specific application.
-      This algorithm prioritizes vertex pairs which are geometrically distant from one another.
+      This algorithm prioritizes vertex pairs that are geometrically distant from one another.
       The idea behind this modification is that to minimize the edge-cut, the cut should be as straight as possible.
       By prioritizing distant vertex pairs, the bisector is typically ``straightened out''; this process can be likened to pulling on the ends of a string in order to straighten it.
 
@@ -875,7 +875,7 @@
     Three 3-D decomposition approaches were investigated in this work: radial and axial aligned subdomains, radially aligned subdomains, and an approach with no alignment restrictions.
     The radially aligned approach is expected to out perform the current approach by an average of 10\% for typical cases.
     However, the unrestricted approach is actually expected to perform worse than the current approach on average because the problem is well balanced axially.
-    This analysis was performed on a 3-D core, which was relatively homogeneous in the axial direction; if a core design were to be more axially heterogeneous, then a more significant increase in performance might be expected.
+    This analysis was performed on a 3-D core, that was relatively homogeneous in the axial direction; if a core design were to be more axially heterogeneous, then a more significant increase in performance might be expected.
 
     The parallel efficiency is a measure of how well computational resources are utilized in parallel applications.
     MPACT's overall parallel efficiency decreases rapidly as more domains are used due to two factors: increased number of iterations, and the inefficiency of the parallel \ac{CMFD} solve.

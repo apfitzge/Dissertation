@@ -12,7 +12,7 @@
   The ray-tracing technique is referred to as the \emph{macroray}, because the 3-D ``macro''paths are no longer bands, but instead parallel-pipes.
 
   This work implemented a 3-D ray-tracing and transport solver library in MPACT based on the macroray method.
-  The initial step in this implementation was to implement a 2-D version \footnote{which did not support \ac{CMFD}}.
+  The initial step in this implementation was to implement a 2-D version \footnote{which does not currently support \ac{CMFD} acceleration}.
   This also serves to confirm the results of previous studies on 2-D macroband \cite{Yamamoto2005,Fevotte2007}.
 
   \section{MacroRay Technique}{\label{sec:MR:MacroRay Technique}
@@ -29,7 +29,7 @@
       A similar method was also developed by \citet{Fevotte2007} where coarse equidistant ray calculations were performed by using a macroband approach within the ray's transverse area (with a single ray per band).
 
       The macroband method ray-tracing is described in \cref{alg:Macroband:Ray-tracing}.
-      A downside of this method is that each ray has a unique width which requires additional storage.
+      A downside of this method is that each ray has a unique width that requires additional storage.
       However, all rays within a macroband pass through the same segments, so the region index for each segment only needs to be stored once, reducing memory by a larger amount.
       The process is shown visually in \cref{fig:MR:Macroband Process}.
 
@@ -207,7 +207,7 @@
         \input{\figpath/MacroRayProjectionsDOFProblem.pdf_tex}
         \caption{
             An example of a ray that causes issues with the fractional contribution interface flux approximation when using 2D/2D ray-tracing.
-            The highlighted red area is the area of the ray outside the domain (which projects to no surface), and the blue highlighted area is an area on the surface that will not be hit by any ray.}
+            The highlighted red area is the area of the ray outside the domain (that projects to no surface), and the blue highlighted area is an area on the surface that will not be hit by any ray.}
         \label{fig:MR:MacroRayProjectionProblem}
       \end{figure}
 
@@ -385,7 +385,7 @@
       The boron will shield the pin from incident thermal neutrons, significantly dampening the reactivity.
       These rods are used in reactor designs to lower reactivity at the beginning of cycle; as the fuel cycle continues, the boron will be depleted and the reactivity will increase.
 
-      Such a thin coating which has a very significant impact on the reactivity can be a difficult problem for transport methods.
+      Such a thin coating that has a very significant impact on the reactivity can be a difficult problem for transport methods.
       The \ac{MOC} is able to handle this case, but generally requires very fine ray-spacing in order to resolve these thin annular regions.
       This makes \ac{VERA} problem 1E a perfect test case for the macroband and macroray methods, which will automatically place rays through these thin regions.
       Ideally, this would allow coarser ray-spacing to be used elsewhere in the pin.
@@ -443,7 +443,7 @@
 
         These results suggest that the macroray method's ray-mesh convergence rate is higher than the traditional \ac{MRT} method's;
           the eigenvalue change between successive calculations (refining the number of rays) drops below 10 pcm with around 5.6 million segments, whereas the \ac{MRT} method was unable to converge within 10 pcm even using 14 million.
-        Additionally, it is clear that the near-monotonic convergence behavior which the macroband had in 2-D holds in 3-D.
+        Additionally, it is clear that the near-monotonic convergence behavior that the macroband had in 2-D holds in 3-D.
 
         The \ac{MRT} calculations were not continued past 14 million segments, as using finer ray-spacing resulted in significantly increased run-times, much of which was spent in the actual ray-tracing procedures.
         While the macroray does significantly simplify the ray-tracing procedure, the author believes that these long ray-tracing run-times in \ac{MRT} are likely due to unoptimized code, rather than an inherent flaw in the method.

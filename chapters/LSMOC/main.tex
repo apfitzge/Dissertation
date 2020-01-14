@@ -968,7 +968,7 @@
 
       The run-time per iteration and number of iterations are listed in \cref{tab:LSMOC:Lattice:Iterations} and \cref{tab:LSMOC:Lattice:Run-time}, respectively.
       In most cases, the number of iterations is approximately the same; however, the \ac{LSA} solver often takes an additional iteration or two to converge for the same problem.
-      As discussed in \cref{ssec:LSMOC:C5G7 Benchmark} and iteration scheme which performs more thermal-group sweeps, as is done in CASMO5, may help to improve performance of both solvers \cite{FerrerPersoanlCommunications2018}.
+      As discussed in \cref{ssec:LSMOC:C5G7 Benchmark} and iteration scheme that performs more thermal-group sweeps, as is done in CASMO5, may help to improve performance of both solvers \cite{FerrerPersoanlCommunications2018}.
       In terms of computational performance, the \ac{LSA} solver reduces total run-time per iteration by 7\% on average.
 
       \begin{table}[htbp]
@@ -1426,7 +1426,7 @@
       The simulation used the graph partitioning spatial decomposition methods described in \cref{ch:Spatial Decomposition} with 692 spatial domains.
       A Tabuchi-Yamamoto quadrature set with 32 azimuthal and 4 polar angles over $\fourpi$ was used with 0.05 cm ray-spacing.
       The TCP0 scattering approximation was also used in this case.
-      These parameters are the same as those which were previously shown to yield results that agree closely with plant data \cite{VERA}.
+      These parameters are the same as those that were previously shown to yield results that agree closely with plant data \cite{VERA}.
       The default mesh contains a total of 51,513,673 source-regions, while the coarse mesh contains a total of 14,932,511 source-regions. %19743263
       The initial coarse mesh results were generated using a fine reflector region, with coarse fuel rod meshes; this mesh had a total of 19743263 source-regions.
       These initial coarse mesh results were generated due to a mistake by the author, but these show close agreement in terms of accuracy with the actual coarse mesh results.
@@ -1634,7 +1634,7 @@
       This represents significant advantage of the \ac{LSA} even in simulations with multiple physics.
 
       The results presented in this section did not use the recently added capability for radial power, temperature, and burnup between MPACT and CTF.
-      In initial testing with the coarse mesh parameters, it appears that the capability assumed that each radial division in the fuel was equal volume, which is not the case for the coarse mesh parameters developed in this work.
+      In initial testing with the coarse mesh parameters, it appears that the capability assumed that each radial division in the fuel was equal volume; that is not the case for the coarse mesh parameters developed in this work.
       Further testing on the coarse mesh with \ac{LSA} and radial coupling will be required once this assumption is lifted from the new capability.
     }
   }

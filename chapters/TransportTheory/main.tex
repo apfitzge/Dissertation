@@ -33,7 +33,7 @@
     \begin{equation}\label{eq:NTT:Location Vector}
       \loc \defined \begin{bmatrix}x\\y\\z\end{bmatrix}.
     \end{equation}
-    The direction vector, $\dir$, is a column unit-vector which gives the direction of flight for neutrons, and is defined by
+    The direction vector, $\dir$, is a column unit-vector that gives the direction of flight for neutrons, and is defined by
     \begin{subequations}\label[subeqs]{eqs:NTT:Direction Definitions}
       \begin{equation}\label{eq:NTT:Direction Vector}
         \dir \defined
@@ -160,7 +160,7 @@
 
     \subsection{Monte Carlo}{\label{ssec:NTT:Monte Carlo}
       Stochastic, or ``Monte Carlo'' methods are methods that simulate individual neutrons in the system.
-      The simulation of each neutron relies on the random sampling of probability distributions for all aspects such as, where the \emph{free} neutron is born, which direction it is traveling in, the energy of the neutron, the distance to the next collision, and the type of collision event.
+      The simulation of each neutron relies on the random sampling of probability distributions for all aspects such as, where the \emph{free} neutron is born, the direction it is traveling in, the energy of the neutron, the distance to the next collision, and the type of collision event.
       This process is repeated until the neutron leaks out of the system or is absorbed, possibly inducing a fission event with other neutrons to simulate, for many different neutrons.
 
       Monte Carlo methods give a probabilistic estimate of the true solution as well as an associated uncertainty in that result.
@@ -623,7 +623,7 @@
       Recent work on STREAM has used a diamond-difference method for approximating axial behavior.% [CITATION].
       Generally, these methods do not suffer from the same inaccuracies of standard 2D/1D methods, but they do still assume the use of extruded meshes.
 
-      The \acf{LEAF} method, developed by \citet{Yamamoto2017} in the GENESIS code, is an extruded method which is distinct from the PROTEUS-like methods.
+      The \acf{LEAF} method, developed by \citet{Yamamoto2017} in the GENESIS code, is an extruded method that is distinct from the PROTEUS-like methods.
       This method is the successor of the ASMOC3D method \cite{Giho2008}.
       The \ac{LEAF} method performs 2-D radial ray-tracing to generate a set of characteristic planes.
       The angular flux on the left, right, top, and bottom surfaces of each characteristic plane is given an assumed shape as a linear combination of Legendre polynomials.
