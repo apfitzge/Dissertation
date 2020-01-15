@@ -664,6 +664,12 @@
             LSMoC - MacroRay            & T & 618\\\bottomrule
           \end{tabular}
         \end{table}
+
+
+        By refining the axial mesh height the accuracy of the macroray calculations can be increased.
+        The previous mesh used an axial source region height of 2.38 cm; by using a height of 1.785 cm, the eigenvalue error is reduced to -54 pcm.
+        By further reducing to an axial source height of 1.428 cm the eigenvalue error becomes -49 pcm.
+        While a similar study was not performed on the rodded B case, the same trend is expected.
       }
 
       \subsubsection{C5G7 Benchmark: Rodded A}{\label{sssec:MR:C5G7:Rodded A}
@@ -776,6 +782,7 @@
         The average, RMS and mean relative errors are all similar compared to the \ac{MRT} method; the error in the maximum power is higher for the macroray method, just as in the previous cases.
         The macroray method also does not outperform the \ac{MRT} method in the number of pins within each uncertainty level of the reference.
         Finally, the macroray method again shows the most significant errors in the upper 1/3 of the fuel, as in previous cases.
+        As mentioned in \cref{sssec:MR:C5G7:Unrodded}, if the axial mesh was refined, lower errors would be expected.
 
         \begin{figure}[htbp]
           \centering
